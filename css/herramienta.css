@@ -46,7 +46,15 @@ body {
 h1 { margin: 0 0 4px; font-size: 21px; font-family: 'Fraunces', Georgia, serif; font-weight: 700; }
 .sub { color: #667071; margin-top: 0; margin-bottom: 14px; text-align: center; max-width: 700px; }
 
+/* box-sizing es obligatorio aquí, no un adorno: width:100% se resuelve contra
+   la caja de contenido del body, que ya descuenta sus 14px de relleno. Con
+   content-box los 36px de relleno de esta caja se sumaban POR FUERA de ese
+   100%, así que la herramienta salía 8px más ancha que la ventana —la
+   diferencia entre los dos rellenos— y aparecía barra horizontal en cualquier
+   ventana por debajo de 1228px. En el escritorio no se veía: el iframe del
+   modal va con scrolling="no" y la escondía. En el móvil sí se veía. */
 .contenedor {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   gap: 24px;
