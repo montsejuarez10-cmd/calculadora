@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Códigos QR · Calculadora de patronaje</title>
+<meta name="description" content="Hoja imprimible con los seis códigos QR de la calculadora de patronaje.">
+<link rel="stylesheet" href="css/fonts.css">
+<style>
+  :root{
+    --mat:#16302A;
+    --mat-line:#2C5346;
+    --paper:#F2E9D3;
+    --paper-edge:#C7B78C;
+    --ink:#241F16;
+    --ink-soft:#57503F;
+    --chalk:#EFE6D3;
+    --thread:#E23F82;
+    --font-display:'Fraunces', 'Didot', Georgia, serif;
+    --font-body:'Inter', 'Segoe UI', sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    background:var(--mat);
+    color:var(--chalk);
+    font-family:var(--font-body);
+  }
+
+  .hoja{
+    max-width:52rem;
+    margin:0 auto;
+    padding:3rem 1.5rem 4rem;
+  }
+
+  header{ text-align:center; margin:0 0 2.4rem; }
+
+  .eyebrow{
+    font-family:var(--font-body);
+    text-transform:uppercase;
+    letter-spacing:0.18em;
+    font-size:0.72rem;
+    color:var(--thread);
+    margin:0 0 0.6rem;
+  }
+
+  h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:clamp(1.7rem, 4vw, 2.4rem);
+    line-height:1.15;
+    margin:0 0 0.7rem;
+    text-wrap:balance;
+  }
+
+  .lede{
+    max-width:34rem;
+    margin:0 auto;
+    color:var(--chalk);
+    opacity:0.78;
+    font-size:0.95rem;
+    line-height:1.55;
+  }
+
+  .rejilla{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:1.2rem;
+  }
+
+  .tarjeta{
+    position:relative;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:10px;
+    padding:1.4rem 1.3rem 1.2rem;
+    display:flex;
+    align-items:center;
+    gap:1.2rem;
+    box-shadow:0 1px 0 rgba(0,0,0,0.15), 0 10px 22px -12px rgba(0,0,0,0.55);
+    break-inside:avoid;
+  }
+
+  /* El mismo filete de linea discontinua que llevan los botones de la portada:
+     es lo que ata esta hoja al resto del sitio. */
+  .tarjeta::before{
+    content:"";
+    position:absolute;
+    inset:5px;
+    border:1px dashed var(--paper-edge);
+    border-radius:6px;
+    pointer-events:none;
+  }
+
+  .codigo{
+    width:8.4rem;
+    height:8.4rem;
+    flex-shrink:0;
+    display:block;
+    background:#fff;
+    border:1px solid var(--paper-edge);
+    border-radius:6px;
+    padding:0.3rem;
+  }
+
+  .datos{ min-width:0; }
+
+  .disco{
+    width:2.2rem;
+    height:2.2rem;
+    border-radius:50%;
+    background:var(--color-opcion, var(--thread));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 0 0.6rem;
+  }
+
+  .icono{ width:1.42rem; height:1.79rem; overflow:visible; }
+  .icono path, .icono circle{
+    fill:none;
+    stroke:var(--ink);
+    stroke-width:6;
+    stroke-linejoin:round;
+    stroke-linecap:round;
+  }
+
+  .nombre{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:1.22rem;
+    line-height:1.15;
+    margin:0;
+  }
+
+  .sub{
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--ink-soft);
+    margin:0.25rem 0 0.7rem;
+  }
+
+  .desc{
+    font-size:0.83rem;
+    line-height:1.45;
+    color:var(--ink-soft);
+    margin:0 0 0.7rem;
+  }
+
+  /* La direccion escrita debajo del codigo: si alguien no puede escanear, la
+     hoja le sigue sirviendo para teclearla. */
+  .url{
+    font-size:0.68rem;
+    line-height:1.35;
+    color:var(--ink-soft);
+    overflow-wrap:anywhere;
+    margin:0;
+    padding-top:0.5rem;
+    border-top:2px solid var(--color-opcion, var(--thread));
+  }
+
+  @media (max-width: 44rem){
+    .rejilla{ grid-template-columns:1fr; }
+    .tarjeta{ flex-direction:column; align-items:flex-start; }
+    .codigo{ width:100%; height:auto; max-width:14rem; }
+  }
+
+  /* En papel manda la tinta, no la pantalla: fondo blanco, sin sombras, y las
+     seis tarjetas repartidas en un A4 sin que ninguna se parta por la mitad. */
+  @page{ size:A4 portrait; margin:12mm; }
+
+  @media print{
+    html,body{ background:#fff; color:#000; }
+    .hoja{ max-width:none; padding:0; }
+    header{ margin:0 0 6mm; }
+    h1{ font-size:16pt; margin:0 0 2mm; }
+    .eyebrow{ font-size:7pt; color:#000; }
+    .lede{ font-size:8.5pt; color:#000; opacity:1; }
+    .rejilla{ gap:7mm; }
+    .tarjeta{
+      background:#fff;
+      box-shadow:none;
+      border:1px solid #000;
+      border-radius:0;
+      padding:5mm;
+      gap:5mm;
+    }
+    .tarjeta::before{ inset:2mm; border-color:#999; }
+    .codigo{ width:36mm; height:36mm; border:none; padding:0; }
+    .disco{ width:9.5mm; height:9.5mm; margin:0 0 2.5mm; }
+    .icono{ width:6mm; height:7.6mm; }
+    .nombre{ font-size:14pt; }
+    .sub{ font-size:7.5pt; margin:1mm 0 2.5mm; }
+    .desc{ font-size:8.5pt; color:#000; margin:0 0 2.5mm; }
+    .url{ font-size:7pt; color:#000; padding-top:2mm; border-top-width:1pt; }
+    /* Los discos van teñidos: si la impresora es en blanco y negro salen en
+       gris y siguen leyendose. */
+    .disco{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hoja">
+
+  <header>
+    <p class="eyebrow">Taller de patronaje</p>
+    <h1>Apunta con el móvil y entra directo</h1>
+    <p class="lede">Cada código abre su calculadora ya desplegada, sin pasar por el menú. Imprime esta hoja, recorta y pega cada uno donde lo vayas a usar.</p>
+  </header>
+
+  <div class="rejilla">
+
+    <div class="tarjeta" style="--color-opcion:#E23F82">
+      <img class="codigo" src="img/qr/qr-inicio.svg" alt="Código QR de la portada">
+      <div class="datos">
+        <span class="disco">
+          <svg class="icono" viewBox="0 0 120 120" aria-hidden="true"><path d="M14,26 L106,26 M14,60 L106,60 M14,94 L106,94"/></svg>
+        </span>
+        <p class="nombre">La portada</p>
+        <p class="sub">Las cinco herramientas</p>
+        <p class="desc">El menú completo, para elegir desde ahí. Tenlo a mano si aún no sabes qué vas a trazar.</p>
+        <p class="url">montsejuarez10-cmd.github.io/calculadora/</p>
+      </div>
+    </div>
+
+    <div class="tarjeta" style="--color-opcion:#ec5151">
+      <img class="codigo" src="img/qr/qr-falda.svg" alt="Código QR del patrón base de falda">
+      <div class="datos">
+        <span class="disco">
+          <svg class="icono" viewBox="0 0 126 108" aria-hidden="true"><path d="M46,12 C54,4 72,4 80,12 L116,90 C98,100 28,100 10,90 Z"/><path d="M57,16 L46,86 M69,16 L80,86"/></svg>
+        </span>
+        <p class="nombre">Falda</p>
+        <p class="sub">Patrón base</p>
+        <p class="desc">La silueta completa, delantero y trasero, con la regla 50-32-18.</p>
+        <p class="url">…/calculadora/?opcion=falda</p>
+      </div>
+    </div>
+
+    <div class="tarjeta" style="--color-opcion:#f27b2c">
+      <img class="codigo" src="img/qr/qr-cuerpo.svg" alt="Código QR del cuerpo base">
+      <div class="datos">
+        <span class="disco">
+          <svg class="icono" viewBox="0 0 100 145" aria-hidden="true"><path d="M8,32 L34,13 C40,25 60,25 66,13 L92,32 C84,46 80,58 80,72 C80,92 70,110 68,130 L32,130 C30,110 20,92 20,72 C20,58 16,46 8,32 Z"/></svg>
+        </span>
+        <p class="nombre">Cuerpo</p>
+        <p class="sub">Patrón base</p>
+        <p class="desc">Delantero y espalda, con el ajuste al pecho y el reparto 25-40-35 en la cintura.</p>
+        <p class="url">…/calculadora/?opcion=cuerpo</p>
+      </div>
+    </div>
+
+    <div class="tarjeta" style="--color-opcion:#ffa875">
+      <img class="codigo" src="img/qr/qr-manga.svg" alt="Código QR de la manga base">
+      <div class="datos">
+        <span class="disco">
+          <svg class="icono" viewBox="0 0 160 116" aria-hidden="true"><path d="M62,8 C70,26 90,26 98,8 L116,20 C136,46 152,72 158,104 L106,110 C104,84 102,60 102,46 C88,51 72,51 58,46 C58,60 56,84 54,110 L2,104 C8,72 24,46 44,20 Z"/></svg>
+        </span>
+        <p class="nombre">Manga</p>
+        <p class="sub">Patrón base</p>
+        <p class="desc">La copa y la forma, en proporción al recorrido de las dos sisas del cuerpo.</p>
+        <p class="url">…/calculadora/?opcion=manga</p>
+      </div>
+    </div>
+
+    <div class="tarjeta" style="--color-opcion:#90aada">
+      <img class="codigo" src="img/qr/qr-pantalon.svg" alt="Código QR del pantalón base">
+      <div class="datos">
+        <span class="disco">
+          <svg class="icono" viewBox="0 0 100 145" aria-hidden="true"><path d="M20,5 L80,5 L88,20 L78,140 L55,140 L50,70 L45,140 L22,140 L12,20 Z"/></svg>
+        </span>
+        <p class="nombre">Pantalón</p>
+        <p class="sub">Patrón base</p>
+        <p class="desc">Sobre el rectángulo de cuarto de cadera, con el avance de tiro y el reparto de cintura.</p>
+        <p class="url">…/calculadora/?opcion=pantalon</p>
+      </div>
+    </div>
+
+    <div class="tarjeta" style="--color-opcion:#488164">
+      <img class="codigo" src="img/qr/qr-panuelo.svg" alt="Código QR de la falda pañuelo">
+      <div class="datos">
+        <span class="disco">
+          <svg class="icono" viewBox="0 0 120 120" aria-hidden="true"><path d="M60,8 L112,60 L60,112 L8,60 Z"/><circle cx="60" cy="60" r="17"/></svg>
+        </span>
+        <p class="nombre">Pañuelo</p>
+        <p class="sub">Falda</p>
+        <p class="desc">El cuarto de falda desde el radio de cintura, con una capa por cada largo.</p>
+        <p class="url">…/calculadora/?opcion=panuelo</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
