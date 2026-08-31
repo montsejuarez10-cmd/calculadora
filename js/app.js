@@ -1,7 +1,7 @@
 ﻿  // Las cinco opciones del menú. Cada una trae su título, su descripción, la
   // herramienta que embebe y el color con el que se tiñen su botón y su ventana.
   var OPCIONES = {
-    "1": { slug: "falda", titulo: "Patrón Base de Falda", desc: "Trazado técnico interactivo de la silueta completa (delantero y trasero), con la regla 50-32-18.", embebido: "falda_base_interactivo.html", color: "#ec5151" },
+    "1": { slug: "falda", titulo: "Falda Base", desc: "Trazado técnico interactivo de la silueta completa (delantero y trasero), con la regla 50-32-18.", embebido: "falda_base_interactivo.html", color: "#ec5151" },
     "2": { slug: "cuerpo", titulo: "Cuerpo Base", desc: "Trazado del bloque delantero y espalda resolviendo el ajuste a la prominencia del pecho y el reparto 25-40-35 a la cintura.", embebido: "cuerpo_base_interactivo.html", color: "#f27b2c" },
     "3": { slug: "manga", titulo: "Manga Base", desc: "Trazado proporcional de la copa y de la forma de la manga, sacado del recorrido de las dos sisas del cuerpo base.", embebido: "manga_base_interactivo.html", color: "#ffa875" },
     "4": { slug: "pantalon", titulo: "Pantalón Base", desc: "Trazado del delantero y la espalda sobre el rectángulo de cuarto de cadera, con el avance de tiro sacado de la cadera y el reparto de la cintura en costados y pinzas según el tipo de glúteos.", embebido: "pantalon_base_interactivo.html", color: "#90aada" },
