@@ -19,11 +19,11 @@ si solo te interesa una.
 
 | Herramienta | Qué traza |
 |---|---|
-| **Patrón base de falda** — `falda_base_interactivo.html` | La silueta completa, delantero y trasero, con la regla 50-32-18. |
-| **Cuerpo base** — `cuerpo_base_interactivo.html` | El bloque de delantero y espalda, resolviendo el ajuste a la prominencia del pecho y el reparto 25-40-35 en la cintura. |
-| **Manga base** — `manga_base_interactivo.html` | La copa y la forma de la manga, en proporción al recorrido de las dos sisas del cuerpo base. |
-| **Pantalón base** — `pantalon_base_interactivo.html` | Delantero y espalda sobre el rectángulo de cuarto de cadera, con el avance de tiro sacado de la cadera y el reparto de cintura en costados y pinzas según el tipo de glúteos. |
-| **Falda pañuelo** — `falda_panuelo_interactivo.html` | El cuarto de falda a partir del radio de cintura, con una capa por cada largo que quieras superponer. |
+| **Falda Base** — `falda_base_interactivo.html` | La silueta completa, delantero y trasero, con la regla 50-32-18. |
+| **Cuerpo Base** — `cuerpo_base_interactivo.html` | El bloque de delantero y espalda, resolviendo el ajuste a la prominencia del pecho y el reparto 25-40-35 en la cintura. |
+| **Manga Base** — `manga_base_interactivo.html` | La copa y la forma de la manga, en proporción al recorrido de las dos sisas del cuerpo base. |
+| **Pantalón Base** — `pantalon_base_interactivo.html` | Delantero y espalda sobre el rectángulo de cuarto de cadera, con el avance de tiro sacado de la cadera y el reparto de cintura en costados y pinzas según el tipo de glúteos. |
+| **Falda Pañuelo** — `falda_panuelo_interactivo.html` | El cuarto de falda a partir del radio de cintura, con una capa por cada largo que quieras superponer. |
 
 ## Estructura
 
