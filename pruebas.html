@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas del taller</title>
+<style>
+  :root { --ok: #2f7d4f; --mal: #c0392b; --tinta: #2c3e50; --gris: #5b6779; }
+  body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: var(--tinta); background: #f7f5f0;
+    margin: 0; padding: 24px; line-height: 1.5;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .lede { color: var(--gris); margin: 0 0 20px; max-width: 62ch; }
+  #resumen {
+    font-size: 17px; font-weight: bold; padding: 12px 16px; border-radius: 8px;
+    background: #fff; border-left: 5px solid var(--gris); margin-bottom: 18px;
+  }
+  #resumen.ok { border-left-color: var(--ok); color: var(--ok); }
+  #resumen.mal { border-left-color: var(--mal); color: var(--mal); }
+  .herr { background: #fff; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+  .herr h2 { font-size: 15px; margin: 0 0 6px; }
+  .prueba { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: baseline;
+            font-size: 13px; padding: 1px 0; }
+  .prueba .marca { font-weight: bold; }
+  .prueba.pasa .marca { color: var(--ok); }
+  .prueba.falla .marca { color: var(--mal); }
+  .prueba.falla { color: var(--mal); }
+  .cuenta { color: var(--gris); font-variant-numeric: tabular-nums; font-size: 12px; }
+  .detalle { grid-column: 2 / -1; color: var(--mal); font-size: 12px;
+             font-family: ui-monospace, Consolas, monospace; padding-left: 4px; }
+  #aviso { background: #fdecea; border: 1px solid #f5c6cb; color: #86271c;
+           padding: 14px 16px; border-radius: 8px; max-width: 70ch; display: none; }
+  #aviso code { background: #fff; padding: 1px 5px; border-radius: 3px;
+                font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  /* Los bancos de pruebas se cargan de verdad, con su tamaño real: medir el
+     informe o los rótulos en un marco estrecho daría otro reparto de columnas.
+     Se apartan de la vista, no se ocultan: un iframe con display:none no
+     dibuja y getBBox devolvería ceros. */
+  #banco { position: fixed; left: -3000px; top: 0; width: 1100px; }
+  #banco iframe { width: 1062px; height: 900px; border: 0; display: block; }
+</style>
+</head>
+<body>
+
+<h1>Pruebas del taller</h1>
+<p class="lede">Comprueba las cuatro herramientas contra lo que de verdad enseñan
+—el trazado y el informe—, no contra sus variables internas. Así siguen valiendo
+aunque se reescriba el cálculo por dentro.</p>
+
+<div id="aviso">
+  <p><strong>El navegador no deja leer las herramientas.</strong> Abierto con doble
+  clic, una página <code>file://</code> no puede mirar dentro de otra
+  <code>file://</code>, y las pruebas necesitan hacerlo.</p>
+  <p>Hay dos maneras de darle permiso:</p>
+  <ul>
+    <li>Arrancar Chrome con <code>--allow-file-access-from-files</code>, o</li>
+    <li>servir la carpeta y abrirla por <code>http://</code>
+      (por ejemplo <code>python -m http.server</code>).</li>
+  </ul>
+  <p>Las herramientas en sí funcionan con doble clic; esto solo afecta a esta página.</p>
+</div>
+
+<div id="resumen">Ejecutando…</div>
+<div id="salida"></div>
+
+<!-- Sin src: lo pone el guion después de apartar las medidas guardadas, para
+     que las pruebas arranquen siempre de los valores por defecto y no de lo que
+     el usuario tuviera puesto. -->
+<div id="banco">
+  <iframe id="fFalda" data-src="falda_base_interactivo.html"></iframe>
+  <iframe id="fCuerpo" data-src="cuerpo_base_interactivo.html"></iframe>
+  <iframe id="fManga" data-src="manga_base_interactivo.html"></iframe>
+  <iframe id="fPantalon" data-src="pantalon_base_interactivo.html"></iframe>
+  <iframe id="fPanuelo" data-src="falda_panuelo_interactivo.html"></iframe>
+</div>
+
+<script>
+'use strict';
+
+// ---------------------------------------------------------------- utilidades
+
+// Las cifras salen del informe tal cual se leen, con coma decimal.
+function num(txt) {
+  var m = String(txt).replace(/&minus;|−/g, '-').match(/-?\d+(?:,\d+)?/);
+  return m ? parseFloat(m[0].replace(',', '.')) : NaN;
+}
+// "3,2 + 1,4" -> 4,6 ; un guion cuenta como cero
+function suma(txt) {
+  return String(txt).split('+').reduce(function (t, p) {
+    return t + (/[\d]/.test(p) ? num(p) : 0);
+  }, 0);
+}
+function cerca(a, b, tol) { return Math.abs(a - b) <= (tol === undefined ? 0.06 : tol); }
+
+// Las filas del informe, por su rótulo.
+function informe(d) {
+  var out = {};
+  Array.prototype.forEach.call(d.querySelectorAll('#logCalculos .fila'), function (f) {
+    out[f.firstChild.textContent.replace(/\s+/g, ' ').trim()] = f.lastChild.textContent.trim();
+  });
+  return out;
+}
+function notas(d) {
+  return Array.prototype.map.call(d.querySelectorAll('#logCalculos .nota'), function (n) {
+    return n.textContent;
+  });
+}
+// Las entradas de la leyenda del dibujo, por su nombre.
+function leyenda(g) {
+  var out = {};
+  Array.prototype.forEach.call(g.querySelectorAll('text.leyenda'), function (t) {
+    var m = /^(.*?):\s*([\d,]+)\s*cm$/.exec(t.textContent);
+    if (m) out[m[1]] = parseFloat(m[2].replace(',', '.'));
+  });
+  return out;
+}
+// Los rótulos de pieza: van girados -90. La leyenda empieza por las mismas
+// palabras pero no gira, así que el giro es lo que los distingue.
+function rotulos(g) {
+  return Array.prototype.filter.call(g.querySelectorAll('text'), function (t) {
+    return (t.getAttribute('transform') || '').indexOf('rotate(-90') >= 0;
+  });
+}
+function seSolapan(a, b) {
+  return a.right > b.left && b.right > a.left && a.bottom > b.top && b.bottom > a.top;
+}
+
+// ------------------------------------------------------------------ registro
+
+var GRUPOS = [];
+function grupo(nombre) {
+  var g = { nombre: nombre, pruebas: {} };
+  GRUPOS.push(g);
+  return {
+    // Cada comprobación se acumula por su nombre a lo largo de todo el barrido:
+    // interesa "0 de 940 fallan", no mil líneas iguales.
+    ok: function (nombre, cond, detalle) {
+      var p = g.pruebas[nombre] || (g.pruebas[nombre] = { n: 0, fallos: 0, ejemplos: [] });
+      p.n++;
+      if (!cond) {
+        p.fallos++;
+        if (p.ejemplos.length < 3 && detalle) p.ejemplos.push(detalle);
+      }
+    }
+  };
+}
+
+// -------------------------------------------------------------------- barrido
+
+// Los casos son deterministas a propósito: dos ejecuciones seguidas tienen que
+// dar el mismo resultado, o un fallo intermitente no hay quien lo persiga.
+function casos(mandos, cuantos) {
+  var lista = [];
+  var porDefecto = mandos.map(function (s) { return s.value; });
+  lista.push(porDefecto.slice());
+  // todo al mínimo y todo al máximo
+  lista.push(mandos.map(function (s) { return s.min; }));
+  lista.push(mandos.map(function (s) { return s.max; }));
+  // cada mando en sus dos extremos, con el resto por defecto: así un fallo
+  // señala al mando culpable en vez de a una combinación cualquiera
+  mandos.forEach(function (s, i) {
+    [s.min, s.max].forEach(function (v) {
+      var c = porDefecto.slice();
+      c[i] = v;
+      lista.push(c);
+    });
+  });
+  var sem = 20250829;
+  function rnd() { sem = (sem * 1103515245 + 12345) & 0x7fffffff; return sem / 0x7fffffff; }
+  for (var k = 0; k < cuantos; k++) {
+    lista.push(mandos.map(function (s) {
+      var lo = +s.min, hi = +s.max, paso = +(s.step || 1);
+      return String(Math.round((lo + (hi - lo) * rnd()) / paso) * paso);
+    }));
+  }
+  return lista;
+}
+
+function barrer(marco, cuantos, comprobar) {
+  var d = marco.contentDocument, w = marco.contentWindow;
+  var mandos = Array.prototype.slice.call(d.querySelectorAll('input[type=range]'));
+  var lista = casos(mandos, cuantos);
+  var g = { dibujados: 0, avisos: 0, errores: 0 };
+  lista.forEach(function (c) {
+    mandos.forEach(function (s, i) { s.value = c[i]; });
+    var ctx = mandos.map(function (s) { return s.id.slice(2) + '=' + s.value; }).join(' ');
+    try {
+      w.renderizarEsquema();
+    } catch (e) {
+      g.errores++;
+      comprobar.error(ctx, e);
+      return;
+    }
+    if (d.getElementById('avisoError').style.display === 'block') {
+      g.avisos++;
+      comprobar.conAviso(d, ctx);
+    } else {
+      g.dibujados++;
+      comprobar.dibujado(d, ctx);
+    }
+  });
+  return g;
+}
+
+// ------------------------------------------------------ pruebas comunes a las cuatro
+
+function comunes(t, d, ctx) {
+  var svg = d.getElementById('svgPatron');
+
+  var vb = (svg.getAttribute('viewBox') || '').split(/\s+/).map(Number);
+  t.ok('El lienzo tiene medidas válidas',
+    vb.length === 4 && vb.every(isFinite) && vb[2] > 0 && vb[3] > 0,
+    ctx + ' -> viewBox "' + svg.getAttribute('viewBox') + '"');
+
+  var titulo = svg.querySelector('title'), desc = svg.querySelector('desc');
+  var txt = (titulo ? titulo.textContent : '') + ' ' + (desc ? desc.textContent : '');
+  t.ok('El dibujo tiene nombre para quien no lo ve',
+    titulo && desc && titulo.textContent.length > 10 &&
+    txt.indexOf('NaN') < 0 && txt.indexOf('undefined') < 0,
+    ctx + ' -> "' + txt.slice(0, 70) + '"');
+  t.ok('El dibujo se anuncia como imagen',
+    svg.getAttribute('role') === 'img' &&
+    svg.getAttribute('aria-describedby') === 'logCalculos', ctx);
+
+  // Ninguna cifra del informe puede quedar cortada por su columna.
+  var anchas = [];
+  Array.prototype.forEach.call(d.querySelectorAll('#logCalculos .fila'), function (f) {
+    if (f.scrollWidth > f.clientWidth + 1) anchas.push(f.textContent.trim());
+  });
+  t.ok('Ninguna fila del informe se sale de su columna', anchas.length === 0,
+    ctx + ' -> ' + anchas.join(' | '));
+
+  // El informe tiene un tope de alto como red; si lo toca, es que ha crecido
+  // más de lo previsto y hay que revisarlo, no dejar que salga barra.
+  var cuerpo = d.querySelector('.reporte-tecnico > div');
+  t.ok('El informe cabe sin barra de desplazamiento',
+    cuerpo.scrollHeight <= cuerpo.clientHeight + 1,
+    ctx + ' -> ' + cuerpo.scrollHeight + 'px de ' + cuerpo.clientHeight);
+
+  // Los rótulos de las piezas: ni fuera de su pieza ni unos sobre otros.
+  // Se miden en pantalla y no con getBBox, que NO aplica el transform del
+  // propio elemento: para un texto girado devuelve la caja sin girar.
+  var todos = [];
+  ['gDelantero', 'gEspalda', 'gManga'].forEach(function (id) {
+    var g = d.getElementById(id);
+    if (!g) return;
+    var caja = g.getBoundingClientRect();
+    rotulos(g).forEach(function (r) {
+      todos.push(r);
+      var b = r.getBoundingClientRect();
+      t.ok('Los rótulos se quedan dentro de su pieza',
+        b.left >= caja.left - 1 && b.right <= caja.right + 1,
+        ctx + ' -> ' + r.textContent);
+    });
+  });
+  var choque = null;
+  for (var i = 0; i < todos.length && !choque; i++) {
+    for (var j = i + 1; j < todos.length; j++) {
+      if (seSolapan(todos[i].getBoundingClientRect(), todos[j].getBoundingClientRect())) {
+        choque = todos[i].textContent + ' x ' + todos[j].textContent;
+        break;
+      }
+    }
+  }
+  t.ok('Ningún rótulo se pisa con otro', !choque, ctx + ' -> ' + choque);
+
+  // Y lo mismo con TODO el texto del plano, no solo con los rótulos girados.
+  // La comprobación de arriba se le escapó una cota que se montaba sobre un
+  // rótulo justo porque no iba girada.
+  var textos = Array.prototype.filter.call(
+    d.querySelectorAll('#capaPatron text'), function (x) { return x.textContent.trim(); });
+  var choqueTexto = null;
+  for (var a = 0; a < textos.length && !choqueTexto; a++) {
+    for (var b = a + 1; b < textos.length; b++) {
+      if (seSolapan(textos[a].getBoundingClientRect(), textos[b].getBoundingClientRect())) {
+        choqueTexto = '"' + textos[a].textContent + '" x "' + textos[b].textContent + '"';
+        break;
+      }
+    }
+  }
+  t.ok('Ningún texto del plano se pisa con otro', !choqueTexto, ctx + ' -> ' + choqueTexto);
+}
+
+function conAviso(t, d, ctx) {
+  var txt = d.getElementById('avisoError').textContent || '';
+  // El render va blindado: si revienta, en vez de dejar el dibujo anterior sin
+  // decir nada saca su propio aviso. Aquí hay que distinguirlo de un aviso de
+  // medidas imposibles, que sí es correcto.
+  t.ok('El trazado no revienta por dentro', txt.indexOf('fallado al trazar') < 0, ctx);
+  t.ok('Con medidas imposibles, el aviso dice qué mover',
+    (d.getElementById('avisoError').textContent || '').length > 30, ctx);
+  t.ok('Con medidas imposibles no se queda el trazado anterior',
+    d.getElementById('capaPatron').children.length === 0, ctx);
+  t.ok('Con medidas imposibles se esconde la escala',
+    d.getElementById('capaEscala').style.display === 'none', ctx);
+}
+
+// ------------------------------------------------------------------ cada herramienta
+
+function probarFalda(marco) {
+  var t = grupo('Falda');
+  var res = barrer(marco, 120, {
+    error: function (ctx, e) { t.ok('El trazado no revienta', false, ctx + ' -> ' + e.message); },
+    conAviso: function (d, ctx) { conAviso(t, d, ctx); },
+    dibujado: function (d, ctx) {
+      comunes(t, d, ctx);
+      var r = informe(d);
+      // Todo lo que sobra en la media cintura tiene que acabar en algún sitio:
+      // en la cadera, en una pinza o en el centro de espalda. Solo puede faltar
+      // cuando salta el aviso de que la cadera está al tope.
+      var repartido = num(r['A la cadera']) + suma(r['Delantero'])
+                    + suma(r['Espalda']) + suma(r['Centro espalda']);
+      var alTope = notas(d).some(function (n) { return n.indexOf('tope') >= 0; });
+      // La tolerancia es de 0,2 y no de 0,06 porque se están sumando cuatro
+      // cifras que el informe ya ha redondeado a un decimal: el error de
+      // redondeo se acumula hasta 0,2 sin que nada esté mal.
+      t.ok('El sobrante de cintura se reparte entero',
+        alTope || cerca(repartido, num(r['Medio patrón']), 0.2),
+        ctx + ' -> reparte ' + repartido.toFixed(2) + ' de ' + r['Medio patrón']);
+      // Las dos mitades de la cadera son iguales por construcción.
+      var mitades = r['del. y esp.'].split('+').map(num);
+      t.ok('La cadera se reparte igual entre las dos piezas',
+        cerca(mitades[0], mitades[1]), ctx + ' -> ' + r['del. y esp.']);
+    }
+  });
+  return res;
+}
+
+function probarCuerpo(marco) {
+  var t = grupo('Cuerpo');
+  var res = barrer(marco, 160, {
+    error: function (ctx, e) { t.ok('El trazado no revienta', false, ctx + ' -> ' + e.message); },
+    conAviso: function (d, ctx) { conAviso(t, d, ctx); },
+    dibujado: function (d, ctx) {
+      comunes(t, d, ctx);
+      var r = informe(d);
+      var exc = num(r['Talle del. - esp.'] || r['Talle del. − esp.']);
+      var pecho = num(r['Pinza de pecho']);
+      var sisa = r['Pinza de sisa'] ? num(r['Pinza de sisa']) : 0;
+      var aCintura = r['A la pinza del.'] ? num(r['A la pinza del.']) : 0;
+
+      // El volumen del pecho no se pierde por el camino: lo que no se queda en
+      // la pinza de pecho va a la de sisa, y lo que aún sobre, a la de cintura.
+      t.ok('El volumen del pecho se reparte entero',
+        cerca(pecho + sisa + aCintura, exc),
+        ctx + ' -> ' + pecho + '+' + sisa + '+' + aCintura + ' vs ' + exc);
+      // El tope es lo que evita que el pecho salga en cono.
+      t.ok('Ninguna pinza de pecho pasa de 4,5 cm',
+        pecho <= 4.56 && sisa <= 4.56, ctx + ' -> ' + pecho + ' / ' + sisa);
+      t.ok('Se parte en dos solo al pasar del tope',
+        (sisa > 0) === (exc > 4.5 + 0.001), ctx + ' -> exc ' + exc + ', sisa ' + sisa);
+
+      // Las dos pinzas que apuntan al pecho: tienen que cerrar (patas iguales),
+      // abrir justo su profundidad (la cuerda) y salir del mismo punto.
+      var g = d.getElementById('gDelantero');
+      var circulo = g.querySelector('circle.punto-pecho');
+      var pp = { x: +circulo.getAttribute('cx'), y: +circulo.getAttribute('cy') };
+      [['pts-pecho', pecho, 'de pecho'], ['pts-sisa', sisa, 'de sisa']].forEach(function (par) {
+        var el = g.querySelector('path[fill="url(#' + par[0] + ')"]');
+        if (par[1] <= 0) {
+          t.ok('Solo se dibuja la pinza que existe', !el, ctx + ' -> sobra ' + par[0]);
+          return;
+        }
+        t.ok('Solo se dibuja la pinza que existe', !!el, ctx + ' -> falta ' + par[0]);
+        if (!el) return;
+        var v = el.getAttribute('d').match(/-?[\d.]+/g).map(Number);
+        var a = { x: v[0], y: v[1] }, ver = { x: v[2], y: v[3] }, b = { x: v[4], y: v[5] };
+        var la = Math.hypot(a.x - ver.x, a.y - ver.y), lb = Math.hypot(b.x - ver.x, b.y - ver.y);
+        t.ok('Las pinzas de pecho cierran (patas iguales)', Math.abs(la - lb) < 0.05,
+          ctx + ' ' + par[2] + ' -> ' + la.toFixed(3) + ' / ' + lb.toFixed(3));
+        t.ok('Las pinzas de pecho abren su profundidad',
+          cerca(Math.hypot(a.x - b.x, a.y - b.y) / 6, par[1], 0.02),
+          ctx + ' ' + par[2]);
+        t.ok('Las dos apuntan al pecho desde la misma distancia',
+          cerca(Math.hypot(ver.x - pp.x, ver.y - pp.y) / 6, 4, 0.02),
+          ctx + ' ' + par[2] + ' -> ' + (Math.hypot(ver.x - pp.x, ver.y - pp.y) / 6).toFixed(2));
+      });
+
+      // La línea de altura de pecho parte la pinza por la mitad. Cuando no
+      // cabe así —el punto de pecho por encima de la axila— se baja, pero
+      // entonces el informe tiene que decirlo.
+      var cuna = g.querySelector('path[fill="url(#pts-pecho)"]');
+      if (cuna) {
+        var w = cuna.getAttribute('d').match(/-?[\d.]+/g).map(Number);
+        var desvio = ((w[1] + w[5]) / 2 - pp.y) / 6;
+        var avisada = notas(d).some(function (n) { return n.indexOf('baja') >= 0; });
+        t.ok('La línea de pecho parte la pinza por la mitad, o se avisa',
+          Math.abs(desvio) < 0.02 || avisada,
+          ctx + ' -> baja ' + desvio.toFixed(2) + ' cm sin avisar');
+      }
+
+      // Lo que sobra a la cintura se reparte 25-40-35, salvo lo que no cabe.
+      var lados = suma(r['Costados 25 %']);
+      var repartido = lados + suma(r['Espalda 40 %']) + suma(r['Delantero 35 %']);
+      var sinAbsorber = 0;
+      notas(d).forEach(function (n) {
+        var m = /Sin absorber: ([\d,]+)/.exec(n);
+        if (m) sinAbsorber = parseFloat(m[1].replace(',', '.'));
+      });
+      t.ok('El sobrante de cintura se reparte entero',
+        cerca(repartido + sinAbsorber, num(r['Sobrante']) + aCintura, 0.12),
+        ctx + ' -> ' + (repartido + sinAbsorber).toFixed(2) + ' vs ' + (num(r['Sobrante']) + aCintura).toFixed(2));
+    }
+  });
+  return res;
+}
+
+function probarManga(marco) {
+  var t = grupo('Manga');
+  var res = barrer(marco, 120, {
+    error: function (ctx, e) { t.ok('El trazado no revienta', false, ctx + ' -> ' + e.message); },
+    conAviso: function (d, ctx) { conAviso(t, d, ctx); },
+    dibujado: function (d, ctx) {
+      comunes(t, d, ctx);
+      var r = informe(d);
+      var del = num(r['Sisa delantera']), esp = num(r['Sisa espalda']);
+      t.ok('La suma de las dos sisas es la sisa entera',
+        cerca(del + esp, num(r['Suma'])), ctx);
+      t.ok('Z es el 70 % de media sisa',
+        cerca(num(r['Z (mitad × 0,7)']), (del + esp) / 2 * 0.7, 0.08),
+        ctx + ' -> ' + r['Z (mitad × 0,7)']);
+      // La copa se dibuja y luego se mide sobre el propio trazado: tiene que
+      // salir más larga que la sisa, que es de dónde sale el embebido.
+      var embebe = num(r['Embebe']);
+      t.ok('La copa embebe sobre la sisa, no al revés',
+        cerca(num(r['Copa dibujada']) - (del + esp), embebe, 0.12),
+        ctx + ' -> copa ' + r['Copa dibujada'] + ', sisa ' + (del + esp));
+      t.ok('El embebido no es negativo', embebe >= -0.06, ctx + ' -> ' + embebe);
+    }
+  });
+  return res;
+}
+
+function probarPantalon(marco) {
+  var t = grupo('Pantalón');
+  var res = barrer(marco, 160, {
+    error: function (ctx, e) { t.ok('El trazado no revienta', false, ctx + ' -> ' + e.message); },
+    conAviso: function (d, ctx) { conAviso(t, d, ctx); },
+    dibujado: function (d, ctx) {
+      comunes(t, d, ctx);
+      var r = informe(d);
+      var cintura = +d.getElementById('inCintura').value;
+      var cadera = +d.getElementById('inCadera').value;
+
+      // Es la cuenta de la que cuelga todo el método: lo que mide la cintura
+      // del delantero más lo que mide la de la espalda es media cintura.
+      t.ok('Las dos cinturas suman media cintura',
+        cerca(num(r['Delantero (Z)']) + num(r['Espalda']), cintura / 2, 0.12),
+        ctx + ' -> ' + r['Delantero (Z)'] + ' + ' + r['Espalda'] + ' vs ' + (cintura / 2));
+      t.ok('El cuarto de cadera es la cadera entre cuatro',
+        cerca(num(r['Cuarto de cadera']), cadera / 4), ctx);
+
+      // Lo que sobra en la cintura (X) se reparte entre los dos costados, la
+      // pinza delantera y la de espalda. "Costados" es el TOTAL de los dos:
+      // enseñarlo como "a + b" daba a entender que cada pieza mete la mitad,
+      // cuando solo el delantero se construye así.
+      var X = num(r['Diferencia (X)']);
+      t.ok('La diferencia X es media cadera menos media cintura',
+        cerca(X, (cadera - cintura) / 2), ctx + ' -> ' + r['Diferencia (X)']);
+      t.ok('Los costados se llevan la mitad de X, en total',
+        cerca(num(r['Costados']), X / 2, 0.12), ctx + ' -> ' + r['Costados']);
+      t.ok('El reparto de la cintura no promete por pieza',
+        r['Costados'].indexOf('+') < 0, ctx + ' -> ' + r['Costados']);
+      // Lo que mete cada pieza va aparte, y el delantero SÍ mete la mitad del
+      // total de costados; la espalda es la que sale del trazado.
+      var entra = r['Entra al costado'].split('·').map(num);
+      t.ok('El delantero mete la mitad del total de costados',
+        cerca(entra[0], num(r['Costados']) / 2, 0.12),
+        ctx + ' -> ' + r['Entra al costado'] + ' vs ' + r['Costados']);
+      t.ok('El avance de tiro sale de la cadera',
+        cerca(num(r['Avance del.']), cadera / 16 - 1.5), ctx + ' -> ' + r['Avance del.']);
+      // 0,12 de tolerancia: el informe redondea a un decimal, y el doble de un
+      // número ya redondeado no coincide con el redondeo del doble.
+      t.ok('El avance de la espalda es el doble que el del delantero',
+        cerca(num(r['Avance esp.']), 2 * num(r['Avance del.']), 0.12), ctx);
+
+      // "Pinza de espalda" es el volumen a absorber; "en dos" es lo que de
+      // verdad se dibuja, y ESO es lo que no puede pasar de 3 + 2. Lo que no
+      // cabe se va al costado, y entonces sale la nota con el asterisco.
+      if (r['en dos']) {
+        var partes = r['en dos'].split('+').map(num);
+        t.ok('Lo que se dibuja de pinza de espalda no pasa de 3 + 2',
+          partes[0] <= 3.06 && partes[1] <= 2.06, ctx + ' -> ' + r['en dos']);
+      } else {
+        t.ok('Lo que se dibuja de pinza de espalda no pasa de 3 + 2',
+          num(r['Pinza de espalda']) <= 3.56, ctx + ' -> ' + r['Pinza de espalda']);
+      }
+      // Las dos líneas que el método manda medir en carmín ya no llevan rótulo
+      // en el dibujo, pero sus cifras tienen que seguir en el informe.
+      t.ok('Las cifras de las cintura siguen en el informe',
+        r['Línea A'] !== undefined && r['Delantero (Z)'] !== undefined, ctx);
+    }
+  });
+  return res;
+}
+
+function probarPanuelo(marco) {
+  var t = grupo('Pañuelo');
+  var PI2 = 2 * Math.PI, RAIZ2 = Math.SQRT2;
+  var res = barrer(marco, 140, {
+    error: function (ctx, e) { t.ok('El trazado no revienta', false, ctx + ' -> ' + e.message); },
+    conAviso: function (d, ctx) { conAviso(t, d, ctx); },
+    dibujado: function (d, ctx) {
+      comunes(t, d, ctx);
+      var r = informe(d);
+      var cintura = +d.getElementById('inCintura').value;
+      var nCapas = +Array.prototype.filter.call(
+        d.querySelectorAll('input[name="capas"]'), function (x) { return x.checked; })[0].value;
+
+      // La cintura del patrón lleva los 2 cm de la costura del centro de espalda.
+      t.ok('La cintura del patrón lleva su costura',
+        cerca(num(r['Con costura']), cintura + 2), ctx + ' -> ' + r['Con costura']);
+      // El radio es lo único que hay que calcular, y sale de la longitud entera.
+      var radio = num(r['Radio (X)']);
+      t.ok('El radio sale de la longitud de la cintura',
+        cerca(radio, (cintura + 2) / PI2, 0.06), ctx + ' -> ' + r['Radio (X)']);
+      // El arco del cuarto tiene que valer un cuarto de la cintura: es lo que
+      // hace que el agujero del cuadrado sea la cintura de verdad.
+      t.ok('El arco dibujado es un cuarto de la cintura',
+        cerca(num(r['Cuarto de arco']), (cintura + 2) / 4, 0.06), ctx + ' -> ' + r['Cuarto de arco']);
+
+      // Las cifras de las capas viven dentro del dibujo, en su ficha, no en el
+      // informe: se leen de ahí, que es lo que ve el usuario.
+      var g = d.getElementById('gDelantero');
+      var lineas = Array.prototype.map.call(g.querySelectorAll('text.ficha'), function (x) {
+        return x.textContent;
+      }).filter(function (x) { return /^[A-E] ·/.test(x); });
+      t.ok('La ficha del dibujo lista tantas capas como se han pedido',
+        lineas.length === nCapas, ctx + ' -> ' + lineas.length + ' de ' + nCapas);
+      lineas.forEach(function (linea) {
+        var m = /^([A-E]) · largo ([\d,]+) cm · lado ([\d,]+) cm$/.exec(linea);
+        t.ok('Cada capa de la ficha dice su largo y su lado', !!m, ctx + ' -> "' + linea + '"');
+        if (!m) return;
+        var largo = parseFloat(m[2].replace(',', '.')), lado = parseFloat(m[3].replace(',', '.'));
+        // El largo se mide sobre la bisectriz desde la cintura, así que la
+        // diagonal del cuadrado vale radio + largo.
+        t.ok('La diagonal de cada capa es el radio más su largo',
+          cerca(lado * RAIZ2, radio + largo, 0.12),
+          ctx + ' capa ' + m[1] + ' -> lado ' + lado + ', largo ' + largo);
+        // El cuadrado tiene que quedar por fuera del círculo de la cintura.
+        t.ok('El cuadrado no se mete en el círculo de la cintura',
+          lado > radio, ctx + ' capa ' + m[1] + ' -> lado ' + lado + ' vs radio ' + radio);
+      });
+      // Y la cinturilla, que es el paso 3 de la lámina: el doble del ancho.
+      t.ok('La cinturilla se dibuja del doble del ancho pedido',
+        cerca(num(r['Ancho doblado']), 2 * (+d.getElementById('inCinturilla').value)),
+        ctx + ' -> ' + r['Ancho doblado']);
+      t.ok('La cinturilla se dibuja en el plano',
+        g.querySelectorAll('rect.silueta-patron').length === 1, ctx);
+
+      // Y otros tantos contornos en el dibujo: la de fuera es la silueta y las
+      // demás van con su propio trazo.
+      var trazados = g.querySelectorAll('path.silueta-patron').length
+                   + g.querySelectorAll('path.capa-interior').length;
+      t.ok('Se dibujan tantas capas como dice el informe',
+        trazados === nCapas, ctx + ' -> ' + trazados + ' trazados, ' + nCapas + ' capas');
+
+      // Las capas de más se deshabilitan, no se esconden.
+      var apagados = Array.prototype.filter.call(
+        d.querySelectorAll('input[type=range]'), function (s) { return s.disabled; }).length;
+      t.ok('Las capas que sobran quedan deshabilitadas',
+        apagados === 5 - nCapas, ctx + ' -> ' + apagados + ' apagados con ' + nCapas + ' capas');
+    }
+  });
+  return res;
+}
+
+// ------------------------------------------------------------------- presentación
+
+function pintar(resumenPorHerr) {
+  var salida = document.getElementById('salida');
+  var totalN = 0, totalF = 0;
+  GRUPOS.forEach(function (g) {
+    var caja = document.createElement('div');
+    caja.className = 'herr';
+    var r = resumenPorHerr[g.nombre] || {};
+    var h = document.createElement('h2');
+    h.textContent = g.nombre + ' — ' + (r.dibujados || 0) + ' trazados, '
+      + (r.avisos || 0) + ' con aviso de medidas imposibles';
+    caja.appendChild(h);
+    Object.keys(g.pruebas).forEach(function (nombre) {
+      var p = g.pruebas[nombre];
+      totalN += p.n; totalF += p.fallos;
+      var fila = document.createElement('div');
+      fila.className = 'prueba ' + (p.fallos ? 'falla' : 'pasa');
+      fila.innerHTML = '<span class="marca">' + (p.fallos ? '×' : '✓') + '</span>'
+        + '<span>' + nombre + '</span>'
+        + '<span class="cuenta">' + (p.n - p.fallos) + ' / ' + p.n + '</span>';
+      p.ejemplos.forEach(function (e) {
+        var det = document.createElement('div');
+        det.className = 'detalle';
+        det.textContent = e;
+        fila.appendChild(det);
+      });
+      caja.appendChild(fila);
+    });
+    salida.appendChild(caja);
+  });
+  var res = document.getElementById('resumen');
+  res.className = totalF ? 'mal' : 'ok';
+  res.textContent = totalF
+    ? totalF + ' de ' + totalN + ' comprobaciones fallan'
+    : 'Todo en orden: ' + totalN + ' comprobaciones, 0 fallos';
+}
+
+// --------------------------------------------------------------------- arranque
+
+function listo(marco) {
+  try {
+    var d = marco.contentDocument;
+    return !!(d && typeof marco.contentWindow.renderizarEsquema === 'function'
+      && d.querySelector('#capaPatron *'));
+  } catch (e) {
+    return null;   // bloqueado por el origen
+  }
+}
+
+// Las herramientas recuerdan las medidas en localStorage. Las pruebas tienen que
+// arrancar de los valores por defecto y no de lo que el usuario tuviera puesto,
+// así que se aparta lo guardado antes de cargarlas y se devuelve al terminar.
+var CLAVE = 'taller.medidas';
+var guardado = null;
+function apartarMedidas() {
+  try { guardado = localStorage.getItem(CLAVE); localStorage.removeItem(CLAVE); } catch (e) {}
+}
+function devolverMedidas() {
+  try {
+    localStorage.removeItem(CLAVE);
+    if (guardado !== null) localStorage.setItem(CLAVE, guardado);
+  } catch (e) {}
+}
+
+var intentos = 0;
+function arrancar() {
+  var marcos = ['fFalda', 'fCuerpo', 'fManga', 'fPantalon', 'fPanuelo'].map(function (id) {
+    return document.getElementById(id);
+  });
+  var estados = marcos.map(listo);
+  if (estados.some(function (e) { return e === null; })) {
+    document.getElementById('aviso').style.display = 'block';
+    document.getElementById('resumen').style.display = 'none';
+    devolverMedidas();
+    return;
+  }
+  if (!estados.every(Boolean)) {
+    if (++intentos > 150) {
+      document.getElementById('resumen').className = 'mal';
+      document.getElementById('resumen').textContent =
+        'Alguna herramienta no ha llegado a dibujar: mira la consola.';
+      devolverMedidas();
+      return;
+    }
+    return setTimeout(arrancar, 120);
+  }
+  var r = {};
+  r['Falda'] = probarFalda(marcos[0]);
+  r['Cuerpo'] = probarCuerpo(marcos[1]);
+  r['Manga'] = probarManga(marcos[2]);
+  r['Pantalón'] = probarPantalon(marcos[3]);
+  r['Pañuelo'] = probarPanuelo(marcos[4]);
+  pintar(r);
+  devolverMedidas();
+  document.title = 'LISTO';
+}
+
+apartarMedidas();
+Array.prototype.forEach.call(document.querySelectorAll('#banco iframe'), function (f) {
+  f.src = f.getAttribute('data-src');
+});
+setTimeout(arrancar, 400);
+</script>
+</body>
+</html>

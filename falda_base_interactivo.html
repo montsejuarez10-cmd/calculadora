@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script>
+    try {
+      if (window.self !== window.top) document.documentElement.classList.add('sin-scroll');
+    } catch (e) {}
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patrón Base Técnico con Silueta Completa SVG</title>
+  <!-- Las mismas fuentes incrustadas que index.html. Cargan aparte para no
+       bloquear el primer pintado; dentro del modal ya vienen de la caché. -->
+  <link rel="stylesheet" href="css/fonts.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css"></noscript>
+  <link rel="stylesheet" href="css/herramienta.css">
+  <script src="js/herramienta.js"></script>
+  <style>
+    /* Solo lo propio de esta herramienta: su color. El resto está en
+       css/herramienta.css, compartido con las demás. */
+    :root {
+      --color-herramienta: #ec5151;
+      --pista-vacia: #f9dfdf;
+      --color-tinta: #ca3737;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Patrón Base Completo de Falda en SVG</h1>
+
+  <p class="sub">Trazado automático de la silueta exterior delantera y trasera incorporando la regla 50-32-18 e ingeniería de pinzas secundarias.</p>
+  <div class="aviso-error" id="avisoError" role="status">⚠ La cintura no puede ser igual o mayor que la cadera. Ajusta las medidas para generar el patrón.</div>
+
+  <div class="contenedor">
+    <!-- PANEL DE MANDOS -->
+    <div class="controles">
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inCintura">Contorno de Cintura:</label>
+          <span class="valores"><input type="number" id="numCintura" class="num" min="60" max="100" step="1" value="72"> cm</span>
+        </div>
+        <input type="range" id="inCintura" min="60" max="100" value="72">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inCadera">Contorno de Cadera:</label>
+          <span class="valores"><input type="number" id="numCadera" class="num" min="84" max="122" step="1" value="98"> cm</span>
+        </div>
+        <input type="range" id="inCadera" min="84" max="122" value="98">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inAltCadera">Altura de Cadera:</label>
+          <span class="valores"><input type="number" id="numAltCadera" class="num" min="14" max="24" step="0.5" value="18"> cm</span>
+        </div>
+        <input type="range" id="inAltCadera" min="14" max="24" step="0.5" value="18">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inLargo">Largo Deseado:</label>
+          <span class="valores"><input type="number" id="numLargo" class="num" min="40" max="90" step="1" value="60"> cm</span>
+        </div>
+        <input type="range" id="inLargo" min="40" max="90" value="60">
+      </div>
+      <!-- INFORME MATEMÁTICO -->
+      <div class="reporte-tecnico">
+        <h3>Análisis del Descarte de Tejido</h3>
+        <div id="logCalculos">Calculando geometría...</div>
+      </div>
+
+    </div>
+
+    <!-- ESCENARIO GRÁFICO (SVG) -->
+    <div class="visor-svg">
+      <svg id="svgPatron" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg"
+           role="img" aria-describedby="logCalculos">
+        <!-- Los rehace el trazado en cada dibujo: sin ellos el SVG no existe
+             para un lector de pantalla, y es toda la salida de la herramienta. -->
+        <title>Trazado del patrón</title>
+        <desc>El plano se dibuja al ajustar las medidas.</desc>
+        <!-- Los estilos comunes del dibujo están en css/herramienta.css; aquí,
+             solo lo propio de esta herramienta. La falda no añade ninguno. -->
+
+        <g id="capaPatron"><!-- El plano se autodibuja aquí con JS --></g>
+      </svg>
+      <div class="escala" id="capaEscala">
+        <div class="razon" id="escalaRazon">Escala 1:1</div>
+        <div class="regla">
+          <div class="barra" id="escalaBarra"></div>
+          <span id="escalaTramo">10 cm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inCintura = document.getElementById('inCintura');
+    const inCadera = document.getElementById('inCadera');
+    const inAltCadera = document.getElementById('inAltCadera');
+    const inLargo = document.getElementById('inLargo');
+
+    const numCintura = document.getElementById('numCintura');
+    const numCadera = document.getElementById('numCadera');
+    const numAltCadera = document.getElementById('numAltCadera');
+    const numLargo = document.getElementById('numLargo');
+    const logCalculos = document.getElementById('logCalculos');
+    const svgPatron = document.getElementById('svgPatron');
+    const capaPatron = document.getElementById('capaPatron');
+    const avisoError = document.getElementById('avisoError');
+    const capaEscala = document.getElementById('capaEscala');
+    const escalaRazon = document.getElementById('escalaRazon');
+    const escalaBarra = document.getElementById('escalaBarra');
+    const escalaTramo = document.getElementById('escalaTramo');
+
+    const ESCALA = 6; // Relación visual: 1cm = 6px
+    const reflejar = Herramienta.reflejar;
+
+    function renderizarEsquema() {
+      const cmCintura = parseFloat(inCintura.value);
+      const cmCadera = parseFloat(inCadera.value);
+      const cmAltCadera = parseFloat(inAltCadera.value);
+      const cmLargo = parseFloat(inLargo.value);
+
+      reflejar(numCintura, cmCintura);
+      reflejar(numCadera, cmCadera);
+      reflejar(numAltCadera, cmAltCadera);
+      reflejar(numLargo, cmLargo);
+
+      const semiCadera = cmCadera / 2;
+      const semiCintura = cmCintura / 2;
+      const descarteCintura = semiCadera - semiCintura;
+
+      if (descarteCintura <= 0) {
+        avisoError.style.display = 'block';
+        capaPatron.innerHTML = '';
+        // Sin trazado el viewBox se queda con el valor anterior: mostrar su
+        // escala sería mentir sobre un dibujo que ya no está.
+        capaEscala.style.display = 'none';
+        logCalculos.innerHTML = 'Medidas incompatibles: ajusta la cintura o la cadera para calcular el patrón.';
+        return;
+      }
+      avisoError.style.display = 'none';
+
+      // ---- Reparto del sobrante -------------------------------------------
+      // Cada absorbente tiene un tope, en cm por medio patrón. El reparto va en
+      // dos fases: primero la norma 50-32-18 y después, con lo que no ha cabido,
+      // un relleno por orden de prioridad.
+      const TOPES = { cadD: 3, cadE: 3, pplE: 3, CE: 1.5, secE: 1.5, pplD: 2, secD: 1.5 };
+      const MIN_PINZA = 1;    // por debajo de esto una pinza no se marca ni se cose
+      const PRIORIDAD = ['cadD', 'cadE', 'pplE', 'pplD', 'CE', 'secE', 'secD'];
+      const PINZAS = PRIORIDAD.slice(2);
+      const EPS = 1e-9;
+      let caderaDesbordada = false;
+
+      const v = { cadD: 0, cadE: 0, pplE: 0, CE: 0, secE: 0, pplD: 0, secD: 0 };
+      const llenar = (k, disponible) => {
+        const hueco = Math.min(TOPES[k] - v[k], disponible);
+        v[k] += hueco;
+        return disponible - hueco;
+      };
+
+      // Fase 1: norma 50-32-18. Cada cuota baja por su propia cascada y lo que
+      // no logra colocar se acumula como sobrante.
+      let sobra = llenar('cadD', descarteCintura * 0.50 / 2)
+                + llenar('cadE', descarteCintura * 0.50 / 2);
+      let resto = descarteCintura * 0.32;
+      for (const k of ['pplE', 'CE', 'secE']) resto = llenar(k, resto);
+      sobra += resto;
+      resto = descarteCintura * 0.18;
+      for (const k of ['pplD', 'secD']) resto = llenar(k, resto);
+      sobra += resto;
+
+      // Fase 2: el sobrante rellena por orden de prioridad.
+      for (const k of PRIORIDAD) sobra = llenar(k, sobra);
+
+      // Una pinza por debajo del mínimo no se crea. Solo puede recoger su
+      // cantidad otra pinza que con ella alcance el mínimo: sin esa condición
+      // el sobrante rebota entre las dos secundarias y no converge nunca.
+      for (let vuelta = 0; vuelta < PINZAS.length; vuelta++) {
+        const floja = [...PINZAS].reverse().find(k => v[k] > EPS && v[k] < MIN_PINZA - EPS);
+        if (!floja) break;
+        let suelto = v[floja];
+        v[floja] = 0;
+        for (const k of PINZAS) {
+          if (k === floja) continue;
+          const hueco = Math.min(TOPES[k] - v[k], suelto);
+          if (v[k] + hueco < MIN_PINZA - EPS) continue;
+          v[k] += hueco;
+          suelto -= hueco;
+        }
+        sobra += suelto;
+      }
+
+      // Lo que siga sobrando va a la cadera, a partes iguales. Es la única vía
+      // por la que la cadera puede pasarse de su tope.
+      v.cadD += sobra / 2;
+      v.cadE += sobra / 2;
+
+      // Fase 3: si la cadera se ha pasado de 10 cm (5 por lado), el excedente de
+      // cada lado vuelve a las pinzas de SU pieza, que aquí admiten un tope
+      // ampliado. Lo que no quepa ni así regresa a la cadera.
+      const TOPES_AMPLIADOS = { pplD: 3, secD: 2, pplE: 4, CE: 2, secE: 3 };
+      caderaDesbordada = (v.cadD + v.cadE) > 10 + EPS;
+      if (caderaDesbordada) {
+        let excedenteDel = Math.max(0, v.cadD - 5);
+        let excedenteEsp = Math.max(0, v.cadE - 5);
+        v.cadD -= excedenteDel;
+        v.cadE -= excedenteEsp;
+        const ampliar = (k, disponible) => {
+          const hueco = Math.min(TOPES_AMPLIADOS[k] - v[k], disponible);
+          v[k] += hueco;
+          return disponible - hueco;
+        };
+        for (const k of ['pplD', 'secD']) excedenteDel = ampliar(k, excedenteDel);
+        for (const k of ['pplE', 'CE', 'secE']) excedenteEsp = ampliar(k, excedenteEsp);
+        // Las dos caderas son iguales, así que el reparto proporcional es mitad
+        // y mitad.
+        const irreducible = excedenteDel + excedenteEsp;
+        v.cadD += irreducible / 2;
+        v.cadE += irreducible / 2;
+      }
+
+      // La coma decimal, como en las otras tres herramientas.
+      const n = Herramienta.cm;
+      const fila = Herramienta.fila, bloque = Herramienta.bloque;
+      // Una pinza por debajo del mínimo no se marca: se enseña como un guion en
+      // vez de un 0,0, que se leería como una pinza de profundidad cero.
+      const pinzaCm = (x) => x > 0 ? n(x) : '&mdash;';
+
+      logCalculos.innerHTML = '<div class="grupos">'
+        + bloque('El sobrante', [
+            fila('Medio patrón', n(descarteCintura) + ' cm'),
+            fila('A la cadera', n(v.cadD + v.cadE) + ' cm'),
+            fila('del. y esp.', n(v.cadD) + ' + ' + n(v.cadE), true)
+          ])
+        + bloque('Las pinzas', [
+            fila('Delantero', pinzaCm(v.pplD) + ' + ' + pinzaCm(v.secD)),
+            fila('Espalda', pinzaCm(v.pplE) + ' + ' + pinzaCm(v.secE)),
+            fila('Centro espalda', pinzaCm(v.CE))
+          ])
+        + (caderaDesbordada
+            ? '<div class="nota">La cadera está al tope: el resto se reparte ampliando las pinzas.</div>'
+            : '')
+        + '</div>';
+
+      const wCaderaPx = (cmCadera / 4) * ESCALA;
+      const hCaderaPx = cmAltCadera * ESCALA;
+      const hLargoPx = cmLargo * ESCALA;
+
+      const anchoCinturaFrente = wCaderaPx - (v.cadD * ESCALA);
+      const anchoCinturaEspalda = wCaderaPx - (v.cadE * ESCALA) - (v.CE * ESCALA);
+
+      const pxPDel1 = v.pplD * ESCALA;
+      const pxPDel2 = v.secD * ESCALA;
+      const pxPEsp1 = v.pplE * ESCALA;
+      const pxPEsp2 = v.secE * ESCALA;
+      const pxEntalleEsp = v.CE * ESCALA;
+      // La cintura baja hacia el centro delantero, que queda en vértice
+      // inclinado; el centro de espalda arranca recto, a 90 grados. Los hombros
+      // de las pinzas delanteras escalonan esa bajada.
+      const yCinturaDel = 8, yCinturaEsp = 0;
+      const yPDel1 = 3, yPDel2 = 1;
+      const yPEsp1 = 0, yPEsp2 = 0;
+      // La profundidad se mide desde el arranque de cada pinza, así que la
+      // secundaria queda 2 cm más corta que su principal de verdad.
+      const lenPDel1 = yPDel1 + 9 * ESCALA;
+      const lenPDel2 = yPDel2 + 7 * ESCALA;
+      const lenPEsp1 = yPEsp1 + 13 * ESCALA;
+      const lenPEsp2 = yPEsp2 + 11 * ESCALA;
+
+      // La secundaria se sitúa entre la principal y el costado, a 3.5 cm de
+      // distancia (la nota admite de 3 a 4). Esa distancia se mide entre los
+      // bordes más próximos de las dos pinzas, no entre sus ejes, así que la
+      // separación de ejes crece con lo que engorden las pinzas.
+      const HUECO_PINZAS = 3.5;
+      const separacion = (ppl, sec) => (HUECO_PINZAS + ppl / 2 + sec / 2) * ESCALA;
+
+      const ejeDel1 = anchoCinturaFrente * 0.45;
+      const ejeDel2 = ejeDel1 + separacion(v.pplD, v.secD);
+      const ejeEsp1 = pxEntalleEsp + (anchoCinturaEspalda * 0.40);
+      const ejeEsp2 = ejeEsp1 + separacion(v.pplE, v.secE);
+
+      let svgContent = '';
+
+      // Delantero
+      // Los dos bloques se colocan en el origen y se centran después de medirlos.
+      // Las pinzas son huecos que el trazado se salta, así que no tienen relleno
+      // propio: hay que dibujar la superficie retirada como una forma aparte,
+      // por debajo de la silueta para no ensuciar su contorno.
+      const trama = Herramienta.trama;
+      const pinza = (eje, ancho, largo, yBase) =>
+        `M ${eje - ancho/2},${yBase} L ${eje},${largo} L ${eje + ancho/2},${yBase} Z`;
+      const costado = (xCintura) =>
+        `M ${xCintura},-3 Q ${wCaderaPx},${hCaderaPx * 0.4} ${wCaderaPx},${hCaderaPx} L ${wCaderaPx},-3 Z`;
+      // Los bloques se colocan pegados al origen; el lienzo se recorta después.
+
+      // Los rótulos de centro y costado, girados y arrancando desde el bajo.
+      // El anclaje por el borde de la caja —y no por la línea de base, que es
+      // lo que había— es lo que los deja a los cuatro a la misma distancia de
+      // su línea; el porqué está en Herramienta.girado.
+      const girado = Herramienta.girado;
+      const hueco = Herramienta.huecoRotulo(wCaderaPx);
+      const yRotulo = hLargoPx - 15;
+
+      // El resumen bajo cada pieza —un cuadrado con la trama de la pinza y su
+      // tamaño— lo dibuja Herramienta.leyenda, igual en las cuatro.
+      const leyenda = (entradas) => Herramienta.leyenda(entradas, hLargoPx);
+
+      const entradasDel = [
+        { nombre: 'Cadera',     cm: v.cadD, trama: 'pts-costado' },
+        { nombre: 'Principal',  cm: v.pplD, trama: 'pts-principal' },
+        { nombre: 'Secundaria', cm: v.secD, trama: 'pts-secundaria' }
+      ];
+      const entradasEsp = [
+        { nombre: 'Cadera',         cm: v.cadE, trama: 'pts-costado' },
+        { nombre: 'Principal',      cm: v.pplE, trama: 'pts-principal' },
+        { nombre: 'Secundaria',     cm: v.secE, trama: 'pts-secundaria' },
+        { nombre: 'Centro espalda', cm: v.CE,   trama: 'pts-ce' }
+      ];
+
+
+      let pathDelantero = `M 0,${yCinturaDel} `;
+      // Cada pinza se dibuja solo si el reparto le ha dado ancho.
+      if (pxPDel1 > 0) {
+        pathDelantero += `L ${ejeDel1 - pxPDel1/2},${yPDel1} L ${ejeDel1},${lenPDel1} L ${ejeDel1 + pxPDel1/2},${yPDel1} `;
+      }
+      if (pxPDel2 > 0) {
+        pathDelantero += `L ${ejeDel2 - pxPDel2/2},${yPDel2} L ${ejeDel2},${lenPDel2} L ${ejeDel2 + pxPDel2/2},${yPDel2} `;
+      }
+      pathDelantero += `L ${anchoCinturaFrente},-3 `;
+      pathDelantero += `Q ${wCaderaPx},${hCaderaPx * 0.4} ${wCaderaPx},${hCaderaPx} `;
+      pathDelantero += `L ${wCaderaPx},${hLargoPx} L 0,${hLargoPx} Z`;
+
+      svgContent += `
+        <g id="gDelantero" transform="translate(0, 0)">
+          <text x="0" y="-30" class="titulo">DELANTERO (1/4)</text>
+          <rect x="0" y="0" width="${wCaderaPx}" height="${hLargoPx}" class="linea-guia" />
+          <line x1="0" y1="${hCaderaPx}" x2="${wCaderaPx}" y2="${hCaderaPx}" class="linea-guia" />
+          ${trama('pts-costado', costado(anchoCinturaFrente))}
+          ${pxPDel1 > 0 ? trama('pts-principal', pinza(ejeDel1, pxPDel1, lenPDel1, yPDel1)) : ''}
+          ${pxPDel2 > 0 ? trama('pts-secundaria', pinza(ejeDel2, pxPDel2, lenPDel2, yPDel2)) : ''}
+          <path d="${pathDelantero}" class="silueta-patron" />
+          ${girado(hueco, yRotulo, 'Centro Delantero', true)}
+          ${girado(wCaderaPx - hueco, yRotulo, 'Costado', false)}
+          ${leyenda(entradasDel)}
+        </g>
+      `;
+
+      // Espalda
+
+      let pathEspalda = `M ${pxEntalleEsp},${yCinturaEsp} `; 
+      if (pxPEsp1 > 0) {
+        pathEspalda += `L ${ejeEsp1 - pxPEsp1/2},${yPEsp1} L ${ejeEsp1},${lenPEsp1} L ${ejeEsp1 + pxPEsp1/2},${yPEsp1} `;
+      } else {
+        // Sin ninguna pinza no hay nada que sujete la cintura plana al salir del
+        // centro de espalda: el tramo único hasta el costado heredaría su subida
+        // y el vértice dejaría de ser recto. Se escuadra hasta donde iría la
+        // principal, así la forma sigue siendo la misma que con pinza.
+        pathEspalda += `L ${ejeEsp1},${yCinturaEsp} `;
+      }
+      if (pxPEsp2 > 0) {
+        pathEspalda += `L ${ejeEsp2 - pxPEsp2/2},${yPEsp2} L ${ejeEsp2},${lenPEsp2} L ${ejeEsp2 + pxPEsp2/2},${yPEsp2} `;
+      }
+      pathEspalda += `L ${pxEntalleEsp + anchoCinturaEspalda},-3 `;
+      pathEspalda += `Q ${wCaderaPx},${hCaderaPx * 0.4} ${wCaderaPx},${hCaderaPx} `;
+      // El entalle lumbar solo quita ancho en la cintura: baja a ancho completo y el
+      // cierre Z traza la diagonal desde la línea de cadera hasta el punto de cintura.
+      pathEspalda += `L ${wCaderaPx},${hLargoPx} L 0,${hLargoPx} L 0,${hCaderaPx} Z`;
+
+      svgContent += `
+        <g id="gEspalda" transform="translate(0, 0)">
+          <text x="0" y="-30" class="titulo">ESPALDA (1/4)</text>
+          <!-- Solo la geometría va espejada (x -> wCaderaPx - x), para que el costado
+               quede enfrentado al del delantero. Los textos se quedan fuera del espejo
+               y cambian de lado a mano, o se leerían del revés. -->
+          <g transform="translate(${wCaderaPx}, 0) scale(-1, 1)">
+            <rect x="0" y="0" width="${wCaderaPx}" height="${hLargoPx}" class="linea-guia" />
+            <line x1="0" y1="${hCaderaPx}" x2="${wCaderaPx}" y2="${hCaderaPx}" class="linea-guia" />
+            ${trama('pts-costado', costado(pxEntalleEsp + anchoCinturaEspalda))}
+            ${pxEntalleEsp > 0 ? trama('pts-ce', `M 0,${yCinturaEsp} L ${pxEntalleEsp},${yCinturaEsp} L 0,${hCaderaPx} Z`) : ''}
+            ${pxPEsp1 > 0 ? trama('pts-principal', pinza(ejeEsp1, pxPEsp1, lenPEsp1, yPEsp1)) : ''}
+            ${pxPEsp2 > 0 ? trama('pts-secundaria', pinza(ejeEsp2, pxPEsp2, lenPEsp2, yPEsp2)) : ''}
+            <path d="${pathEspalda}" class="silueta-patron" />
+          </g>
+          ${girado(hueco, yRotulo, 'Costado', true)}
+          ${girado(wCaderaPx - hueco, yRotulo, 'Centro Espalda', false)}
+          ${leyenda(entradasEsp)}
+        </g>
+      `;
+
+      capaPatron.innerHTML = svgContent;
+
+      // Los dos bloques se pegan al origen, uno tras otro, y el lienzo se
+      // recorta a lo que ocupan. Hay que medirlo: el resumen y el título pueden
+      // ser más anchos que la propia pieza, así que el ancho de la pieza no
+      // sirve como referencia.
+      const SEPARACION = 60;
+      const gDel = document.getElementById('gDelantero');
+      const gEsp = document.getElementById('gEspalda');
+      const cajaDel = gDel.getBBox(), cajaEsp = gEsp.getBBox();
+      gDel.setAttribute('transform', `translate(${-cajaDel.x}, 0)`);
+      gEsp.setAttribute('transform', `translate(${cajaDel.width + SEPARACION - cajaEsp.x}, 0)`);
+
+      // El lienzo se ciñe al contenido en los dos ejes. Con 800 de ancho y 700
+      // de alto fijos sobraba sitio por todos lados y el plano se dibujaba mucho
+      // más pequeño de lo que cabía.
+      const MARGEN = 24;
+      const caja = capaPatron.getBBox();
+      svgPatron.setAttribute('viewBox',
+        `${caja.x - MARGEN} ${caja.y - MARGEN} ${caja.width + 2 * MARGEN} ${caja.height + 2 * MARGEN}`);
+
+      Herramienta.describir(svgPatron,
+        `Falda base para ${cmCintura} de cintura, ${cmCadera} de cadera y ${cmLargo} cm de largo`,
+        `Delantero y espalda, un cuarto cada uno, enfrentados por el costado. `
+        + `Sobran ${descarteCintura.toFixed(1).replace('.', ',')} cm en la media cintura, `
+        + `repartidos entre los costados y las pinzas. Las cifras están en el informe.`);
+
+      capaEscala.style.display = '';
+      util.actualizarEscala();
+    }
+
+    // Un trazado que revienta tiene que decirlo: sin esto se queda el dibujo
+    // anterior en pantalla y la herramienta parece que va, pero no responde.
+    renderizarEsquema = Herramienta.blindar(renderizarEsquema, {
+      aviso: avisoError, capa: capaPatron, escala: capaEscala, informe: logCalculos
+    });
+
+    // Sliders, casillas numéricas, agrupación de renders y capa de escala:
+    // todo eso vive en js/herramienta.js, compartido con las demás herramientas.
+    const util = Herramienta.montar({
+      nombre: 'falda',
+      svg: svgPatron,
+      escala: { capa: capaEscala, razon: escalaRazon, barra: escalaBarra, tramo: escalaTramo },
+      tramas: ['costado', 'principal', 'secundaria', 'ce'],
+      cmPorUnidad: ESCALA,
+      render: renderizarEsquema,
+      medidas: [
+        [inCintura, numCintura],
+        [inCadera, numCadera],
+        [inAltCadera, numAltCadera],
+        [inLargo, numLargo]
+      ]
+    });
+
+    renderizarEsquema();
+    util.avisarAlto();   // el modal necesita el alto para no cortar la herramienta
+  </script>
+</body>
+</html>

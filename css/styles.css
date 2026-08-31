@@ -1,0 +1,424 @@
+@charset "UTF-8";
+
+  :root{
+    --mat:#16302A;
+    --mat-2:#1D3E35;
+    --mat-line:#2C5346;
+    --paper:#F2E9D3;
+    --paper-2:#E8D9B6;
+    --paper-edge:#C7B78C;
+    --ink:#241F16;
+    --ink-soft:#57503F;
+    --chalk:#EFE6D3;
+    --thread:#E23F82;
+    --thread-dark:#B72A66;
+    --pin:#D9A441;
+    --mist:#A9C4B9;
+    --font-display:'Fraunces', 'Didot', Georgia, serif;
+    --font-body:'Inter', 'Segoe UI', sans-serif;
+    /* Ya no es monoespaciada: es la voz de las etiquetas técnicas, en versalitas
+       y con mucho espaciado. Inter cubre ese papel con tabular-nums. */
+    --font-detalle:'Inter', 'Segoe UI', sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    background:var(--mat);
+    color:var(--chalk);
+    font-family:var(--font-body);
+    min-height:100%;
+  }
+
+  /* Columna a pantalla completa: la portada ocupa la ventana entera aunque el
+     contenido no llegue, asi que las dos capas de fondo nunca se quedan a media
+     altura con banda muerta debajo. */
+  body{
+    position:relative;
+    overflow-x:hidden;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+  }
+
+  .mat-illustrations{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+    pointer-events:none;
+    background-color:var(--mat);
+    background-image:
+      repeating-linear-gradient(0deg, var(--mat-line) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(90deg, var(--mat-line) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(45deg, rgba(239,230,211,0.035) 0 1px, transparent 1px 22px),
+      radial-gradient(ellipse at 50% -10%, rgba(233,213,157,0.10), transparent 55%);
+    background-attachment:fixed;	
+  }
+  .mat-illustrations .piece{
+    fill:none;
+    stroke:var(--chalk);
+  }
+  .mat-illustrations .piece-outline{
+    stroke-width:1.4;
+    stroke-dasharray:6 5;
+  }
+  .mat-illustrations .piece-detail{
+    stroke-width:1;
+    stroke-dasharray:2 4;
+  }
+  .mat-illustrations .piece-solid{
+    stroke-width:1.2;
+  }
+  .mat-illustrations .notch{
+    fill:var(--chalk);
+    stroke:none;
+  }
+
+  /* El desfile va en la misma capa que el tapiz (z-index 0) pero despues en el
+     documento, asi que se pinta encima sin necesidad de inventarse un nivel
+     intermedio entre el fondo y el contenido. Anclado abajo, queda bajo los
+     botones. La mascara disuelve el borde superior: el tapiz no se corta con una
+     linea recta, se desvanece dentro de la escena. */
+  .pasarela{
+    position:fixed;
+    left:0;
+    width:100%;
+    /* La escena se hunde por debajo del borde inferior para que su parte alta
+       —las cabezas del publico y la de la modelo— quede lejos de los botones.
+       Lo que se pierde por abajo es suelo de pasarela, que no dice nada.
+       El desplazamiento va en vw, la misma unidad que manda en el tamano del
+       dibujo, asi que la escena baja lo mismo en proporcion en cualquier
+       ventana. Y la altura es la natural, sin recorte: recortando por arriba
+       para acortar la banda, en ventanas anchas y bajas la modelo se quedaba
+       sin cabeza. */
+    bottom:-9vw;
+    height:auto;
+    z-index:0;
+    pointer-events:none;
+    opacity:0.42;
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 42%);
+    mask-image:linear-gradient(to bottom, transparent 0, #000 42%);
+  }
+
+  main{
+    position:relative;
+    z-index:1;
+    flex:1 0 auto;
+    max-width:76rem;
+    margin:0 auto;
+    /* El margen de arriba se encoge con la ventana: en pantallas cortas la
+       escena del desfile cabalga mas alto y la cabeza de la modelo se acerca a
+       los botones, asi que ahi es donde hace falta recortar. En ventanas altas
+       no hubo nunca choque y se deja respirar. */
+    padding:clamp(3.25rem, 5vh, 4.5rem) 1.5rem 6rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+  }
+
+  .eyebrow{
+    font-family:var(--font-detalle);
+    font-size:0.95rem;
+    font-weight:600;
+    letter-spacing:0.32em;
+    text-transform:uppercase;
+    color:var(--pin);
+    margin:0 0 1.4rem;
+  }
+
+  h1{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(2.6rem, 6vw, 4.6rem);
+    line-height:1.05;
+    letter-spacing:-0.01em;
+    margin:0 0 1.3rem;
+    color:var(--paper);
+    text-wrap:balance;
+  }
+
+  h1 em{
+    font-style:italic;
+    font-weight:500;
+    color:var(--thread);
+  }
+
+  .lede{
+    font-size:1.08rem;
+    line-height:1.6;
+    color:var(--mist);
+    max-width:38rem;
+    margin:0 0 2.4rem;
+    text-wrap:balance;
+  }
+
+  .options{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:1.1rem;
+    width:100%;
+    max-width:64rem;
+    margin:0 0 3rem;
+  }
+
+  .tag-btn{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:0.85rem;
+    background:var(--paper);
+    color:var(--ink);
+    border:none;
+    border-radius:10px;
+    padding:1rem 1.4rem 1rem 1.1rem;
+    min-width:11.5rem;
+    cursor:pointer;
+    font-family:var(--font-body);
+    text-align:left;
+    box-shadow:0 1px 0 rgba(0,0,0,0.15), 0 10px 22px -12px rgba(0,0,0,0.55);
+    transition:transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  }
+  .tag-btn::before{
+    content:"";
+    position:absolute;
+    inset:5px;
+    border:1px dashed var(--paper-edge);
+    border-radius:6px;
+    pointer-events:none;
+  }
+  .tag-btn:hover{
+    background:#F8F1DE;
+    transform:translateY(-3px) rotate(-0.4deg);
+    box-shadow:0 1px 0 rgba(0,0,0,0.15), 0 16px 26px -12px rgba(0,0,0,0.6);
+  }
+  .tag-btn:active{ transform:translateY(-1px) rotate(0deg); }
+  .tag-btn:focus-visible{
+    outline:2px solid var(--color-opcion, var(--thread));
+    outline-offset:3px;
+  }
+
+  .tag-num{
+    background:var(--color-opcion, var(--thread));
+    width:2.5rem;
+    height:2.5rem;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+
+  /* El icono ocupa el 65 % del ancho del disco y el 82 % del alto. Ninguno de
+     los cinco llena las esquinas de su caja —los dos más altos, cuerpo y
+     pantalón, se quedan a 1,04rem del centro con 1,25 de radio—, así que hay
+     aire de sobra. */
+  .tag-icon{
+    width:1.62rem;
+    height:2.04rem;
+    overflow:visible;
+  }
+  /* Tinta y no blanco: sobre el disco de color gana en las cinco opciones
+     (4,6 la falda, 6,0 el cuerpo, 8,7 la manga, 7,0 el pantalón y 4,1 el rosa
+     de la paleta, frente a 3,6 / 2,7 / 1,9 / 2,3 / 4,0 en blanco). En los tonos
+     claros el trazo blanco casi desaparecía. Uniforme a propósito: mezclar
+     iconos claros y oscuros en la misma fila se vería como un descuido. */
+  .tag-icon path,
+  .tag-icon circle{
+    fill:none;
+    stroke:var(--ink);
+    stroke-width:6;
+    stroke-linejoin:round;
+    stroke-linecap:round;
+  }
+
+  .tag-label{
+    font-weight:600;
+    font-size:1.02rem;
+    line-height:1.2;
+  }
+  .tag-sub{
+    display:block;
+    font-family:var(--font-detalle);
+    font-size:0.68rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-top:0.15rem;
+  }
+
+
+  /* ---- Modal ---- */
+  dialog#opcion-modal{
+    border:none;
+    padding:0;
+    background:transparent;
+    max-width:34rem;
+    width:calc(100% - 2.5rem);
+    max-height:calc(100vh - 2.5rem);
+    border-radius:16px;
+    overflow:visible;
+  }
+  dialog#opcion-modal::backdrop{
+    background:rgba(10, 20, 17, 0.72);
+    backdrop-filter:blur(2px);
+  }
+  dialog#opcion-modal[open]{
+    animation:cardIn 220ms cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes cardIn{
+    from{ opacity:0; transform:translateY(10px) scale(0.97); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    dialog#opcion-modal[open]{ animation:none; }
+  }
+
+  /* Modal ampliado para alojar la herramienta interactiva de la Opción 1 */
+  dialog#opcion-modal.modal-wide{
+    max-width:70rem;
+  }
+  dialog#opcion-modal.modal-wide .card{
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    /* Abajo menos que arriba: arriba el hueco lo llenan el título y la
+       descripción, y abajo se sumaba al relleno propio de la herramienta,
+       que ya trae 18px de caja más lo que deje su columna más corta. */
+    padding:1.6rem 1.8rem 0.9rem;
+  }
+  /* El alto lo fija app.js con el que cada herramienta declara por postMessage:
+     una con nueve mandos es mucho más alta que otra con cuatro, y con una
+     altura fija la de más mandos se corta. El max-height lo pone también
+     app.js, con lo que quepa en la ventana.
+     Nace SIN desplazamiento y app.js solo lo activa cuando la herramienta de
+     verdad no cabe: con overflow-y:auto permanente, un desbordamiento de una
+     fracción de píxel —redondeos de la escala del sistema, por ejemplo— sacaba
+     una barra que no servía para nada. */
+  /* Visible siempre: las cinco opciones llevan herramienta embebida. Estaba
+     oculto de partida porque antes había opciones sin ella, que enseñaban en
+     su lugar una calculadora genérica. */
+  .iframe-wrap{
+    display:block;
+    position:relative;
+    height:auto;
+    width:100%;
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .iframe-wrap iframe{
+    display:block;
+    width:100%;
+    height:610px;
+    border:0;
+    overflow:hidden;
+  }
+  .iframe-loading{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#fff;
+    font-family:var(--font-detalle);
+    font-size:1.08rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+  }
+  @media (max-width: 30rem){
+    dialog#opcion-modal.modal-wide{ max-width:calc(100% - 1.5rem); }
+  }
+  dialog#opcion-modal.modal-wide h2{
+    margin-bottom:0.4rem;
+  }
+  dialog#opcion-modal.modal-wide p{
+    margin-bottom:0.9rem;
+  }
+
+  .card{
+    position:relative;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:14px;
+    padding:2.4rem 2.2rem 2.2rem;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:9px;
+    border:1.5px dashed var(--paper-edge);
+    border-radius:9px;
+    pointer-events:none;
+  }
+
+  .card-close{
+    position:absolute;
+    top:12px;
+    right:12px;
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:var(--pin);
+    border:3px solid var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:1.1rem;
+    line-height:1;
+    cursor:pointer;
+    box-shadow:0 6px 14px -6px rgba(0,0,0,0.6);
+    transition:transform 140ms ease;
+  }
+  .card-close:hover{ transform:rotate(90deg); }
+  .card-close:focus-visible{ outline:2px solid var(--thread); outline-offset:2px; }
+
+  .card h2{
+    font-family:var(--font-display);
+    font-weight:700;
+    color:var(--color-opcion, var(--ink));
+    font-size:1.9rem;
+    margin:0 0 0.9rem;
+    display:flex;
+    align-items:center;
+    gap:0.6rem;
+  }
+  #modal-titulo-texto{ text-wrap:balance; }
+
+  /* El icono se clona del botón que abre la ventana; height:1em lo ata al
+     cuerpo del título y el ancho sale solo de la proporción de su viewBox. */
+  .titulo-icono:empty{ display:none; }
+  .titulo-icono{ display:flex; flex-shrink:0; }
+  .titulo-icono svg{
+    height:1em;
+    width:auto;
+    overflow:visible;
+  }
+  /* Trazo más grueso que en el botón (6): ahí el icono va en blanco sobre el
+     disco y a 1,45rem, aquí compite con una Fraunces de 700 y a 6 se veía
+     escuálido al lado del título. */
+  .titulo-icono svg path,
+  .titulo-icono svg circle{
+    fill:none;
+    stroke:var(--color-opcion, var(--ink));
+    stroke-width:11;
+    stroke-linejoin:round;
+    stroke-linecap:round;
+  }
+
+  .card p{
+    font-size:0.98rem;
+    line-height:1.55;
+    color:var(--ink-soft);
+    margin:0 0 1.6rem;
+  }
+
+  @media (max-width: 30rem){
+    .calc-row{ grid-template-columns:1fr; }
+    .card{ padding:2rem 1.4rem 1.8rem; }
+  }

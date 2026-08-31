@@ -1,0 +1,18 @@
+# Ajustes locales de Claude Code: permisos de esta maquina, no del proyecto.
+.claude/settings.local.json
+
+# Basura del sistema y de los editores.
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Copias y temporales sueltos.
+*.bak
+*.orig
+*.tmp

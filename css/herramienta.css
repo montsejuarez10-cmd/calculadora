@@ -1,0 +1,374 @@
+/* Estilos comunes a las herramientas interactivas (falda, cuerpo, ...).
+   Cada página fija sus dos colores en :root; los valores de aquí son solo la
+   reserva, para que un olvido no deje los mandos sin color.
+
+   --color-herramienta  el color de la opción: pulsador, tramo recorrido, foco
+                        y casilla de verificación
+   --pista-vacia        el tramo del slider que aún no se ha recorrido; un tono
+                        muy claro del mismo color
+   --color-tinta        el MISMO color, oscurecido hasta 5,1:1 sobre blanco.
+                        Para lo que es un CONTROL y hay que poder leer: el botón
+                        de volver a las medidas por defecto y el resalte del
+                        aviso de procedencia.
+
+                        La cifra del deslizador NO lo usa: va del color de la
+                        opción tal cual, por decisión expresa. Se pierde
+                        contraste —la manga se queda en 1,9:1 y el pantalón en
+                        2,3:1, con un mínimo exigible de 4,5— a cambio de que la
+                        cifra se reconozca como el color de su herramienta. Un
+                        naranja oscurecido hasta ser legible sobre blanco deja de
+                        ser naranja: cuerpo y manga acababan en dos marrones
+                        casi idénticos.
+
+   js/herramienta.js lee las dos de :root, así que el degradado de la pista sale
+   de aquí y no hay que repetirlas en el JavaScript.
+
+   Las fuentes vienen aparte, de css/fonts.css. */
+
+:root {
+  --color-herramienta: #ec5151;
+  --pista-vacia: #f9dfdf;
+  --color-tinta: #ca3737;
+}
+
+html.sin-scroll, html.sin-scroll body { overflow: hidden; }
+html.sin-scroll h1, html.sin-scroll .sub { display: none; }
+
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #2c3e50;
+  margin: 0;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+h1 { margin: 0 0 4px; font-size: 21px; font-family: 'Fraunces', Georgia, serif; font-weight: 700; }
+.sub { color: #667071; margin-top: 0; margin-bottom: 14px; text-align: center; max-width: 700px; }
+
+.contenedor {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  max-width: 1200px;
+  width: 100%;
+}
+/* 1.4 y no 1: el informe va dentro de esta columna y necesita 362px para
+   repartirse en dos bloques. El sitio sale del visor, que va sobrado de ancho
+   porque los trazados son altos y estrechos: el dibujo solo pinta 420 de los
+   722px en la falda, 517 en el cuerpo y 602 en la manga. Quitándole 74px
+   ninguno llega a encogerse. */
+.controles {
+  flex: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.control-group { display: flex; flex-direction: column; gap: 5px; }
+
+/* Con muchas medidas la columna de mandos se hace tan alta que la herramienta
+   ya no cabe en el modal y aparece barra de desplazamiento. La usa el pantalón,
+   que tiene once; las demás, con cuatro o nueve, siguen en una sola columna.
+   Se le da algo más de sitio a costa del visor: el trazado del pantalón es casi
+   cuadrado y no lo echa de menos. */
+.controles.dos-columnas {
+  flex: 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 18px;
+  align-content: start;
+}
+/* El informe cruza las dos columnas: partirlo lo dejaría ilegible. */
+.controles.dos-columnas .reporte-tecnico { grid-column: 1 / -1; }
+@media (max-width: 760px) {
+  .controles.dos-columnas { grid-template-columns: 1fr; }
+}
+label { font-weight: bold; font-size: 13px; }
+
+/* accent-color solo permite elegir el relleno: la pista restante la decide el
+   navegador y sale casi negra. Con appearance:none se dibujan los dos.
+   En Chrome el relleno es un degradado que pinta pintarPista(); Firefox tiene
+   pseudoelemento propio (::-moz-range-progress) y no lo necesita. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--pista, var(--pista-vacia));
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;   /* centra el pulsador sobre una pista de 6px */
+  border-radius: 50%;
+  background: var(--pulsador, var(--color-herramienta));
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.28);
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--vacio, var(--pista-vacia));
+}
+input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--pulsador, var(--color-herramienta));
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--pulsador, var(--color-herramienta));
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.28);
+}
+input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--color-herramienta); outline-offset: 2px; }
+input[type="range"]:focus-visible::-moz-range-thumb { outline: 2px solid var(--color-herramienta); outline-offset: 2px; }
+input[type="range"]:disabled { cursor: not-allowed; }
+
+/* El color lo toma de aquí también la cifra: .num hereda con color:inherit. */
+/* nowrap: si el rótulo obliga a dos líneas, el "cm" no debe caer solo debajo
+   de la cifra. Se nota en el pantalón, que reparte los mandos en dos columnas. */
+.valores { font-size: 13px; color: var(--color-herramienta); font-weight: bold; white-space: nowrap; }
+/* Cada medida se puede mover con el slider o teclear en su casilla. */
+.fila-medida { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.num {
+  width: 4.2em; font: inherit; color: inherit; text-align: right;
+  padding: 2px 4px; border: 1px solid #cbd5e0; border-radius: 4px; background: #fff;
+}
+/* El aro va separado 1px del borde para que no se fundan en un trazo gordo.
+   Ni el color del borde ni el outline ocupan sitio: el campo no se mueve. */
+.num:focus { border-color: var(--color-herramienta); outline: 2px solid var(--color-herramienta); outline-offset: 1px; }
+.num:disabled { background: #edf2f7; color: #a0aec0; border-color: #e2e8f0; }
+
+.reporte-tecnico {
+  background: #edf2f7;
+  padding: 10px 12px;
+  border-radius: 8px;
+  /* Ya no es monoespaciada; tabular-nums mantiene las cifras quietas
+     mientras se arrastran los sliders. */
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  margin-top: 4px;
+  color: #2d3748;
+}
+.reporte-tecnico h3 { margin-top: 0; color: #2c3e50; font-family: 'Inter', 'Segoe UI', sans-serif; font-variant-numeric: normal; }
+/* Se desplaza el cuerpo del informe, no la caja entera: así el rótulo se queda
+   fijo y sigue diciendo qué se está leyendo.
+   18rem = 288px deja holgura de sobra sobre el informe más alto de las cuatro:
+   el del cuerpo con sus seis filas al pecho y las tres notas a la vez —volumen
+   partido en dos pinzas, pinza bajada de su línea y sobrante sin absorber—
+   llega a 266px. Lo mide pruebas.html en cada pasada, así que si un
+   informe crece por encima del tope se entera antes que el usuario. Está como
+   red: en la práctica no recorta nunca. */
+.reporte-tecnico > div {
+  max-height: 18rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---- El informe, en bloques -------------------------------------------
+   Cada herramienta agrupa sus cifras en dos o cuatro bloques con rótulo, y
+   dentro de cada uno una fila por dato: concepto a la izquierda y cifra
+   alineada a la derecha. Antes iban varios datos por línea separados por
+   puntos, y las líneas se partían donde caía.
+
+   auto-fit con minmax es lo que hace que degrade solo: con sitio salen dos
+   columnas, y en una ventana estrecha —donde .contenedor ya se apila— cae a
+   una sola sin desbordar ninguna fila. */
+.grupos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 7px 18px;
+}
+.grupo h4 {
+  margin: 0 0 2px;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #5b6779;
+}
+/* 1fr auto: el rótulo cede y la cifra manda, que es la que no puede partirse.
+   El hueco de 10px es el mínimo para que no se lean como una sola palabra. */
+.grupo .fila {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 10px;
+  align-items: baseline;
+}
+.grupo .fila b { font-weight: bold; }
+/* Sangrada: cuelga de la fila de encima. NO se llama 'sub': esa clase ya
+   es la del subtitulo de la pagina, que el modal esconde (el desglose de una pinza doble). */
+.grupo .fila.detalle { padding-left: 8px; color: #4a5568; }
+/* Los avisos cruzan los bloques: son excepciones del método, no un dato más. */
+.grupos .nota {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  color: #9c4221;
+}
+.grupos .nota i { color: #5b6779; }
+
+/* Fila con casilla de verificación. Ninguna herramienta usa una ahora mismo;
+   se queda porque el enganche 'casillas' de Herramienta.montar sí existe.
+   En una casilla accent-color solo pinta el fondo al marcarla y deja la marca
+   en blanco, que es justo lo que hace falta. */
+.chk-opcion { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.chk-opcion input[type="checkbox"] { width: auto; cursor: pointer; accent-color: var(--color-herramienta); }
+
+.aviso-error {
+  display: none;
+  color: #c0392b;
+  background: #fdecea;
+  border: 1px solid #f5c6cb;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 15px;
+  max-width: 700px;
+  text-align: center;
+}
+
+/* align-items: flex-start y no center. Cuando la columna de mandos es más alta
+   que el dibujo —el cuerpo tiene nueve medidas frente a las cuatro de la falda—
+   centrarlo dejaba un hueco muerto por encima del patrón. Arriba los dos
+   trazados arrancan a la misma altura. */
+.visor-svg {
+  position: relative;   /* ancla la capa de escala */
+  flex: 2.5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  background-color: #faf7f2;
+}
+svg { width: 100%; height: auto; max-height: 540px; }
+
+/* La escala depende del tamaño en pantalla, no de las coordenadas del
+   dibujo, así que va superpuesta en HTML y no dentro del SVG: metida en la
+   capa del patrón entraría en el getBBox que ciñe el lienzo y lo encogería. */
+.escala {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  pointer-events: none;
+  background: rgba(250, 247, 242, 0.88);
+  border-radius: 5px;
+  padding: 5px 8px 6px;
+  font-size: 11px;
+  color: #5b6b73;
+  line-height: 1.35;
+}
+.escala .razon { font-variant-numeric: tabular-nums; font-weight: bold; }
+.escala .regla {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+}
+/* La barra lleva un tope vertical en cada extremo, como una regla de plano.
+   border-box para que el ancho que le pone el JS sea el de tope a tope: con
+   content-box los dos topes sumarían 2px de más al tramo medido. */
+.escala .barra {
+  position: relative;
+  box-sizing: border-box;
+  height: 7px;
+  border-left: 1px solid #7f8c8d;
+  border-right: 1px solid #7f8c8d;
+}
+.escala .barra::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px solid #7f8c8d;
+}
+
+@media (max-width: 950px) { .contenedor { flex-direction: column; } }
+
+/* Grupo de opciones excluyentes. Lo usa el pantalón para el tipo de glúteos,
+   que no es una medida que se deslice sino una de tres construcciones del tiro
+   de la espalda. Va con radios y no con un desplegable para que las tres
+   opciones y lo que cambia cada una se vean sin abrir nada. */
+.grupo-opciones .opciones { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 2px; }
+.grupo-opciones .chk-opcion { font-weight: normal; font-size: 13px; }
+.grupo-opciones input[type="radio"] { width: auto; margin: 0; cursor: pointer; accent-color: var(--color-herramienta); }
+/* Las tres en la misma línea, cruzando las dos columnas de mandos. */
+.controles.dos-columnas .grupo-opciones { grid-column: 1 / -1; }
+
+/* ---- El dibujo ---------------------------------------------------------
+   Estos siete estilos eran idénticos en el <style> de las cuatro páginas.
+   Una hoja externa alcanza igual al SVG en línea, así que viven aquí y cada
+   herramienta solo declara lo suyo: el punto de pecho del cuerpo, la línea de
+   plancha del pantalón, las cotas de color de la manga.
+
+   El pantalón los reescribe un tercio más grandes: se dibuja a 1:10 y con
+   estos cuerpos los rótulos quedaban diminutos al lado de una pieza de 110 cm. */
+.silueta-patron { stroke: #2c3e50; stroke-width: 2.5; stroke-linejoin: round; fill: #ffffff; fill-opacity: 0.5; }
+.linea-guia { stroke: #7f8c8d; stroke-width: 1.5; stroke-dasharray: 6 3; fill: none; }
+.texto { font-family: 'Courier New', monospace; font-size: 18px; fill: #2c3e50; }
+.titulo { font-family: 'Helvetica', sans-serif; font-size: 16px; font-weight: bold; fill: #2c3e50; }
+.cota { font-family: 'Helvetica', sans-serif; font-size: 13px; fill: #34495e; }
+.relleno { stroke: none; }
+.leyenda { font-family: 'Helvetica', sans-serif; font-size: 15px; fill: #2c3e50; }
+.muestra { stroke: #2c3e50; stroke-width: 1; }
+
+/* Volver a las medidas por defecto. Solo se enseña cuando hay algo que
+   deshacer, así que en el arranque no ocupa ni distrae. */
+.volver-defecto {
+  align-self: flex-start;
+  font: inherit;
+  font-size: 12px;
+  color: var(--color-tinta, var(--color-herramienta));
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 3px 11px;
+  cursor: pointer;
+}
+.volver-defecto:hover { background: var(--pista-vacia); }
+.volver-defecto:focus-visible { outline: 2px solid var(--color-herramienta); outline-offset: 2px; }
+/* En el pantalón los mandos van en dos columnas: el botón cruza las dos. */
+.controles.dos-columnas .volver-defecto { grid-column: 1 / -1; justify-self: start; }
+
+/* De dónde vienen unas medidas que no se han tecleado aquí: la manga recoge
+   las dos sisas del cuerpo base. */
+.de-otra {
+  margin: 0;
+  font-size: 12px;
+  color: #5b6779;
+  background: #edf2f7;
+  border-radius: 6px;
+  padding: 5px 9px;
+}
+.de-otra strong { color: var(--color-tinta, var(--color-herramienta)); }
+
+/* Una medida por línea: rótulo, deslizador y casilla en la misma fila, en vez
+   de la casilla encima del deslizador. Para cuando hay muchas medidas del mismo
+   tipo y en dos filas cada una no cabrían: los cinco largos de capa de la falda
+   pañuelo. El rótulo lleva un ancho mínimo para que los deslizadores arranquen
+   todos a la misma altura y se lean como una columna. */
+.control-group.en-linea {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+.control-group.en-linea label { flex: none; min-width: 4.4em; }
+.control-group.en-linea input[type="range"] { flex: 1; min-width: 0; }
+.control-group.en-linea .valores { flex: none; }

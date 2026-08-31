@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script>
+    try {
+      if (window.self !== window.top) document.documentElement.classList.add('sin-scroll');
+    } catch (e) {}
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manga Base Técnica en SVG</title>
+  <!-- Las mismas fuentes incrustadas que index.html. Cargan aparte para no
+       bloquear el primer pintado; dentro del modal ya vienen de la caché. -->
+  <link rel="stylesheet" href="css/fonts.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css"></noscript>
+  <link rel="stylesheet" href="css/herramienta.css">
+  <script src="js/herramienta.js"></script>
+  <style>
+    /* Solo lo propio de esta herramienta: su color. El resto está en
+       css/herramienta.css, compartido con las demás. */
+    :root {
+      --color-herramienta: #ffa875;
+      --pista-vacia: #fce8dc;
+      --color-tinta: #a7592c;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Manga Base en SVG</h1>
+
+  <p class="sub">Trazado proporcional de la copa y de la forma de la manga, sacado del recorrido de las dos sisas del cuerpo base.</p>
+  <div class="aviso-error" id="avisoError" role="status"></div>
+
+  <div class="contenedor">
+    <!-- PANEL DE MANDOS -->
+    <div class="controles">
+      <!-- Las dos sisas salen del cuerpo base: en cuanto se traza uno, esta
+           herramienta las recoge sola y no hay que medirlas sobre el dibujo.
+           Se pueden mover igualmente para probar otra manga sin tocar el
+           cuerpo. -->
+      <p class="de-otra">Las dos sisas vienen del <strong>cuerpo base</strong>.</p>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inSisaDel">Sisa Delantera:</label>
+          <span class="valores"><input type="number" id="numSisaDel" class="num" min="14" max="26" step="0.5" value="17.5"> cm</span>
+        </div>
+        <input type="range" id="inSisaDel" min="14" max="26" step="0.5" value="17.5">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inSisaEsp">Sisa Espalda:</label>
+          <span class="valores"><input type="number" id="numSisaEsp" class="num" min="16" max="28" step="0.5" value="20.5"> cm</span>
+        </div>
+        <input type="range" id="inSisaEsp" min="16" max="28" step="0.5" value="20.5">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inLargo">Largo de Manga:</label>
+          <span class="valores"><input type="number" id="numLargo" class="num" min="52" max="66" step="1" value="58"> cm</span>
+        </div>
+        <input type="range" id="inLargo" min="52" max="66" value="58">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inCodo">Altura de Codo:</label>
+          <span class="valores"><input type="number" id="numCodo" class="num" min="30" max="40" step="1" value="34"> cm</span>
+        </div>
+        <input type="range" id="inCodo" min="30" max="40" value="34">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inPuno">Contorno de Puño:</label>
+          <span class="valores"><input type="number" id="numPuno" class="num" min="18" max="30" step="0.5" value="24"> cm</span>
+        </div>
+        <input type="range" id="inPuno" min="18" max="30" step="0.5" value="24">
+      </div>
+      <!-- INFORME MATEMÁTICO -->
+      <div class="reporte-tecnico">
+        <h3>Copa y Ancho de Manga</h3>
+        <div id="logCalculos">Calculando geometría...</div>
+      </div>
+
+    </div>
+
+    <!-- ESCENARIO GRÁFICO (SVG) -->
+    <div class="visor-svg">
+      <svg id="svgPatron" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg"
+           role="img" aria-describedby="logCalculos">
+        <!-- Los rehace el trazado en cada dibujo: sin ellos el SVG no existe
+             para un lector de pantalla, y es toda la salida de la herramienta. -->
+        <title>Trazado del patrón</title>
+        <desc>El plano se dibuja al ajustar las medidas.</desc>
+        <style>
+          /* Los comunes están en css/herramienta.css; aquí, lo propio de la manga. */
+          .tejado { stroke: #7f8c8d; stroke-width: 1.5; fill: none; }
+          .saliente { stroke: #34495e; stroke-width: 1.6; fill: none; }
+          /* Los dos valores que salen del cálculo, con el color con el que van
+             marcados a rotulador en el boceto. */
+          .cota-copa { stroke: #f2a03c; stroke-width: 5; stroke-linecap: butt; fill: none; }
+          .cota-ancho { stroke: #ef7d86; stroke-width: 5; stroke-linecap: butt; fill: none; }
+        </style>
+        <g id="capaPatron"><!-- El plano se autodibuja aquí con JS --></g>
+      </svg>
+      <div class="escala" id="capaEscala">
+        <div class="razon" id="escalaRazon">Escala 1:1</div>
+        <div class="regla">
+          <div class="barra" id="escalaBarra"></div>
+          <span id="escalaTramo">10 cm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inSisaDel = document.getElementById('inSisaDel');
+    const inSisaEsp = document.getElementById('inSisaEsp');
+    const inLargo = document.getElementById('inLargo');
+    const inCodo = document.getElementById('inCodo');
+    const inPuno = document.getElementById('inPuno');
+
+    const numSisaDel = document.getElementById('numSisaDel');
+    const numSisaEsp = document.getElementById('numSisaEsp');
+    const numLargo = document.getElementById('numLargo');
+    const numCodo = document.getElementById('numCodo');
+    const numPuno = document.getElementById('numPuno');
+
+    const logCalculos = document.getElementById('logCalculos');
+    const svgPatron = document.getElementById('svgPatron');
+    const capaPatron = document.getElementById('capaPatron');
+    const avisoError = document.getElementById('avisoError');
+    const capaEscala = document.getElementById('capaEscala');
+    const escalaRazon = document.getElementById('escalaRazon');
+    const escalaBarra = document.getElementById('escalaBarra');
+    const escalaTramo = document.getElementById('escalaTramo');
+
+    const ESCALA = 6; // Relación visual: 1cm = 6px
+    const reflejar = Herramienta.reflejar;
+    // La spline interpolante que dibuja la copa vive en js/herramienta.js: el
+    // pantalón la usa también para las costuras de la pierna.
+    const splinePorPuntos = Herramienta.spline;
+
+    // ---- Constantes de la memoria ------------------------------------------
+    const PROPORCION_SISA = 0.7;     // "dividir esta medida entre dos y multiplicarlo por 0,7"
+    const AJUSTE_Z = 1.25;           // Z - 1,25 = copa; (Z + 1,25) x 2 = ancho
+
+    // Los valores que la página 99 escribe sobre cada división del tejado, en
+    // centímetros y medidos en perpendicular a la diagonal. Positivo = hacia
+    // fuera del triángulo; negativo = hacia dentro. El índice es el punto de
+    // cuarto contado desde el pico, así que el 1 es el primer cuarto y el 0 y
+    // el 4 son los extremos, que no llevan desplazamiento.
+    const SALIENTES_DEL = [0, 1.5, 0, -1.5, 0];
+    const SALIENTES_ESP = [0, 2, 1.5, -1.2, 0];
+
+    // ---- Constantes DERIVADAS ----------------------------------------------
+    // La memoria no las da. Viven juntas aquí para poder corregirlas sin bucear.
+    const CUARTO_MINIMO = 3;         // cm de diagonal por división; por debajo,
+                                     // un saliente de 2 cm mordería la curva
+
+    const u = (cm) => cm * ESCALA;   // centímetros a unidades del lienzo
+
+    function renderizarEsquema() {
+      const cmSisaDel = parseFloat(inSisaDel.value);
+      const cmSisaEsp = parseFloat(inSisaEsp.value);
+      const cmLargo = parseFloat(inLargo.value);
+      const cmCodo = parseFloat(inCodo.value);
+      const cmPuno = parseFloat(inPuno.value);
+
+      reflejar(numSisaDel, cmSisaDel);
+      reflejar(numSisaEsp, cmSisaEsp);
+      reflejar(numLargo, cmLargo);
+      reflejar(numCodo, cmCodo);
+      reflejar(numPuno, cmPuno);
+
+      const fallar = (msg) => {
+        avisoError.textContent = '⚠ ' + msg;
+        avisoError.style.display = 'block';
+        capaPatron.innerHTML = '';
+        capaEscala.style.display = 'none';
+        logCalculos.textContent = 'Ajusta las medidas para poder trazar el patrón.';
+      };
+
+      // ---- El cálculo de la memoria ----------------------------------------
+      const sisaTotal = cmSisaDel + cmSisaEsp;
+      const Z = (sisaTotal / 2) * PROPORCION_SISA;
+      const cmCopa = Z - AJUSTE_Z;
+      const cmAncho = (Z + AJUSTE_Z) * 2;
+      const medioAncho = cmAncho / 2;
+
+      // ---- Medidas incompatibles -------------------------------------------
+      // Cada condición trae su propio aviso: con cinco mandos, "medidas
+      // incompatibles" no diría cuál hay que mover.
+      if (cmCodo <= cmCopa) {
+        return fallar('La altura de codo cae dentro de la copa. Sube la altura de codo o baja las sisas.');
+      }
+      if (cmCodo >= cmLargo) {
+        return fallar('La altura de codo cae por debajo del puño. Baja la altura de codo o alarga la manga.');
+      }
+      if (cmPuno > cmAncho) {
+        return fallar('El contorno de puño supera el ancho de manga: la manga se abriría en vez de estrecharse. Baja el puño o sube las sisas.');
+      }
+      const ladoTejado = Math.hypot(medioAncho, cmCopa);
+      if (ladoTejado / 4 <= CUARTO_MINIMO) {
+        return fallar('Las sisas son tan cortas que el cuarto de diagonal no da para los salientes de la copa. Sube las sisas.');
+      }
+
+      avisoError.style.display = 'none';
+
+      // ---- La cruz ----------------------------------------------------------
+      // Origen en la intersección de la cruz. De ahí hacia arriba la altura de
+      // copa; a derecha e izquierda, la mitad del ancho de manga.
+      const W = u(medioAncho);
+      const yPico = -u(cmCopa);
+      // Largo de manga y altura de codo se miden desde el PICO, no desde la
+      // línea de bíceps: es lo que dice el boceto, donde la flecha del largo
+      // abarca toda la altura del dibujo.
+      const yPuno = yPico + u(cmLargo);
+      const yCodo = yPico + u(cmCodo);
+      const P = u(cmPuno / 2);
+      const yMitades = yPuno / 2;   // dónde se rotulan el delantero y la espalda
+      // El costado es recto del bíceps al puño, así que el medio ancho a la
+      // altura del codo sale de interpolar entre los dos.
+      const anchoCodo = W + (P - W) * (yCodo / yPuno);
+
+      const pico = { x: 0, y: yPico };
+      const bicepsIzq = { x: -W, y: 0 };
+      const bicepsDer = { x: W, y: 0 };
+      const punoIzq = { x: -P, y: yPuno };
+      const punoDer = { x: P, y: yPuno };
+
+      // ---- El tejado a dos aguas y sus cuatro divisiones --------------------
+      // Para cada mitad: los puntos de cuarto sobre la diagonal y esos mismos
+      // puntos ya desplazados en perpendicular con el valor de la página 99.
+      // La normal se toma siempre hacia fuera del triángulo, así que un valor
+      // positivo saca la curva y uno negativo la mete.
+      const aguas = (extremo, salientes) => {
+        const dx = extremo.x - pico.x, dy = extremo.y - pico.y;
+        const largo = Math.hypot(dx, dy);
+        const ux = dx / largo, uy = dy / largo;
+        // De las dos normales, la que se aleja del eje vertical.
+        const signo = extremo.x < 0 ? 1 : -1;
+        const nx = -uy * signo, ny = ux * signo;
+        const divisiones = [];
+        for (let k = 1; k <= 3; k++) {
+          const base = { x: pico.x + dx * k / 4, y: pico.y + dy * k / 4 };
+          const cm = salientes[k];
+          divisiones.push({
+            cm: cm,
+            base: base,
+            normal: { x: nx, y: ny },
+            punto: { x: base.x + nx * u(cm), y: base.y + ny * u(cm) }
+          });
+        }
+        return divisiones;
+      };
+
+      const divIzq = aguas(bicepsIzq, SALIENTES_DEL);
+      const divDer = aguas(bicepsDer, SALIENTES_ESP);
+
+      // ---- La copa ----------------------------------------------------------
+      // La mitad izquierda se genera del bíceps hacia el pico para poder
+      // encadenarla con la derecha en un solo trazado. La spline centrípeta es
+      // simétrica, así que sale la misma curva que recorriéndola al revés.
+      const puntosIzq = [bicepsIzq].concat(divIzq.map(d => d.punto).reverse()).concat([pico]);
+      const puntosDer = [pico].concat(divDer.map(d => d.punto)).concat([bicepsDer]);
+      // Tangente horizontal en el pico en las dos mitades: es lo que evita que
+      // la copa remate en punta. Las dos apuntan hacia la derecha porque las
+      // dos mitades se recorren en ese sentido.
+      const copaIzq = splinePorPuntos(puntosIzq, null, { x: 1, y: 0 });
+      const copaDer = splinePorPuntos(puntosDer, { x: 1, y: 0 }, null);
+
+      const dCopa = 'M ' + bicepsIzq.x.toFixed(2) + ',' + bicepsIzq.y.toFixed(2) + ' ' + copaIzq + copaDer;
+
+      // El contorno completo: la copa entera y, colgando de sus dos extremos,
+      // los costados rectos hasta el puño.
+      const dManga = dCopa
+        + 'L ' + punoDer.x.toFixed(2) + ',' + punoDer.y.toFixed(2) + ' '
+        + 'L ' + punoIzq.x.toFixed(2) + ',' + punoIzq.y.toFixed(2) + ' Z';
+
+      // ---- Armazón ----------------------------------------------------------
+      // El andamiaje del método a la vista: la cruz, la caja de la copa, el
+      // tejado, las divisiones con su valor y la línea de codo.
+      const marcaDivision = (d) => {
+        if (Math.abs(d.cm) < 0.001) return '';
+        // La etiqueta va SIEMPRE por fuera del tejado, aunque el saliente meta
+        // la curva hacia dentro: por dentro caería sobre la propia pieza y, en
+        // los dos salientes de abajo, encima de la línea de bíceps.
+        const aparta = Math.max(u(d.cm), 0) + 15;
+        const ex = d.base.x + d.normal.x * aparta, ey = d.base.y + d.normal.y * aparta;
+        const texto = Math.abs(d.cm).toFixed(1).replace('.', ',');
+        return '<line x1="' + d.base.x.toFixed(2) + '" y1="' + d.base.y.toFixed(2) + '" '
+             + 'x2="' + d.punto.x.toFixed(2) + '" y2="' + d.punto.y.toFixed(2) + '" class="saliente" />'
+             + '<text x="' + ex.toFixed(2) + '" y="' + (ey + 4).toFixed(2) + '" class="cota" text-anchor="middle">' + texto + '</text>';
+      };
+
+      const divisiones = divIzq.concat(divDer).map(marcaDivision).join('\n          ');
+
+      // ---- Leyenda ----------------------------------------------------------
+      // Al costado y no debajo: la manga es alta y estrecha, y a los lados del
+      // visor sobra el sitio que si no se queda en blanco.
+      const LADO_MUESTRA = 15, PASO_LEYENDA = 22;
+      const xLeyenda = W + 46;
+      const entradas = [
+        { nombre: 'Altura de copa', cm: cmCopa, color: '#f2a03c' },
+        { nombre: 'Ancho de manga completa', cm: cmAncho, color: '#ef7d86' }
+      ];
+      const leyenda = entradas.map((e, i) => {
+        const y = yPico + 40 + i * PASO_LEYENDA;
+        return '<rect x="' + xLeyenda.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + LADO_MUESTRA + '" height="' + LADO_MUESTRA + '" class="muestra" fill="' + e.color + '" />'
+             + '<text x="' + (xLeyenda + LADO_MUESTRA + 7).toFixed(2) + '" y="' + (y + LADO_MUESTRA - 2).toFixed(2) + '" class="leyenda">' + e.nombre + ': ' + e.cm.toFixed(1).replace('.', ',') + ' cm</text>';
+      }).join('\n          ');
+
+      const svgContent = `
+        <g id="gManga">
+          <text x="${(-W).toFixed(2)}" y="${(yPico - 34).toFixed(2)}" class="titulo">MANGA (pieza entera)</text>
+
+          <!-- La cruz y la caja de la copa -->
+          <line x1="0" y1="${(yPico - 14).toFixed(2)}" x2="0" y2="${(yPuno + 14).toFixed(2)}" class="linea-guia" />
+          <line x1="${(-W).toFixed(2)}" y1="${yPico.toFixed(2)}" x2="${W.toFixed(2)}" y2="${yPico.toFixed(2)}" class="linea-guia" />
+          <line x1="${(-W).toFixed(2)}" y1="${yPico.toFixed(2)}" x2="${(-W).toFixed(2)}" y2="0" class="linea-guia" />
+          <line x1="${W.toFixed(2)}" y1="${yPico.toFixed(2)}" x2="${W.toFixed(2)}" y2="0" class="linea-guia" />
+
+          <!-- El tejado a dos aguas con sus cuatro divisiones por lado -->
+          <path d="M ${(-W).toFixed(2)},0 L 0,${yPico.toFixed(2)} L ${W.toFixed(2)},0" class="tejado" />
+          ${divisiones}
+
+          <!-- La línea de codo, de costado a costado: a esa altura la manga ya
+               ha estrechado, así que no vale el ancho de bíceps. -->
+          <line x1="${(-anchoCodo).toFixed(2)}" y1="${yCodo.toFixed(2)}" x2="${anchoCodo.toFixed(2)}" y2="${yCodo.toFixed(2)}" class="linea-guia" />
+
+          <!-- El contorno. El medidor lleva la copa sola: es lo que hay que
+               contrastar con la sisa, y sin trazo ni relleno no se ve. -->
+          <path d="${dManga}" class="silueta-patron" />
+          <path id="medidorCopa" d="${dCopa}" fill="none" stroke="none" />
+
+          <!-- Los dos valores que salen del cálculo, con el color del boceto -->
+          <line x1="0" y1="0" x2="0" y2="${yPico.toFixed(2)}" class="cota-copa" />
+          <line x1="${(-W).toFixed(2)}" y1="0" x2="${W.toFixed(2)}" y2="0" class="cota-ancho" />
+
+          <text x="${(anchoCodo + 8).toFixed(2)}" y="${(yCodo + 4).toFixed(2)}" class="cota">Línea de codo</text>
+          <!-- Los dos rótulos van girados: puestos en horizontal no caben uno
+               al lado del otro, la manga es más estrecha que las dos palabras
+               juntas y se pisaban en el centro. -->
+          <text x="${(-W / 2).toFixed(2)}" y="${yMitades.toFixed(2)}" class="titulo" text-anchor="middle" transform="rotate(-90, ${(-W / 2).toFixed(2)}, ${yMitades.toFixed(2)})">DELANTERO</text>
+          <text x="${(W / 2).toFixed(2)}" y="${yMitades.toFixed(2)}" class="titulo" text-anchor="middle" transform="rotate(-90, ${(W / 2).toFixed(2)}, ${yMitades.toFixed(2)})">ESPALDA</text>
+          <text x="0" y="${(yPuno + 30).toFixed(2)}" class="cota" text-anchor="middle">eje de manga</text>
+          ${leyenda}
+        </g>
+      `;
+
+      capaPatron.innerHTML = svgContent;
+
+      // ---- Embebido ----------------------------------------------------------
+      // La comprobación que el propio método promete: la copa dibujada tiene
+      // que medir la sisa más un poco de embebido. Se mide sobre la curva ya
+      // trazada, no sobre la fórmula.
+      const recorridoCopa = document.getElementById('medidorCopa').getTotalLength() / ESCALA;
+      const embebido = recorridoCopa - sisaTotal;
+
+      // ---- Informe -----------------------------------------------------------
+      const n = Herramienta.cm;
+      const n2 = (x) => x.toFixed(2).replace('.', ',');
+      const fila = Herramienta.fila, bloque = Herramienta.bloque;
+
+      logCalculos.innerHTML = '<div class="grupos">'
+        + bloque('La copa', [
+            fila('Sisa delantera', n(cmSisaDel) + ' cm'),
+            fila('Sisa espalda', n(cmSisaEsp) + ' cm'),
+            fila('Suma', n(sisaTotal) + ' cm', true),
+            fila('Z (mitad &times; 0,7)', n2(Z)),
+            fila('Altura de copa', n(cmCopa) + ' cm')
+          ])
+        + bloque('La manga', [
+            fila('Ancho completo', n(cmAncho) + ' cm'),
+            fila('Copa dibujada', n(recorridoCopa) + ' cm'),
+            fila('Embebe', n(embebido) + ' cm', true),
+            fila('sobre la sisa', n(100 * embebido / sisaTotal) + ' %', true),
+            fila('Bíceps al codo', n(cmCodo - cmCopa) + ' cm'),
+            fila('Estrecha al puño', n(cmAncho - cmPuno) + ' cm')
+          ])
+        + '</div>';
+
+      // getBBox no cuenta el grosor del trazo: el margen se lo come.
+      const MARGEN = 24;
+      const caja = capaPatron.getBBox();
+      svgPatron.setAttribute('viewBox',
+        (caja.x - MARGEN) + ' ' + (caja.y - MARGEN) + ' ' + (caja.width + 2 * MARGEN) + ' ' + (caja.height + 2 * MARGEN));
+
+      Herramienta.describir(svgPatron,
+        `Manga base para una sisa de ${n(sisaTotal)} cm y ${cmLargo} cm de largo`,
+        `Una sola pieza: la copa sale del recorrido de las dos sisas del cuerpo `
+        + `—${n(cmSisaDel)} delante y ${n(cmSisaEsp)} detrás— y la manga baja al codo `
+        + `y al puño. La copa dibujada mide ${n(recorridoCopa)} cm y embebe `
+        + `${n(embebido)} cm sobre la sisa. Las cifras están en el informe.`);
+
+      capaEscala.style.display = '';
+      util.actualizarEscala();
+    }
+
+    // Un trazado que revienta tiene que decirlo: sin esto se queda el dibujo
+    // anterior en pantalla y la herramienta parece que va, pero no responde.
+    renderizarEsquema = Herramienta.blindar(renderizarEsquema, {
+      aviso: avisoError, capa: capaPatron, escala: capaEscala, informe: logCalculos
+    });
+
+    // Sliders, casillas numéricas, agrupación de renders y capa de escala:
+    // todo eso vive en js/herramienta.js, compartido con las demás herramientas.
+    const util = Herramienta.montar({
+      nombre: 'manga',
+      svg: svgPatron,
+      escala: { capa: capaEscala, razon: escalaRazon, barra: escalaBarra, tramo: escalaTramo },
+      cmPorUnidad: ESCALA,
+      render: renderizarEsquema,
+      medidas: [
+        [inSisaDel, numSisaDel],
+        [inSisaEsp, numSisaEsp],
+        [inLargo, numLargo],
+        [inCodo, numCodo],
+        [inPuno, numPuno]
+      ]
+    });
+
+    renderizarEsquema();
+    util.avisarAlto();   // el modal necesita el alto para no cortar la herramienta
+  </script>
+</body>
+</html>

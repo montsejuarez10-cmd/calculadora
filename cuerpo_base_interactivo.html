@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script>
+    try {
+      if (window.self !== window.top) document.documentElement.classList.add('sin-scroll');
+    } catch (e) {}
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuerpo Base Técnico en SVG</title>
+  <!-- Las mismas fuentes incrustadas que index.html. Cargan aparte para no
+       bloquear el primer pintado; dentro del modal ya vienen de la caché. -->
+  <link rel="stylesheet" href="css/fonts.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css"></noscript>
+  <link rel="stylesheet" href="css/herramienta.css">
+  <script src="js/herramienta.js"></script>
+  <style>
+    /* Solo lo propio de esta herramienta: su color. El resto está en
+       css/herramienta.css, compartido con las demás. */
+    :root {
+      --color-herramienta: #f27b2c;
+      --pista-vacia: #fae9de;
+      --color-tinta: #a35b2b;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Cuerpo Base en SVG</h1>
+
+  <p class="sub">Trazado del bloque delantero y espalda resolviendo a la vez el ajuste a la prominencia del pecho y el reparto 25-40-35 a la cintura.</p>
+  <div class="aviso-error" id="avisoError" role="status"></div>
+
+  <div class="contenedor">
+    <!-- PANEL DE MANDOS -->
+    <div class="controles">
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inPecho">Contorno de Pecho:</label>
+          <span class="valores"><input type="number" id="numPecho" class="num" min="78" max="112" step="1" value="88"> cm</span>
+        </div>
+        <input type="range" id="inPecho" min="78" max="112" value="88">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inCintura">Contorno de Cintura:</label>
+          <span class="valores"><input type="number" id="numCintura" class="num" min="60" max="100" step="1" value="72"> cm</span>
+        </div>
+        <input type="range" id="inCintura" min="60" max="100" value="72">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inTalleDel">Largo Talle Delantero:</label>
+          <span class="valores"><input type="number" id="numTalleDel" class="num" min="40" max="50" step="1" value="44"> cm</span>
+        </div>
+        <input type="range" id="inTalleDel" min="40" max="50" value="44">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inTalleEsp">Largo Talle Espalda:</label>
+          <span class="valores"><input type="number" id="numTalleEsp" class="num" min="37" max="45" step="1" value="40"> cm</span>
+        </div>
+        <input type="range" id="inTalleEsp" min="37" max="45" value="40">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inAltPecho">Altura de Pecho:</label>
+          <span class="valores"><input type="number" id="numAltPecho" class="num" min="22" max="32" step="1" value="26"> cm</span>
+        </div>
+        <input type="range" id="inAltPecho" min="22" max="32" value="26">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inSepPecho">Separación de Pecho:</label>
+          <span class="valores"><input type="number" id="numSepPecho" class="num" min="15" max="23" step="1" value="18"> cm</span>
+        </div>
+        <input type="range" id="inSepPecho" min="15" max="23" value="18">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inAnchoEsp">Ancho de Espalda:</label>
+          <span class="valores"><input type="number" id="numAnchoEsp" class="num" min="31" max="41" step="1" value="35"> cm</span>
+        </div>
+        <input type="range" id="inAnchoEsp" min="31" max="41" value="35">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inBajHombro">Bajada de Hombro (del.):</label>
+          <span class="valores"><input type="number" id="numBajHombro" class="num" min="2" max="6.5" step="0.5" value="4"> cm</span>
+        </div>
+        <input type="range" id="inBajHombro" min="2" max="6.5" step="0.5" value="4">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inCinturaSisa">De Cintura a Sisa:</label>
+          <span class="valores"><input type="number" id="numCinturaSisa" class="num" min="17" max="25" step="1" value="21"> cm</span>
+        </div>
+        <input type="range" id="inCinturaSisa" min="17" max="25" value="21">
+      </div>
+      <!-- INFORME MATEMÁTICO -->
+      <div class="reporte-tecnico">
+        <h3>Ajuste al Pecho y a la Cintura</h3>
+        <div id="logCalculos">Calculando geometría...</div>
+      </div>
+
+    </div>
+
+    <!-- ESCENARIO GRÁFICO (SVG) -->
+    <div class="visor-svg">
+      <svg id="svgPatron" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg"
+           role="img" aria-describedby="logCalculos">
+        <!-- Los rehace el trazado en cada dibujo: sin ellos el SVG no existe
+             para un lector de pantalla, y es toda la salida de la herramienta. -->
+        <title>Trazado del patrón</title>
+        <desc>El plano se dibuja al ajustar las medidas.</desc>
+        <style>
+          /* Los comunes están en css/herramienta.css. Este es el único propio:
+             el punto de pecho al que apuntan las dos pinzas. */
+          .punto-pecho { fill: none; stroke: #2c3e50; stroke-width: 1.5; }
+        </style>
+
+        <g id="capaPatron"><!-- El plano se autodibuja aquí con JS --></g>
+      </svg>
+      <div class="escala" id="capaEscala">
+        <div class="razon" id="escalaRazon">Escala 1:1</div>
+        <div class="regla">
+          <div class="barra" id="escalaBarra"></div>
+          <span id="escalaTramo">10 cm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inPecho = document.getElementById('inPecho');
+    const inCintura = document.getElementById('inCintura');
+    const inTalleDel = document.getElementById('inTalleDel');
+    const inTalleEsp = document.getElementById('inTalleEsp');
+    const inAltPecho = document.getElementById('inAltPecho');
+    const inSepPecho = document.getElementById('inSepPecho');
+    const inAnchoEsp = document.getElementById('inAnchoEsp');
+    const inBajHombro = document.getElementById('inBajHombro');
+    const inCinturaSisa = document.getElementById('inCinturaSisa');
+
+    const numPecho = document.getElementById('numPecho');
+    const numCintura = document.getElementById('numCintura');
+    const numTalleDel = document.getElementById('numTalleDel');
+    const numTalleEsp = document.getElementById('numTalleEsp');
+    const numAltPecho = document.getElementById('numAltPecho');
+    const numSepPecho = document.getElementById('numSepPecho');
+    const numAnchoEsp = document.getElementById('numAnchoEsp');
+    const numBajHombro = document.getElementById('numBajHombro');
+    const numCinturaSisa = document.getElementById('numCinturaSisa');
+
+    const logCalculos = document.getElementById('logCalculos');
+    const svgPatron = document.getElementById('svgPatron');
+    const capaPatron = document.getElementById('capaPatron');
+    const avisoError = document.getElementById('avisoError');
+    const capaEscala = document.getElementById('capaEscala');
+    const escalaRazon = document.getElementById('escalaRazon');
+    const escalaBarra = document.getElementById('escalaBarra');
+    const escalaTramo = document.getElementById('escalaTramo');
+
+    const ESCALA = 6; // Relación visual: 1cm = 6px
+    const reflejar = Herramienta.reflejar;
+
+    // ---- Constantes de la memoria ------------------------------------------
+    const TOPE_PECHO = 4.5;          // "el máximo permitido es de 4,5 cm": pasado
+                                     // eso el pecho sale en cono
+    const QUEDA_PECHO = 4;           // lo que se mantiene en la pinza de pecho al
+                                     // partir el volumen ("por ejemplo 4 cm")
+    const TOPE_PINZA = 4;            // pasado esto se hace pinza doble
+    const RETRANQUEO = 2.5;          // el vértice para "2 o 3 cm" antes del volumen
+    // Las dos pinzas que apuntan al pecho llevan su propio retranqueo: la memoria
+    // las quiere "a la misma distancia del centro de pecho, es decir, 4 cm". Las
+    // de cintura no se mencionan y siguen con el retranqueo general.
+    const RETRANQUEO_PECHO = 4;
+    const ACORTA_SEGUNDA = 2;        // la segunda pinza, 2 cm más corta
+    const HUECO_PINZAS = 2.5;        // entre los bordes más próximos, no entre ejes
+
+    // ---- Constantes DERIVADAS ----------------------------------------------
+    // La memoria no las da: son proporciones al uso. Viven juntas aquí para
+    // poder corregirlas sin bucear por el trazado.
+    const HOLGURA_PECHO = 5;         // cm de holgura al contorno, bloque ajustado
+    const ALZA_ESCOTE_ESP = 2;       // el escote de espalda sube sobre el nacimiento
+    const SALIENTE_HOMBRO = 1.3;     // el hombro rebasa el ancho de espalda
+    const EMBEBIDO_HOMBRO = 0.5;     // el hombro delantero, más corto: se embebe
+    const DIF_BAJADA_HOMBRO = 2.25;  // memoria: "entre 2 y 2.5 cm menor" que el delantero
+    const ESTRECHA_DEL = 1.5;        // el ancho de pecho delantero, menor que el de espalda
+    const escoteAncho = (pecho) => pecho / 20 + 2;
+
+    function renderizarEsquema() {
+      const cmPecho = parseFloat(inPecho.value);
+      const cmCintura = parseFloat(inCintura.value);
+      const cmTalleDel = parseFloat(inTalleDel.value);
+      const cmTalleEsp = parseFloat(inTalleEsp.value);
+      const cmAltPecho = parseFloat(inAltPecho.value);
+      const cmSepPecho = parseFloat(inSepPecho.value);
+      const cmAnchoEsp = parseFloat(inAnchoEsp.value);
+      const cmBajHombro = parseFloat(inBajHombro.value);
+      const cmCinturaSisa = parseFloat(inCinturaSisa.value);
+
+      reflejar(numPecho, cmPecho);
+      reflejar(numCintura, cmCintura);
+      reflejar(numTalleDel, cmTalleDel);
+      reflejar(numTalleEsp, cmTalleEsp);
+      reflejar(numAltPecho, cmAltPecho);
+      reflejar(numSepPecho, cmSepPecho);
+      reflejar(numAnchoEsp, cmAnchoEsp);
+      reflejar(numBajHombro, cmBajHombro);
+      reflejar(numCinturaSisa, cmCinturaSisa);
+
+      const fallar = (msg) => {
+        avisoError.textContent = '⚠ ' + msg;
+        avisoError.style.display = 'block';
+        capaPatron.innerHTML = '';
+        capaEscala.style.display = 'none';
+        logCalculos.textContent = 'Ajusta las medidas para poder trazar el patrón.';
+      };
+
+      // ---- Medidas incompatibles ------------------------------------------
+      // Con nueve mandos un aviso genérico no dice cuál mover, así que cada
+      // condición trae el suyo.
+      const anchoCuarto = (cmPecho + HOLGURA_PECHO) / 4;
+      const medioAnchoEsp = cmAnchoEsp / 2;
+
+      if (cmTalleDel <= cmTalleEsp) {
+        return fallar('El largo de talle delantero tiene que ser mayor que el de espalda: su diferencia es la pinza de pecho.');
+      }
+      if (cmPecho <= cmCintura) {
+        return fallar('El contorno de pecho tiene que ser mayor que el de cintura: su diferencia es lo que absorben las pinzas.');
+      }
+      // No basta con que quepa el ancho de espalda: el hombro lo rebasa en
+      // SALIENTE_HOMBRO y la sisa necesita sitio para curvarse antes de llegar
+      // al punto de axila. Sin este cm de holgura el hombro se sale del cuarto
+      // y la sisa sale hacia fuera y vuelve.
+      if (medioAnchoEsp + SALIENTE_HOMBRO + 1 > anchoCuarto) {
+        return fallar('El ancho de espalda no deja sitio para el hombro y la sisa dentro del cuarto de pecho. Baja el ancho de espalda o sube el contorno de pecho.');
+      }
+      if (cmAltPecho >= cmTalleDel) {
+        return fallar('La altura de pecho tiene que quedar por encima de la cintura: baja la altura o sube el largo de talle delantero.');
+      }
+      if (cmCinturaSisa >= cmTalleEsp) {
+        return fallar('La distancia de cintura a sisa no cabe en el talle de espalda.');
+      }
+      avisoError.style.display = 'none';
+
+      // ---- Ajuste a la prominencia del pecho -------------------------------
+      // La diferencia entre los dos talles ES la pinza de pecho.
+      const excedentePecho = cmTalleDel - cmTalleEsp;
+      // Pasado el tope, el volumen se parte en dos pinzas que apuntan las dos al
+      // pecho: se mantienen QUEDA_PECHO en la de pecho y el resto va a una
+      // segunda pinza en la sisa. Y si esa segunda también pasara del tope
+      // —hacen falta más de 8,5 cm de diferencia entre talles—, se topa igual y
+      // lo que quede va a la pinza delantera de cintura, que apunta al pecho
+      // también. Sin ese tercer escalón la sisa se comería una cuña enorme.
+      let pinzaPecho, pinzaSisa = 0, extraCintura = 0;
+      const pechoDesbordado = excedentePecho > TOPE_PECHO;
+      if (!pechoDesbordado) {
+        pinzaPecho = excedentePecho;
+      } else {
+        pinzaPecho = QUEDA_PECHO;
+        pinzaSisa = Math.min(excedentePecho - QUEDA_PECHO, TOPE_PECHO);
+        extraCintura = excedentePecho - QUEDA_PECHO - pinzaSisa;
+      }
+
+      // ---- Ajuste a la cintura ---------------------------------------------
+      const semi = (cmPecho - cmCintura) / 2;
+      // El bloque se dibuja por cuartos, así que el 25% del costado se parte
+      // entre las dos piezas.
+      const costadoD = semi * 0.25 / 2;
+      const costadoE = semi * 0.25 / 2;
+      const cinturaEsp = semi * 0.40;
+      const cinturaDel = semi * 0.35 + extraCintura;
+
+      // Pasado el tope no se tocan los porcentajes: se hace pinza doble. El
+      // reparto a partes iguales es decisión propia (la memoria no lo dice):
+      // dos pinzas parejas ahorman mejor que una a tope y otra con las sobras.
+      let sinAbsorber = 0;
+      const partir = (cm) => {
+        if (cm <= TOPE_PINZA) return [cm, 0];
+        if (cm / 2 <= TOPE_PINZA) return [cm / 2, cm / 2];
+        sinAbsorber += cm - 2 * TOPE_PINZA;
+        return [TOPE_PINZA, TOPE_PINZA];
+      };
+      const [pplD, secD] = partir(cinturaDel);
+      const [pplE, secE] = partir(cinturaEsp);
+
+      // ---- A unidades de dibujo --------------------------------------------
+      const u = (cm) => cm * ESCALA;
+      const wCuarto = u(anchoCuarto);
+      const wEscote = u(escoteAncho(cmPecho));
+      const wMedioEsp = u(medioAnchoEsp);
+      const wMedioDel = u(medioAnchoEsp - ESTRECHA_DEL);
+
+      // ================= ESPALDA =============================================
+      // y = 0 en el nacimiento del centro de espalda, creciendo hacia abajo.
+      const bajHombroEsp = Math.max(0.5, cmBajHombro - DIF_BAJADA_HOMBRO);
+      const yCinturaEsp = u(cmTalleEsp);
+      const ySisaEsp = yCinturaEsp - u(cmCinturaSisa);
+      const yCuelloEsp = -u(ALZA_ESCOTE_ESP);          // el escote sube hacia el hombro
+      const xHombroEsp = wMedioEsp + u(SALIENTE_HOMBRO);
+      const yHombroEsp = yCuelloEsp + u(bajHombroEsp);
+      const largoHombro = Math.hypot(xHombroEsp - wEscote, yHombroEsp - yCuelloEsp);
+
+      // ================= DELANTERO ===========================================
+      // y = 0 al nivel del punto de cuello del hombro.
+      const yCinturaDel = u(cmTalleDel);
+      // El costado delantero lleva la pinza de pecho abierta, así que en plano
+      // mide la de espalda MÁS la pinza: al cerrarla, los dos costados coinciden.
+      const ySisaDel = yCinturaDel - u(cmCinturaSisa) - u(pinzaPecho);
+      const yEscoteDel = u(escoteAncho(cmPecho) + 1);  // derivado: ancho + 1
+      const yHombroDel = u(cmBajHombro);
+      // El hombro delantero es el de espalda menos el embebido; su punto sale de
+      // la geometría, no de una medida inventada aparte.
+      const largoHombroDel = Math.max(1, largoHombro - u(EMBEBIDO_HOMBRO));
+      const dxHombroDel = Math.sqrt(Math.max(0.01, largoHombroDel ** 2 - yHombroDel ** 2));
+      const xHombroDel = wEscote + dxHombroDel;
+
+      if (ySisaDel <= yHombroDel + 1 || ySisaEsp <= yHombroEsp + 1) {
+        return fallar('No queda altura de sisa. Sube el largo de talle o baja la distancia de cintura a sisa.');
+      }
+      // El hombro delantero sale del largo del de espalda, así que puede
+      // desbordar por su cuenta si la bajada es muy pequeña.
+      if (xHombroDel > wCuarto) {
+        return fallar('El hombro delantero se sale del cuarto de pecho. Sube el contorno de pecho o baja el ancho de espalda.');
+      }
+
+      // Punto de pecho: separación desde el centro delantero, altura desde el
+      // nivel del punto de cuello.
+      const xPecho = u(cmSepPecho / 2);
+      const yPecho = u(cmAltPecho);
+
+      // ---- Pinza de pecho, abierta sobre el costado -------------------------
+      // La geometría de una pinza —vértice retranqueado y dos patas iguales—
+      // vive en Herramienta: no tiene nada de un cuerpo.
+      const abrirPinza = Herramienta.abrirPinza;
+
+      const puntoPecho = { x: xPecho, y: yPecho };
+      // La línea de altura de pecho es la BISECTRIZ de la pinza: la mitad de la
+      // profundidad queda por encima y la otra mitad por debajo. El recorte solo
+      // salta si así la pinza invadiría la sisa o la cintura.
+      const yMedioPecho = Math.min(
+        Math.max(yPecho, ySisaDel + u(2) + u(pinzaPecho) / 2),
+        yCinturaDel - u(2) - u(pinzaPecho) / 2
+      );
+      // Cuando salta, la línea de pecho deja de ser la bisectriz, así que hay
+      // que decirlo: si no, el dibujo enseña la pinza descolgada sin explicar
+      // por qué. Pasa cuando el punto de pecho cae por encima de la axila, que
+      // en un cuerpo real no ocurre; el recorte es la red, no el método.
+      const bajaLaPinza = (yMedioPecho - yPecho) / ESCALA;
+      const dePecho = abrirPinza(
+        { x: wCuarto, y: yMedioPecho }, puntoPecho, u(RETRANQUEO_PECHO), u(pinzaPecho));
+      if (!dePecho) {
+        return fallar('La pinza de pecho no cabe: es más ancha que el doble de su propia pata. Baja la diferencia entre los largos de talle o sube la altura de pecho.');
+      }
+      const vertice = dePecho.vertice;
+      const [pataA, pataB] = dePecho.patas;
+
+      // ---- Pinza de sisa ----------------------------------------------------
+      // La segunda pinza del volumen del pecho va del punto de pecho al punto
+      // más cercano de la sisa delantera, así que hace falta la sisa como cúbica
+      // suelta para poder partirla por ahí.
+      const hSisaDel = ySisaDel - yHombroDel;
+      // La sisa delantera se ahonda más que la de espalda: el primer control cae
+      // casi a plomo desde el hombro y el segundo la mete hasta el ancho de pecho
+      // antes de abrirla al punto de axila.
+      const sisaDel = [
+        { x: xHombroDel, y: yHombroDel },
+        { x: xHombroDel - 1.0 * ESCALA, y: yHombroDel + hSisaDel * 0.34 },
+        { x: wMedioDel - 1.2 * ESCALA, y: ySisaDel - hSisaDel * 0.34 },
+        { x: wCuarto, y: ySisaDel }
+      ];
+      const enBezier = Herramienta.enBezier, partirBezier = Herramienta.partirBezier;
+
+      const N_SISA = 400;
+      let deSisa = null;
+      if (pinzaSisa > 0.001) {
+        // 1. El punto más cercano de la sisa al punto de pecho: es el eje de la
+        //    pinza. El vértice se retranquea igual que el de la de pecho, para
+        //    que las dos se queden a la misma distancia del centro de pecho.
+        let iCerca = 0, dCerca = Infinity;
+        for (let i = 0; i <= N_SISA; i++) {
+          const p = enBezier(sisaDel, i / N_SISA);
+          const d = Math.hypot(p.x - xPecho, p.y - yPecho);
+          if (d < dCerca) { dCerca = d; iCerca = i; }
+        }
+        if (dCerca <= u(RETRANQUEO_PECHO) + 1) {
+          return fallar('La sisa delantera pasa demasiado cerca del punto de pecho para abrir ahí la segunda pinza. Baja la altura de pecho o sube la separación de pecho.');
+        }
+        const pCerca = enBezier(sisaDel, iCerca / N_SISA);
+        const vSisa = {
+          x: xPecho + (pCerca.x - xPecho) / dCerca * u(RETRANQUEO_PECHO),
+          y: yPecho + (pCerca.y - yPecho) / dCerca * u(RETRANQUEO_PECHO)
+        };
+
+        // 2. Las dos patas, sobre la propia sisa y de igual largo. Se busca el
+        //    radio desde el vértice cuya circunferencia corta la sisa a los dos
+        //    lados dejando entre los cortes justo la profundidad de la pinza:
+        //    al caer las dos patas sobre la misma circunferencia miden lo mismo
+        //    —la pinza cierra— y al caer sobre la curva el resto de la pieza no
+        //    se mueve, así que no hay que girar el hombro ni la axila.
+        const dv = [];
+        let iMin = 0;
+        for (let i = 0; i <= N_SISA; i++) {
+          const p = enBezier(sisaDel, i / N_SISA);
+          dv.push(Math.hypot(p.x - vSisa.x, p.y - vSisa.y));
+          if (dv[i] < dv[iMin]) iMin = i;
+        }
+        const cruce = (paso, r) => {
+          let i = iMin;
+          while (dv[i] < r && i + paso >= 0 && i + paso <= N_SISA) i += paso;
+          if (dv[i] < r) return null;                       // se sale por el extremo
+          if (i === iMin) return iMin / N_SISA;
+          const a = dv[i - paso], b = dv[i];                // a < r <= b
+          return ((i - paso) + paso * (r - a) / (b - a)) / N_SISA;
+        };
+        const cuerda = (r) => {
+          const t1 = cruce(-1, r), t2 = cruce(1, r);
+          if (t1 === null || t2 === null) return null;
+          const pa = enBezier(sisaDel, t1), pb = enBezier(sisaDel, t2);
+          return { d: Math.hypot(pa.x - pb.x, pa.y - pb.y), t1, t2, pa, pb };
+        };
+        const objetivo = u(pinzaSisa);
+        let lo = dv[iMin], hi = Math.min(dv[0], dv[N_SISA]);
+        const tope = cuerda(hi);
+        if (!tope || tope.d < objetivo) {
+          return fallar('La pinza de sisa no cabe entera dentro de la sisa delantera. Baja la diferencia entre los largos de talle, o sube la distancia de cintura a sisa.');
+        }
+        for (let k = 0; k < 60; k++) {
+          const mitad = (lo + hi) / 2;
+          const c = cuerda(mitad);
+          if (c && c.d < objetivo) lo = mitad; else hi = mitad;
+        }
+        const c = cuerda(hi);
+        deSisa = {
+          vertice: vSisa, t1: c.t1, t2: c.t2, patas: [c.pa, c.pb],
+          antes: partirBezier(sisaDel, c.t1)[0],
+          despues: partirBezier(sisaDel, c.t2)[1]
+        };
+      }
+
+      // ---- Pinzas de cintura ------------------------------------------------
+      // Vértice a RETRANQUEO del punto de volumen real. Delante es el pecho;
+      // detrás, el omóplato, que la memoria no sitúa: se toma la línea de ancho
+      // de espalda (DERIVADO).
+      const yVolumenEsp = ySisaEsp + (yCinturaEsp - ySisaEsp) * 0.15;
+      const largoPplD = yCinturaDel - (yPecho + u(RETRANQUEO));
+      const largoPplE = yCinturaEsp - (yVolumenEsp + u(RETRANQUEO));
+
+      // La distancia se mide entre los bordes más próximos, no entre ejes.
+      const separacion = (ppl, sec) => u(HUECO_PINZAS + ppl / 2 + sec / 2);
+      const ejePplD = xPecho;                       // la principal apunta al pecho
+      const ejeSecD = ejePplD + separacion(pplD, secD);
+      const ejePplE = wCuarto * 0.42;               // DERIVADO
+      const ejeSecE = ejePplE + separacion(pplE, secE);
+
+      const pinzasDel = [
+        { eje: ejePplD, ancho: u(pplD), largo: largoPplD },
+        { eje: ejeSecD, ancho: u(secD), largo: Math.max(u(2), largoPplD - u(ACORTA_SEGUNDA)) }
+      ].filter(p => p.ancho > 0);
+      const pinzasEsp = [
+        { eje: ejePplE, ancho: u(pplE), largo: largoPplE },
+        { eje: ejeSecE, ancho: u(secE), largo: Math.max(u(2), largoPplE - u(ACORTA_SEGUNDA)) }
+      ].filter(p => p.ancho > 0);
+
+      // ---- Trazados ---------------------------------------------------------
+      // La cintura se recorre del costado hacia el centro, con una uve por pinza.
+      const cinturaConPinzas = (pinzas, yCintura) => pinzas
+        .slice().sort((a, b) => b.eje - a.eje)
+        .map(p => `L ${(p.eje + p.ancho / 2).toFixed(2)},${yCintura.toFixed(2)} `
+                + `L ${p.eje.toFixed(2)},${(yCintura - p.largo).toFixed(2)} `
+                + `L ${(p.eje - p.ancho / 2).toFixed(2)},${yCintura.toFixed(2)} `)
+        .join('');
+
+      const hSisaEsp = ySisaEsp - yHombroEsp;
+      let pathEspalda = `M 0,0 `                                    // nacimiento del centro
+        + `C ${(wEscote * 0.55).toFixed(2)},0 ${wEscote.toFixed(2)},${(yCuelloEsp * 0.6).toFixed(2)} ${wEscote.toFixed(2)},${yCuelloEsp.toFixed(2)} `
+        + `L ${xHombroEsp.toFixed(2)},${yHombroEsp.toFixed(2)} `    // hombro
+        // La sisa de espalda es más plana: pasa cerca de la línea de ancho de
+        // espalda y solo se abre al final.
+        + `C ${(xHombroEsp - 0.4 * ESCALA).toFixed(2)},${(yHombroEsp + hSisaEsp * 0.36).toFixed(2)} `
+        +   `${(wMedioEsp - 0.4 * ESCALA).toFixed(2)},${(ySisaEsp - hSisaEsp * 0.32).toFixed(2)} `
+        +   `${wCuarto.toFixed(2)},${ySisaEsp.toFixed(2)} `         // sisa
+        + `L ${(wCuarto - u(costadoE)).toFixed(2)},${yCinturaEsp.toFixed(2)} `   // costado
+        + cinturaConPinzas(pinzasEsp, yCinturaEsp)
+        + `L 0,${yCinturaEsp.toFixed(2)} Z`;
+
+      // La sisa, con la cuña de la pinza de sisa recortada si la hay. `cub` no
+      // escribe el punto de arranque: viene del tramo anterior.
+      const cub = Herramienta.cubica;
+      const tramoSisa = deSisa
+        ? cub(deSisa.antes)                                          // hombro a la pata 1
+          + `L ${deSisa.vertice.x.toFixed(2)},${deSisa.vertice.y.toFixed(2)} `
+          + `L ${deSisa.patas[1].x.toFixed(2)},${deSisa.patas[1].y.toFixed(2)} `
+          + cub(deSisa.despues)                                      // pata 2 a la axila
+        : cub(sisaDel);
+
+      let pathDelantero = `M 0,${yEscoteDel.toFixed(2)} `           // escote en el centro
+        + `C ${(wEscote * 0.55).toFixed(2)},${yEscoteDel.toFixed(2)} ${wEscote.toFixed(2)},${(yEscoteDel * 0.45).toFixed(2)} ${wEscote.toFixed(2)},0 `
+        + `L ${xHombroDel.toFixed(2)},${yHombroDel.toFixed(2)} `    // hombro
+        + tramoSisa                                                 // sisa
+        + `L ${pataA.x.toFixed(2)},${pataA.y.toFixed(2)} `          // costado hasta la pinza
+        + `L ${vertice.x.toFixed(2)},${vertice.y.toFixed(2)} `      // pata 1 al vértice
+        + `L ${pataB.x.toFixed(2)},${pataB.y.toFixed(2)} `          // pata 2
+        + `L ${(wCuarto - u(costadoD)).toFixed(2)},${yCinturaDel.toFixed(2)} `   // costado
+        + cinturaConPinzas(pinzasDel, yCinturaDel)
+        + `L 0,${yCinturaDel.toFixed(2)} Z`;
+
+      // ---- Rellenos ---------------------------------------------------------
+      const trama = Herramienta.trama;
+      const uve = (p, yCintura) =>
+        `M ${p.eje - p.ancho / 2},${yCintura} L ${p.eje},${yCintura - p.largo} L ${p.eje + p.ancho / 2},${yCintura} Z`;
+      // Lo que se quita por el costado: entre el ancho completo y la costura
+      // real. Detrás es un triángulo limpio desde la axila; delante arranca por
+      // debajo de la pinza de pecho, porque por encima la costura va a plomo.
+      const zonaCostado = (yCintura, ySisa, costado) =>
+        `M ${wCuarto},${ySisa} L ${wCuarto},${yCintura} L ${wCuarto - u(costado)},${yCintura} Z`;
+      const zonaCostadoDel = () =>
+        `M ${pataB.x},${pataB.y} L ${wCuarto},${pataB.y} L ${wCuarto},${yCinturaDel} `
+        + `L ${wCuarto - u(costadoD)},${yCinturaDel} Z`;
+
+      const rellenoPinzas = (pinzas, yCintura) => pinzas
+        .map((p, i) => trama(i === 0 ? 'pts-principal' : 'pts-secundaria', uve(p, yCintura)))
+        .join('\n          ');
+
+      // ---- Rótulos ----------------------------------------------------------
+      // Girados y arrancando desde la cintura. El anclaje por el borde de la
+      // caja —y no por la línea de base, que es lo que había— es lo que los deja
+      // a los cuatro a la misma distancia de su línea; el porqué está en
+      // Herramienta.girado.
+      const girado = Herramienta.girado;
+      const hueco = Herramienta.huecoRotulo(wCuarto);
+      // Los rótulos arrancan justo encima de la cintura, y AHÍ la costura de
+      // costado ya no está en el ancho del cuarto: se ha metido lo que entra
+      // por el costado. Anclarlos en wCuarto los dejaba a 8px de la costura
+      // frente a los 14 del centro, y con un entalle grande se salían de la
+      // pieza. De la cintura hacia arriba la pieza solo ensancha, así que el
+      // borde de la cintura es el anclaje seguro.
+      //
+      // La espalda va reflejada (x de pantalla = wCuarto - x de la pieza), así
+      // que su costado cae a la izquierda y su centro a la derecha.
+      const xCostadoDel = wCuarto - u(costadoD) - hueco;
+      const xCostadoEsp = u(costadoE) + hueco;
+
+      // Las dos piezas se dibujan cada una desde su propia referencia de arriba
+      // y luego se cuadran por la cintura, así que sus bordes superiores no
+      // coinciden: la espalda baja el desnivel entre talles. Los dos títulos se
+      // ponen a una misma altura absoluta, por encima de la más alta de las dos,
+      // y al de la espalda se le descuenta el desnivel que le aplica su grupo.
+      const desnivel = yCinturaDel - yCinturaEsp;
+      const HUECO_TITULO = 34;
+      const yTitulo = Math.min(0, desnivel + yCuelloEsp) - HUECO_TITULO;
+
+      // ---- Leyenda ----------------------------------------------------------
+      const leyenda = Herramienta.leyenda;
+
+      const entradasDel = [
+        { nombre: 'Costado',        cm: costadoD,   trama: 'pts-costado' },
+        { nombre: 'Pinza de pecho', cm: pinzaPecho, trama: 'pts-pecho' },
+        { nombre: 'Pinza de sisa',  cm: pinzaSisa,  trama: 'pts-sisa' },
+        { nombre: 'Principal',      cm: pplD,       trama: 'pts-principal' },
+        { nombre: 'Secundaria',     cm: secD,       trama: 'pts-secundaria' }
+      ];
+      const entradasEsp = [
+        { nombre: 'Costado',    cm: costadoE, trama: 'pts-costado' },
+        { nombre: 'Principal',  cm: pplE,     trama: 'pts-principal' },
+        { nombre: 'Secundaria', cm: secE,     trama: 'pts-secundaria' }
+      ];
+
+      const svgContent = `
+        <g id="gDelantero" transform="translate(0, 0)">
+          <text x="0" y="${yTitulo.toFixed(2)}" class="titulo">DELANTERO (1/4)</text>
+          <line x1="0" y1="${ySisaDel.toFixed(2)}" x2="${wCuarto.toFixed(2)}" y2="${ySisaDel.toFixed(2)}" class="linea-guia" />
+          <line x1="0" y1="${yPecho.toFixed(2)}" x2="${wCuarto.toFixed(2)}" y2="${yPecho.toFixed(2)}" class="linea-guia" />
+          ${trama('pts-costado', zonaCostadoDel())}
+          ${trama('pts-pecho', `M ${pataA.x},${pataA.y} L ${vertice.x},${vertice.y} L ${pataB.x},${pataB.y} Z`)}
+          ${deSisa ? trama('pts-sisa', `M ${deSisa.patas[0].x},${deSisa.patas[0].y} L ${deSisa.vertice.x},${deSisa.vertice.y} L ${deSisa.patas[1].x},${deSisa.patas[1].y} Z`) : ''}
+          ${rellenoPinzas(pinzasDel, yCinturaDel)}
+          <path d="${pathDelantero}" class="silueta-patron" />
+          <circle cx="${xPecho.toFixed(2)}" cy="${yPecho.toFixed(2)}" r="4" class="punto-pecho" />
+          ${girado(hueco, yCinturaDel - 15, 'Centro Delantero', true)}
+          ${girado(xCostadoDel, yCinturaDel - 15, 'Costado', false)}
+          ${leyenda(entradasDel, yCinturaDel)}
+        </g>
+
+        <g id="gEspalda" transform="translate(0, 0)">
+          <text x="0" y="${(yTitulo - desnivel).toFixed(2)}" class="titulo">ESPALDA (1/4)</text>
+          <g transform="translate(${wCuarto.toFixed(2)}, 0) scale(-1, 1)">
+            <line x1="0" y1="${ySisaEsp.toFixed(2)}" x2="${wCuarto.toFixed(2)}" y2="${ySisaEsp.toFixed(2)}" class="linea-guia" />
+            <line x1="${wMedioEsp.toFixed(2)}" y1="${yHombroEsp.toFixed(2)}" x2="${wMedioEsp.toFixed(2)}" y2="${ySisaEsp.toFixed(2)}" class="linea-guia" />
+            ${trama('pts-costado', zonaCostado(yCinturaEsp, ySisaEsp, costadoE))}
+            ${rellenoPinzas(pinzasEsp, yCinturaEsp)}
+            <path d="${pathEspalda}" class="silueta-patron" />
+          </g>
+          ${girado(xCostadoEsp, yCinturaEsp - 15, 'Costado', true)}
+          ${girado(wCuarto - hueco, yCinturaEsp - 15, 'Centro Espalda', false)}
+          ${leyenda(entradasEsp, yCinturaEsp)}
+        </g>
+      `;
+
+      // ---- Lo que miden las dos sisas ---------------------------------------
+      // De aquí sale la copa de la manga, y hasta ahora había que medirlas a
+      // mano sobre el dibujo y teclearlas en la otra herramienta. Se miden
+      // sobre trazados sonda —el mismo truco que usa la manga con su copa— y se
+      // publican como medidas del cuerpo, así la manga las recoge sola.
+      //
+      // Con la pinza de sisa abierta el contorno lleva la cuña recortada, pero
+      // la sisa que se cose es la de la pinza CERRADA: los dos trozos de curva
+      // seguidos, sin las patas. Por eso se miden las subcurvas y no el
+      // contorno.
+      const sonda = (d) => {
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        p.setAttribute('d', d);
+        capaPatron.appendChild(p);
+        const largo = p.getTotalLength() / ESCALA;
+        capaPatron.removeChild(p);
+        return largo;
+      };
+      const arranque = (P) => `M ${P[0].x.toFixed(2)},${P[0].y.toFixed(2)} `;
+      const largoSisaDel = deSisa
+        ? sonda(arranque(deSisa.antes) + cub(deSisa.antes))
+          + sonda(arranque(deSisa.despues) + cub(deSisa.despues))
+        : sonda(arranque(sisaDel) + cub(sisaDel));
+      const largoSisaEsp = sonda(
+        `M ${xHombroEsp.toFixed(2)},${yHombroEsp.toFixed(2)} `
+        + `C ${(xHombroEsp - 0.4 * ESCALA).toFixed(2)},${(yHombroEsp + hSisaEsp * 0.36).toFixed(2)} `
+        +   `${(wMedioEsp - 0.4 * ESCALA).toFixed(2)},${(ySisaEsp - hSisaEsp * 0.32).toFixed(2)} `
+        +   `${wCuarto.toFixed(2)},${ySisaEsp.toFixed(2)}`);
+      Herramienta.publicarMedida('SisaDel', Math.round(largoSisaDel * 2) / 2);
+      Herramienta.publicarMedida('SisaEsp', Math.round(largoSisaEsp * 2) / 2);
+
+      // ---- Informe ----------------------------------------------------------
+      const n = Herramienta.cm;
+      const fila = Herramienta.fila, bloque = Herramienta.bloque;
+      // Una pinza secundaria a cero no existe: se enseña como guion, no como 0,0.
+      const doble = (ppl, sec) => sec > 0 ? n(ppl) + ' + ' + n(sec) : n(ppl);
+
+      const filasPecho = [
+        fila('Cuarto de pecho', n(anchoCuarto) + ' cm'),
+        fila('Talle del. &minus; esp.', n(excedentePecho) + ' cm'),
+        fila('Pinza de pecho', n(pinzaPecho) + ' cm')
+      ];
+      if (pinzaSisa > 0) filasPecho.push(fila('Pinza de sisa', n(pinzaSisa) + ' cm', true));
+      if (extraCintura > 0) filasPecho.push(fila('A la pinza del.', n(extraCintura) + ' cm', true));
+      // Las dos sisas no son un dato del cuerpo: son lo que la manga necesita, y
+      // se enseñan aquí para que se vea que las dos herramientas hablan del
+      // mismo patrón.
+      filasPecho.push(fila('Sisa del. y esp.', n(largoSisaDel) + ' + ' + n(largoSisaEsp)));
+
+      const notas = [];
+      if (pechoDesbordado) {
+        notas.push('El excedente pasa de ' + n(TOPE_PECHO) + ' cm: el volumen se parte '
+          + 'en dos pinzas que apuntan las dos al pecho. '
+          + '<i>De una sola pieza el pecho saldría en cono.</i>');
+      }
+      if (bajaLaPinza > 0.05) {
+        notas.push('La pinza de pecho baja <b>' + n(bajaLaPinza) + ' cm</b> de su línea: '
+          + 'el punto de pecho queda por encima de la axila. '
+          + '<i>Sube la distancia de cintura a sisa.</i>');
+      }
+      if (sinAbsorber > 0.001) {
+        notas.push('<b>Sin absorber: ' + n(sinAbsorber) + ' cm</b> &mdash; ni con pinza doble '
+          + 'cabe al tope de ' + TOPE_PINZA + ' cm.');
+      }
+
+      logCalculos.innerHTML = '<div class="grupos">'
+        + bloque('Al pecho', filasPecho)
+        + bloque('A la cintura', [
+            fila('Sobrante', n(semi) + ' cm'),
+            fila('Costados 25 %', n(costadoD) + ' + ' + n(costadoE)),
+            fila('Espalda 40 %', doble(pplE, secE)),
+            fila('Delantero 35 %', doble(pplD, secD))
+          ])
+        + notas.map(t => '<div class="nota">' + t + '</div>').join('')
+        + '</div>';
+
+      capaPatron.innerHTML = svgContent;
+
+      // Los dos bloques se pegan al origen, uno tras otro, y el lienzo se
+      // recorta a lo que ocupan. Hay que medirlo: el resumen y el título pueden
+      // ser más anchos que la propia pieza.
+      const SEPARACION = 60;
+      const gDel = document.getElementById('gDelantero');
+      const gEsp = document.getElementById('gEspalda');
+      // Cada pieza se traza desde su propia referencia de arriba (el punto de
+      // cuello delante, el nacimiento detrás), que son puntos distintos del
+      // cuerpo. La única línea que de verdad comparten es la cintura, así que
+      // es la que se hace coincidir: si no, el delantero cuelga por debajo
+      // justo lo que mide la pinza de pecho y parece descuadrado.
+      const cajaDel = gDel.getBBox(), cajaEsp = gEsp.getBBox();
+      gDel.setAttribute('transform', `translate(${-cajaDel.x}, 0)`);
+      gEsp.setAttribute('transform', `translate(${cajaDel.width + SEPARACION - cajaEsp.x}, ${desnivel})`);
+
+      // getBBox no cuenta el grosor del trazo: el margen se lo come.
+      const MARGEN = 24;
+      const caja = capaPatron.getBBox();
+      svgPatron.setAttribute('viewBox',
+        `${caja.x - MARGEN} ${caja.y - MARGEN} ${caja.width + 2 * MARGEN} ${caja.height + 2 * MARGEN}`);
+
+      Herramienta.describir(svgPatron,
+        `Cuerpo base para ${cmPecho} de pecho y ${cmCintura} de cintura`,
+        `Delantero y espalda, un cuarto cada uno. El delantero lleva la pinza de pecho `
+        + `de ${n(pinzaPecho)} cm sobre el costado`
+        + (pinzaSisa > 0 ? ` y otra de ${n(pinzaSisa)} cm en la sisa, las dos apuntando al pecho` : '')
+        + `. A la cintura sobran ${n(semi)} cm en la mitad del contorno. `
+        + `Las cifras están en el informe.`);
+
+      capaEscala.style.display = '';
+      util.actualizarEscala();
+    }
+
+    // Un trazado que revienta tiene que decirlo: sin esto se queda el dibujo
+    // anterior en pantalla y la herramienta parece que va, pero no responde.
+    renderizarEsquema = Herramienta.blindar(renderizarEsquema, {
+      aviso: avisoError, capa: capaPatron, escala: capaEscala, informe: logCalculos
+    });
+
+    // Sliders, casillas numéricas, agrupación de renders y capa de escala:
+    // todo eso vive en js/herramienta.js, compartido con las demás herramientas.
+    const util = Herramienta.montar({
+      nombre: 'cuerpo',
+      svg: svgPatron,
+      escala: { capa: capaEscala, razon: escalaRazon, barra: escalaBarra, tramo: escalaTramo },
+      tramas: ['costado', 'principal', 'secundaria', 'pecho', 'sisa'],
+      cmPorUnidad: ESCALA,
+      render: renderizarEsquema,
+      medidas: [
+        [inPecho, numPecho],
+        [inCintura, numCintura],
+        [inTalleDel, numTalleDel],
+        [inTalleEsp, numTalleEsp],
+        [inAltPecho, numAltPecho],
+        [inSepPecho, numSepPecho],
+        [inAnchoEsp, numAnchoEsp],
+        [inBajHombro, numBajHombro],
+        [inCinturaSisa, numCinturaSisa]
+      ]
+    });
+
+    renderizarEsquema();
+    util.avisarAlto();   // el modal necesita el alto para no cortar la herramienta
+  </script>
+</body>
+</html>

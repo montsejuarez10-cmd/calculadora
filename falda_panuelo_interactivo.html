@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script>
+    try {
+      if (window.self !== window.top) document.documentElement.classList.add('sin-scroll');
+    } catch (e) {}
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Falda Pañuelo en SVG</title>
+  <!-- Las mismas fuentes incrustadas que index.html. Cargan aparte para no
+       bloquear el primer pintado; dentro del modal ya vienen de la caché. -->
+  <link rel="stylesheet" href="css/fonts.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css"></noscript>
+  <link rel="stylesheet" href="css/herramienta.css">
+  <script src="js/herramienta.js"></script>
+  <style>
+    /* Solo lo propio de esta herramienta: su color. El resto está en
+       css/herramienta.css, compartido con las demás.
+
+       Un verde apagado (tono 150, saturación 0,28) elegido midiendo, no a ojo:
+       4,58:1 sobre blanco, que es lo que hace falta para que la cifra del
+       deslizador se lea, y 3,57:1 con la tinta del icono encima del disco, por
+       encima del 3:1 que se le pide a un gráfico. */
+    :root {
+      --color-herramienta: #488164;
+      --pista-vacia: #e6f2ec;
+      --color-tinta: #44785e;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Falda Pañuelo en SVG</h1>
+
+  <p class="sub">Trazado del cuarto de falda a partir del radio de cintura, con una capa por cada largo que quieras superponer.</p>
+  <div class="aviso-error" id="avisoError" role="status"></div>
+
+  <div class="contenedor">
+    <!-- PANEL DE MANDOS -->
+    <div class="controles">
+      <!-- Esta falda no sale del patrón base: la lámina pide su propia toma de
+           medidas, y de ahí que la única que comparte con las demás
+           herramientas sea el contorno de cintura. -->
+      <p class="de-otra">Esta falda <strong>no parte del patrón base</strong>: lleva su propia toma de medidas.</p>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inCintura">Contorno de Cintura:</label>
+          <span class="valores"><input type="number" id="numCintura" class="num" min="60" max="100" step="1" value="72"> cm</span>
+        </div>
+        <input type="range" id="inCintura" min="60" max="100" value="72">
+      </div>
+
+      <!-- No es una medida que se deslice: es cuántas faldas se superponen.
+           Las capas que sobran no se esconden, se deshabilitan, para que se vea
+           que están ahí y qué largo tenían. -->
+      <div class="control-group grupo-opciones">
+        <label>Número de capas:</label>
+        <div class="opciones">
+          <label class="chk-opcion"><input type="radio" name="capas" id="cap1" value="1"> Una</label>
+          <label class="chk-opcion"><input type="radio" name="capas" id="cap2" value="2" checked> Dos</label>
+          <label class="chk-opcion"><input type="radio" name="capas" id="cap3" value="3"> Tres</label>
+          <label class="chk-opcion"><input type="radio" name="capas" id="cap4" value="4"> Cuatro</label>
+          <label class="chk-opcion"><input type="radio" name="capas" id="cap5" value="5"> Cinco</label>
+        </div>
+      </div>
+
+      <!-- Los cinco largos van en una línea cada uno —rótulo, deslizador y
+           casilla— porque en dos filas no cabrían junto al informe. Sus cifras
+           no se repiten aquí abajo: están dentro del propio dibujo. -->
+      <div class="control-group en-linea">
+        <label for="inLargoA">Capa A</label>
+        <input type="range" id="inLargoA" min="15" max="100" value="55">
+        <span class="valores"><input type="number" id="numLargoA" class="num" min="15" max="100" step="1" value="55"> cm</span>
+      </div>
+      <div class="control-group en-linea">
+        <label for="inLargoB">Capa B</label>
+        <input type="range" id="inLargoB" min="15" max="100" value="38">
+        <span class="valores"><input type="number" id="numLargoB" class="num" min="15" max="100" step="1" value="38"> cm</span>
+      </div>
+      <div class="control-group en-linea">
+        <label for="inLargoC">Capa C</label>
+        <input type="range" id="inLargoC" min="15" max="100" value="28">
+        <span class="valores"><input type="number" id="numLargoC" class="num" min="15" max="100" step="1" value="28"> cm</span>
+      </div>
+      <div class="control-group en-linea">
+        <label for="inLargoD">Capa D</label>
+        <input type="range" id="inLargoD" min="15" max="100" value="22">
+        <span class="valores"><input type="number" id="numLargoD" class="num" min="15" max="100" step="1" value="22"> cm</span>
+      </div>
+      <div class="control-group en-linea">
+        <label for="inLargoE">Capa E</label>
+        <input type="range" id="inLargoE" min="15" max="100" value="17">
+        <span class="valores"><input type="number" id="numLargoE" class="num" min="15" max="100" step="1" value="17"> cm</span>
+      </div>
+
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inCinturilla">Ancho de la Cinturilla:</label>
+          <span class="valores"><input type="number" id="numCinturilla" class="num" min="2" max="8" step="0.5" value="4"> cm</span>
+        </div>
+        <input type="range" id="inCinturilla" min="2" max="8" step="0.5" value="4">
+      </div>
+
+      <!-- INFORME MATEMÁTICO -->
+      <div class="reporte-tecnico">
+        <h3>Radio de Cintura y Cinturilla</h3>
+        <div id="logCalculos">Calculando geometría...</div>
+      </div>
+
+    </div>
+
+    <!-- ESCENARIO GRÁFICO (SVG) -->
+    <div class="visor-svg">
+      <svg id="svgPatron" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg"
+           role="img" aria-describedby="logCalculos">
+        <!-- Los rehace el trazado en cada dibujo: sin ellos el SVG no existe
+             para un lector de pantalla, y es toda la salida de la herramienta. -->
+        <title>Trazado del patrón</title>
+        <desc>El plano se dibuja al ajustar las medidas.</desc>
+        <style>
+          /* Los comunes están en css/herramienta.css; aquí, lo propio de esta.
+             La bisectriz es la línea sobre la que se miden el radio y los
+             largos, así que va marcada distinta de las de referencia. */
+          .bisectriz { stroke: #7f8c8d; stroke-width: 1.5; stroke-dasharray: 10 4 2 4; fill: none; }
+          /* Las capas de dentro no son la silueta de la pieza: son el contorno
+             de otra falda que se superpone, y van sin relleno. */
+          .capa-interior { stroke: #2c3e50; stroke-width: 2; stroke-linejoin: round; fill: none; }
+          /* El radio de cintura y el arco que traza: es lo único que hay que
+             calcular, así que van en naranja para que se localicen de un
+             vistazo sobre un plano que es todo azul pizarra.
+
+             El trazo va de naranja puro. Eso lo deja en 2,5:1 sobre el lienzo,
+             por debajo del 3:1 que se le pide a un gráfico —sobre un fondo casi
+             blanco no hay naranja que llegue: el más oscuro que lo cumple ya se
+             lee marrón—, así que se compensa engordando la línea a 7. El
+             rótulo, que es texto y necesita 4,5:1, se queda en un naranja
+             tostado de 4,70. */
+          .cota-radio { stroke: #f57f00; stroke-width: 7; stroke-linecap: butt; fill: none; }
+          .radio { fill: #b05606; font-weight: bold; }
+          .cota-largo { stroke: #2c3e50; stroke-width: 2; fill: none; }
+          .punto-ref { fill: #2c3e50; }
+          /* La cinturilla se dobla por la mitad a lo ancho, de ahí que se
+             dibuje del doble del ancho que se quiere y con su línea de doblez. */
+          .doblez { stroke: #7f8c8d; stroke-width: 1.5; stroke-dasharray: 8 4; fill: none; }
+          /* Los cuerpos de letra del plano, mayores que los comunes: este
+             trazado es de los grandes —una falda de metro y pico de lado— y el
+             lienzo lo encoge hasta 1:8, con lo que los tamaños compartidos se
+             quedaban diminutos. */
+          .texto { font-size: 23px; }
+          .titulo { font-size: 21px; }
+          .cota { font-size: 18px; }
+          .ficha { font-family: 'Helvetica', sans-serif; font-size: 20px; fill: #2c3e50; }
+          /* Los dos rótulos de la ficha van en negrita y en la misma tinta que
+             el resto del plano: en gris claro se leían como una nota al pie en
+             vez de como el título de su columna. */
+          .ficha-titulo { font-family: 'Helvetica', sans-serif; font-size: 16px; font-weight: bold;
+                          letter-spacing: 0.06em; fill: #2c3e50; }
+        </style>
+
+        <g id="capaPatron"><!-- El plano se autodibuja aquí con JS --></g>
+      </svg>
+      <div class="escala" id="capaEscala">
+        <div class="razon" id="escalaRazon">Escala 1:1</div>
+        <div class="regla">
+          <div class="barra" id="escalaBarra"></div>
+          <span id="escalaTramo">10 cm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inCintura = document.getElementById('inCintura');
+    const inLargoA = document.getElementById('inLargoA');
+    const inLargoB = document.getElementById('inLargoB');
+    const inLargoC = document.getElementById('inLargoC');
+    const inLargoD = document.getElementById('inLargoD');
+    const inLargoE = document.getElementById('inLargoE');
+    const inCinturilla = document.getElementById('inCinturilla');
+
+    const numCintura = document.getElementById('numCintura');
+    const numLargoA = document.getElementById('numLargoA');
+    const numLargoB = document.getElementById('numLargoB');
+    const numLargoC = document.getElementById('numLargoC');
+    const numLargoD = document.getElementById('numLargoD');
+    const numLargoE = document.getElementById('numLargoE');
+    const numCinturilla = document.getElementById('numCinturilla');
+
+    const radiosCapas = Array.from(document.querySelectorAll('input[name="capas"]'));
+
+    const logCalculos = document.getElementById('logCalculos');
+    const svgPatron = document.getElementById('svgPatron');
+    const capaPatron = document.getElementById('capaPatron');
+    const avisoError = document.getElementById('avisoError');
+    const capaEscala = document.getElementById('capaEscala');
+    const escalaRazon = document.getElementById('escalaRazon');
+    const escalaBarra = document.getElementById('escalaBarra');
+    const escalaTramo = document.getElementById('escalaTramo');
+
+    const ESCALA = 6; // Relación visual: 1cm = 6px
+    const reflejar = Herramienta.reflejar;
+    const n = Herramienta.cm;
+    const fila = Herramienta.fila, bloque = Herramienta.bloque;
+    const girado = Herramienta.girado;
+
+    // ---- Constantes de la lámina -------------------------------------------
+    // "Obtén el contorno de cintura y súmale 2cm, de forma que puedas cortar al
+    // lomo teniendo en cuenta la costura del centro espalda."
+    const COSTURA_CE = 2;
+
+    // El mismo naranja que el CSS: la muestra de la ficha y el trazo del arco
+    // tienen que ir del mismo color, y desde JS no se puede pintar con una
+    // variable CSS dentro de un atributo fill.
+    const NARANJA = "#f57f00";
+
+    const u = (cm) => cm * ESCALA;   // centímetros a unidades del lienzo
+    const RAIZ2 = Math.SQRT2;
+
+    // Las tres capas, de fuera a dentro. El orden de la lámina es A la más
+    // larga, pero no se impone: si se cambian los largos, se reordenan solas.
+    const MANDOS_CAPA = [
+      { letra: 'A', slider: inLargoA, campo: numLargoA },
+      { letra: 'B', slider: inLargoB, campo: numLargoB },
+      { letra: 'C', slider: inLargoC, campo: numLargoC },
+      { letra: 'D', slider: inLargoD, campo: numLargoD },
+      { letra: 'E', slider: inLargoE, campo: numLargoE }
+    ];
+
+    function renderizarEsquema() {
+      const cmCintura = parseFloat(inCintura.value);
+      const cmCinturilla = parseFloat(inCinturilla.value);
+      const nCapas = parseInt((radiosCapas.find(r => r.checked) || {}).value || '2', 10);
+
+      reflejar(numCintura, cmCintura);
+      reflejar(numCinturilla, cmCinturilla);
+      MANDOS_CAPA.forEach(m => reflejar(m.campo, m.slider.value));
+
+      // Las capas de más se deshabilitan en vez de esconderse: así se ve que
+      // están ahí y con qué largo, y al subir el número vuelven con su valor.
+      MANDOS_CAPA.forEach((m, i) => {
+        const activa = i < nCapas;
+        m.slider.disabled = !activa;
+        m.campo.disabled = !activa;
+      });
+      util.pintarTodas();
+
+      const fallar = (msg) => {
+        avisoError.textContent = '⚠ ' + msg;
+        avisoError.style.display = 'block';
+        capaPatron.innerHTML = '';
+        capaEscala.style.display = 'none';
+        logCalculos.textContent = 'Ajusta las medidas para poder trazar el patrón.';
+      };
+
+      // ---- El radio de cintura ---------------------------------------------
+      // Es lo único que hay que calcular, y de lo que cuelga todo el trazado:
+      // la falda es un cuadrado con un agujero circular en medio, y ese agujero
+      // es la cintura. Su arco de un cuarto vale un cuarto de la cintura del
+      // patrón, así que el radio sale de la longitud entera.
+      const cinturaPatron = cmCintura + COSTURA_CE;
+      const radio = cinturaPatron / (2 * Math.PI);
+      const cuartoCintura = cinturaPatron / 4;
+
+      // ---- Las capas --------------------------------------------------------
+      // El largo se mide desde la cintura SOBRE LA BISECTRIZ, y el punto que
+      // queda es la esquina del cuadrado. Como la esquina está en la diagonal,
+      // el lado sale de dividir la diagonal entre raíz de dos.
+      const capas = MANDOS_CAPA.slice(0, nCapas).map(m => {
+        const largo = parseFloat(m.slider.value);
+        const diagonal = radio + largo;
+        return { letra: m.letra, largo, diagonal, lado: diagonal / RAIZ2 };
+      }).sort((a, b) => b.lado - a.lado);   // de fuera a dentro
+
+      // El cuadrado tiene que quedar por fuera del círculo de la cintura: su
+      // punto más cercano al centro es el lado, no la esquina.
+      const corta = capas.find(c => c.lado <= radio + 0.05);
+      if (corta) {
+        return fallar('La capa ' + corta.letra + ' es demasiado corta para este radio de cintura: '
+          + 'el cuadrado se metería dentro del círculo de la cintura. '
+          + 'Hacen falta al menos ' + n(radio * (RAIZ2 - 1)) + ' cm de largo.');
+      }
+      avisoError.style.display = 'none';
+
+      // ---- Trazado -----------------------------------------------------------
+      // El punto de referencia va en el origen; el cuarto de falda crece hacia
+      // la derecha y hacia abajo, como en la lámina.
+      const r = u(radio);
+      const fuera = capas[0];
+      const L = u(fuera.lado);
+      const MARGEN_GUIA = 18;   // lo que las líneas de referencia rebasan la pieza
+
+      // El cuarto de círculo de la cintura, del eje vertical al horizontal.
+      const arco = (rr) => `M 0,${rr.toFixed(2)} A ${rr.toFixed(2)},${rr.toFixed(2)} 0 0 0 ${rr.toFixed(2)},0`;
+
+      // La pieza: cuadrado menos el cuarto de círculo. Se recorre desde el
+      // arranque del arco para que el contorno salga en un solo trazo cerrado.
+      const pieza = (lado) =>
+        `M 0,${r.toFixed(2)} `
+        + `A ${r.toFixed(2)},${r.toFixed(2)} 0 0 0 ${r.toFixed(2)},0 `   // la cintura
+        + `L ${lado.toFixed(2)},0 `                                      // hasta la línea horizontal
+        + `L ${lado.toFixed(2)},${lado.toFixed(2)} `                     // la esquina, el pico
+        + `L 0,${lado.toFixed(2)} Z`;                                    // y de vuelta al centro
+
+      // La bisectriz, sobre la que se miden el radio y los largos.
+      const diagFuera = u(fuera.diagonal);
+      const dx = diagFuera / RAIZ2;
+
+      // Todo se mide sobre la bisectriz: el radio desde el punto de referencia
+      // hasta la cintura, y desde ahí el largo de cada capa.
+      const enDiag = (d) => ({ x: d / RAIZ2, y: d / RAIZ2 });
+
+      // El radio, del centro al arco. Su rótulo NO va sobre la bisectriz —ahí
+      // se pisaría con ella—, sino apartado en perpendicular, hacia el hueco
+      // que queda entre la bisectriz y la línea horizontal.
+      // Solo la letra: la cifra va en la leyenda y en el informe, y aquí dentro
+      // del hueco de la cintura no cabe sin montarse sobre el arco.
+      // El desplazamiento va hacia el hueco de la derecha y no hacia el de la
+      // izquierda: por ese lado baja el rótulo girado de la línea de
+      // referencia, que ocupa una banda de unos 43 de ancho. Con la cintura al
+      // mínimo el radio es tan corto que el desplazamiento no bastaba y los dos
+      // se tocaban, así que además se le pone un suelo.
+      const BANDA_ROTULO = 56;
+      const medioRadio = enDiag(r / 2);
+      const xRadio = Math.max(medioRadio.x + 20, BANDA_ROTULO);
+      const cotaRadio =
+        `<line x1="0" y1="0" x2="${enDiag(r).x.toFixed(2)}" y2="${enDiag(r).y.toFixed(2)}" class="cota-radio" />`
+        + `<text x="${xRadio.toFixed(2)}" y="${(medioRadio.y - 13).toFixed(2)}" class="cota radio">X</text>`;
+
+      // Cada capa acaba en su esquina, sobre la bisectriz. Se marca con un
+      // trazo corto en perpendicular —que sí se ve, porque cruza la bisectriz
+      // en vez de taparla— y la letra con su largo al lado.
+      //
+      // La de fuera lleva el rótulo pasada la esquina, donde no hay nada. Las
+      // de dentro lo llevan hacia el centro y alineado por la derecha: puesto
+      // hacia fuera cruzaría el borde de la capa que la envuelve.
+      // Solo la letra en la esquina: el largo y el lado están en la ficha de
+      // abajo. Con cinco capas, la cifra al lado de cada marca no cabía.
+      const marcaCapa = (c, i) => {
+        const p = enDiag(u(c.diagonal));
+        const t = 9;   // medio largo del trazo, en perpendicular a la bisectriz
+        const fuera = i === 0;
+        return `<line x1="${(p.x + t).toFixed(2)}" y1="${(p.y - t).toFixed(2)}" `
+             + `x2="${(p.x - t).toFixed(2)}" y2="${(p.y + t).toFixed(2)}" class="cota-largo" />`
+             + `<text x="${(p.x + (fuera ? 14 : -13)).toFixed(2)}" y="${(p.y + (fuera ? 21 : -9)).toFixed(2)}"`
+             + ` class="cota"${fuera ? '' : ' text-anchor="end"'}>${c.letra}</text>`;
+      };
+
+      // ---- La cinturilla ------------------------------------------------------
+      // Paso 3 de la lámina: "un rectángulo con las medidas de tu contorno de
+      // cintura y el doble del ancho deseado, para poder doblarlo". Va debajo
+      // del cuarto, alineada con él, con su línea de doblez por la mitad.
+      // 74 y no menos: el rótulo de la capa exterior cuelga por debajo de la
+      // esquina de la pieza, y con la falda más pequeña posible se tocaba con el
+      // título de la cinturilla.
+      const HUECO_PIEZAS = 74;
+
+      // Las dos rotulaciones se reparten la línea de doblez, una a cada lado:
+      // arriba qué es esa línea y abajo lo que mide la pieza. Pero la cinturilla
+      // es una barra fina, y con el ancho al mínimo —4 cm ya doblada, 24 de
+      // dibujo— en cada mitad no cabe una línea de texto: entonces salen fuera,
+      // por encima y por debajo de la barra, en vez de desbordarla.
+      const ALTO_ROTULO_COTA = 23;
+      function rotulosCinturilla() {
+        const medio = yCint + altoCint / 2;
+        const cabe = altoCint / 2 >= ALTO_ROTULO_COTA;
+        const yDoblez = cabe ? medio - 7 : yCint - 8;
+        const yMedidas = cabe ? medio + 20 : yCint + altoCint + 21;
+        const medio_x = (anchoCint / 2).toFixed(2);
+        return `<text x="${medio_x}" y="${yDoblez.toFixed(2)}" class="cota" text-anchor="middle">doblez</text>`
+          + `<text x="${medio_x}" y="${yMedidas.toFixed(2)}" class="cota" text-anchor="middle">`
+          + `${n(cmCintura)} &times; ${n(cmCinturilla * 2)} cm</text>`;
+      }
+      const anchoCint = u(cmCintura);
+      const altoCint = u(cmCinturilla * 2);
+      const yCint = L + HUECO_PIEZAS;
+      const cinturilla =
+        `<text x="0" y="${(yCint - 12).toFixed(2)}" class="titulo">CINTURILLA</text>`
+        + `<rect x="0" y="${yCint.toFixed(2)}" width="${anchoCint.toFixed(2)}" height="${altoCint.toFixed(2)}" class="silueta-patron" />`
+        + `<line x1="0" y1="${(yCint + altoCint / 2).toFixed(2)}" x2="${anchoCint.toFixed(2)}" y2="${(yCint + altoCint / 2).toFixed(2)}" class="doblez" />`
+        + rotulosCinturilla();
+
+      // ---- Las leyendas, en su propia columna ----------------------------------
+      // El plano va en dos columnas: los patrones a la izquierda —el cuarto de
+      // falda y, debajo, la cinturilla— y las leyendas a la derecha, una encima
+      // de la otra. Debajo de las piezas el trazado salía muy alto y estrecho, y
+      // el visor, que es más ancho que alto, lo encogía.
+      //
+      // Las cifras viven aquí dentro y no en el informe: son de la pieza, y en
+      // la columna de mandos le quitaban sitio a los deslizadores.
+      const PASO_FICHA = 29, LADO_MUESTRA = 19;
+      // La columna arranca pasada la pieza más ancha de la izquierda. La
+      // cinturilla ya no necesita reserva a su derecha: sus medidas van dentro,
+      // bajo la línea de doblez.
+      const xLeyendas = Math.max(L + 44, anchoCint + 44);
+      const yCapas = 78;   // el segundo bloque, bajo el primero
+      const ficha =
+        `<text x="${xLeyendas.toFixed(2)}" y="0" class="ficha-titulo">LA CINTURA</text>`
+        + `<rect x="${xLeyendas.toFixed(2)}" y="14" width="${LADO_MUESTRA}" height="${LADO_MUESTRA}" class="muestra" fill="${NARANJA}" />`
+        + `<text x="${(xLeyendas + LADO_MUESTRA + 9).toFixed(2)}" y="30" class="ficha">`
+        + `X &middot; radio ${n(radio)} cm</text>`
+        + `<text x="${xLeyendas.toFixed(2)}" y="${yCapas}" class="ficha-titulo">LAS CAPAS</text>`
+        + capas.map((c, i) => `<text x="${xLeyendas.toFixed(2)}" y="${(yCapas + 30 + i * PASO_FICHA).toFixed(2)}" class="ficha">`
+            + `${c.letra} &middot; largo ${n(c.largo)} cm &middot; lado ${n(c.lado)} cm</text>`).join('');
+
+      const svgContent = `
+        <g id="gDelantero">
+          <text x="${(r + 14).toFixed(2)}" y="-26" class="titulo">CUARTO DE FALDA</text>
+          <line x1="0" y1="${(-MARGEN_GUIA).toFixed(2)}" x2="0" y2="${(L + MARGEN_GUIA).toFixed(2)}" class="linea-guia" />
+          <line x1="${(-MARGEN_GUIA).toFixed(2)}" y1="0" x2="${(L + MARGEN_GUIA).toFixed(2)}" y2="0" class="linea-guia" />
+          <line x1="0" y1="0" x2="${(dx + MARGEN_GUIA).toFixed(2)}" y2="${(dx + MARGEN_GUIA).toFixed(2)}" class="bisectriz" />
+          <path d="${pieza(L)}" class="silueta-patron" />
+          ${capas.slice(1).map(c => `<path d="${pieza(u(c.lado))}" class="capa-interior" />`).join('\n          ')}
+          <path d="${arco(r)}" class="cota-radio" />
+          ${cotaRadio}
+          ${capas.map(marcaCapa).join('\n          ')}
+          <circle cx="0" cy="0" r="4.5" class="punto-ref" />
+          ${girado(14, L - 14, 'Línea de referencia', true)}
+          ${cinturilla}
+          ${ficha}
+        </g>
+      `;
+
+      capaPatron.innerHTML = svgContent;
+
+      // ---- Informe ------------------------------------------------------------
+      // Las capas no salen aquí: sus cifras están dentro del dibujo, que es
+      // donde se entienden, y así esta columna le deja el sitio a los cinco
+      // deslizadores de largo.
+      const notas = [];
+      if (nCapas > 1) {
+        notas.push('Las capas se cortan por separado y se superponen; el corte del '
+          + 'centro de espalda va de la cintura al bajo.');
+      }
+
+      logCalculos.innerHTML = Herramienta.informe([
+        bloque('La cintura', [
+          fila('Contorno', n(cmCintura) + ' cm'),
+          fila('Con costura', n(cinturaPatron) + ' cm', true),
+          fila('<b>Radio (X)</b>', '<b>' + n(radio) + ' cm</b>'),
+          fila('Cuarto de arco', n(cuartoCintura) + ' cm', true)
+        ]),
+        bloque('La cinturilla', [
+          fila('Largo', n(cmCintura) + ' cm'),
+          fila('Ancho doblado', n(cmCinturilla * 2) + ' cm', true)
+        ])
+      ], notas);
+
+      Herramienta.describir(svgPatron,
+        `Falda pañuelo para ${cmCintura} de cintura, con ${nCapas} `
+        + (nCapas === 1 ? 'capa' : 'capas'),
+        `Un cuarto de la falda: un cuadrado con un cuarto de círculo recortado en `
+        + `la esquina, que es la cintura. El radio de cintura mide ${n(radio)} cm y su `
+        + `arco, ${n(cuartoCintura)} cm. `
+        + capas.map(c => `La capa ${c.letra} mide ${n(c.largo)} cm de largo y ${n(c.lado)} de lado`).join('; ')
+        + '. Las cifras están en el informe.');
+
+      // getBBox no cuenta el grosor del trazo: el margen se lo come.
+      const MARGEN = 24;
+      const caja = capaPatron.getBBox();
+      svgPatron.setAttribute('viewBox',
+        `${caja.x - MARGEN} ${caja.y - MARGEN} ${caja.width + 2 * MARGEN} ${caja.height + 2 * MARGEN}`);
+
+      capaEscala.style.display = '';
+      util.actualizarEscala();
+    }
+
+    // Un trazado que revienta tiene que decirlo: sin esto se queda el dibujo
+    // anterior en pantalla y la herramienta parece que va, pero no responde.
+    renderizarEsquema = Herramienta.blindar(renderizarEsquema, {
+      aviso: avisoError, capa: capaPatron, escala: capaEscala, informe: logCalculos
+    });
+
+    // Sliders, casillas numéricas, agrupación de renders y capa de escala:
+    // todo eso vive en js/herramienta.js, compartido con las demás herramientas.
+    // Los radios del número de capas entran por el enganche 'casillas'.
+    const util = Herramienta.montar({
+      nombre: 'panuelo',
+      svg: svgPatron,
+      escala: { capa: capaEscala, razon: escalaRazon, barra: escalaBarra, tramo: escalaTramo },
+      cmPorUnidad: ESCALA,
+      render: renderizarEsquema,
+      medidas: [
+        [inCintura, numCintura],
+        [inLargoA, numLargoA],
+        [inLargoB, numLargoB],
+        [inLargoC, numLargoC],
+        [inLargoD, numLargoD],
+        [inLargoE, numLargoE],
+        [inCinturilla, numCinturilla]
+      ],
+      casillas: radiosCapas
+    });
+
+    renderizarEsquema();
+    util.avisarAlto();   // el modal necesita el alto para no cortar la herramienta
+  </script>
+</body>
+</html>

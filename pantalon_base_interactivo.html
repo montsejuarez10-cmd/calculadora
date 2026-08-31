@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script>
+    try {
+      if (window.self !== window.top) document.documentElement.classList.add('sin-scroll');
+    } catch (e) {}
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pantalón Base Técnico en SVG</title>
+  <!-- Las mismas fuentes incrustadas que index.html. Cargan aparte para no
+       bloquear el primer pintado; dentro del modal ya vienen de la caché. -->
+  <link rel="stylesheet" href="css/fonts.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css"></noscript>
+  <link rel="stylesheet" href="css/herramienta.css">
+  <script src="js/herramienta.js"></script>
+  <style>
+    /* Solo lo propio de esta herramienta: su color. El resto está en
+       css/herramienta.css, compartido con las demás. */
+    :root {
+      --color-herramienta: #90aada;
+      --pista-vacia: #e4eaf4;
+      --color-tinta: #3f6cbd;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Pantalón Base en SVG</h1>
+
+  <p class="sub">Trazado del delantero y la espalda sobre el rectángulo de cuarto de cadera, con el avance de tiro sacado de la cadera y el reparto de la cintura en costados y pinzas según el tipo de glúteos.</p>
+  <div class="aviso-error" id="avisoError" role="status"></div>
+
+  <div class="contenedor">
+    <!-- PANEL DE MANDOS -->
+    <div class="controles dos-columnas">
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inCintura">Contorno de Cintura:</label>
+          <span class="valores"><input type="number" id="numCintura" class="num" min="60" max="100" step="1" value="72"> cm</span>
+        </div>
+        <input type="range" id="inCintura" min="60" max="100" value="72">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inCadera">Contorno de Cadera:</label>
+          <span class="valores"><input type="number" id="numCadera" class="num" min="84" max="122" step="1" value="98"> cm</span>
+        </div>
+        <input type="range" id="inCadera" min="84" max="122" value="98">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inAltCadera">Altura de Cadera:</label>
+          <span class="valores"><input type="number" id="numAltCadera" class="num" min="14" max="24" step="0.5" value="18"> cm</span>
+        </div>
+        <input type="range" id="inAltCadera" min="14" max="24" step="0.5" value="18">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inAltTiro">Altura de Tiro:</label>
+          <span class="valores"><input type="number" id="numAltTiro" class="num" min="22" max="34" step="0.5" value="26"> cm</span>
+        </div>
+        <input type="range" id="inAltTiro" min="22" max="34" step="0.5" value="26">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inAltRodilla">Altura de Rodilla:</label>
+          <span class="valores"><input type="number" id="numAltRodilla" class="num" min="48" max="66" step="1" value="56"> cm</span>
+        </div>
+        <input type="range" id="inAltRodilla" min="48" max="66" value="56">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inLargo">Largo del Pantalón:</label>
+          <span class="valores"><input type="number" id="numLargo" class="num" min="90" max="120" step="1" value="110"> cm</span>
+        </div>
+        <input type="range" id="inLargo" min="90" max="120" value="110">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inRodilla">Contorno de Rodilla:</label>
+          <span class="valores"><input type="number" id="numRodilla" class="num" min="34" max="60" step="1" value="47"> cm</span>
+        </div>
+        <input type="range" id="inRodilla" min="34" max="60" value="47">
+      </div>
+      <div class="control-group">
+        <div class="fila-medida">
+          <label for="inTobillo">Contorno de Tobillo:</label>
+          <span class="valores"><input type="number" id="numTobillo" class="num" min="24" max="46" step="1" value="34"> cm</span>
+        </div>
+        <input type="range" id="inTobillo" min="24" max="46" value="34">
+      </div>
+
+      <!-- No es una medida que se deslice, sino una de tres construcciones del
+           tiro de la espalda: cambia cuánto sube y cuánto se mete el punto de
+           centro de espalda con la cintura. -->
+      <div class="control-group grupo-opciones">
+        <label>Tipo de Glúteos:</label>
+        <div class="opciones">
+          <label class="chk-opcion"><input type="radio" name="gluteos" id="glPlano" value="plano"> Plano <span class="valores">sube 2 / mete 1,5</span></label>
+          <label class="chk-opcion"><input type="radio" name="gluteos" id="glEstandar" value="estandar" checked> Estándar <span class="valores">sube 3 / mete 2,5</span></label>
+          <label class="chk-opcion"><input type="radio" name="gluteos" id="glProminente" value="prominente"> Prominente <span class="valores">sube 3 / mete 3,5</span></label>
+        </div>
+      </div>
+
+      <!-- INFORME MATEMÁTICO -->
+      <div class="reporte-tecnico">
+        <h3>Tiro, Cintura y Pinzas</h3>
+        <div id="logCalculos">Calculando geometría...</div>
+      </div>
+
+    </div>
+
+    <!-- ESCENARIO GRÁFICO (SVG) -->
+    <div class="visor-svg">
+      <svg id="svgPatron" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg"
+           role="img" aria-describedby="logCalculos">
+        <!-- Los rehace el trazado en cada dibujo: sin ellos el SVG no existe
+             para un lector de pantalla, y es toda la salida de la herramienta. -->
+        <title>Trazado del patrón</title>
+        <desc>El plano se dibuja al ajustar las medidas.</desc>
+        <style>
+          /* Los comunes están en css/herramienta.css. Aquí, lo propio del
+             pantalón: la línea de plancha, las dos cotas de color y los cuerpos
+             de letra, un tercio mayores porque se dibuja a 1:10 y con los
+             comunes los rótulos quedaban diminutos al lado de una pieza de
+             110 cm. */
+          .plancha { stroke: #34495e; stroke-width: 1.8; stroke-dasharray: 12 5; fill: none; }
+          .texto { font-size: 24px; }
+          .titulo { font-size: 22px; }
+          .cota { font-size: 18px; }
+          .leyenda { font-size: 20px; }
+          /* El carmín del boceto: la línea de cintura que el método manda medir
+             en el delantero (de ahí sale Z) y la línea de largo A que la
+             traduce en la espalda. Son las dos medidas de las que cuelga todo
+             el reparto, igual que la altura de copa en la manga. */
+          .linea-medida { stroke: #c92d4b; stroke-width: 4; fill: none; }
+          /* El avance de tiro: el tramo que la línea de tiro sale del centro
+             de la pieza, hacia fuera del rectángulo de cuarto de cadera. Va en
+             magenta para que no se confunda con el carmín de las cinturas: las
+             dos son cotas, pero esta es la única que se sale del rectángulo. */
+          .linea-avance { stroke: #cc00cc; stroke-width: 4; fill: none; }
+        </style>
+
+        <g id="capaPatron"><!-- El plano se autodibuja aquí con JS --></g>
+      </svg>
+      <div class="escala" id="capaEscala">
+        <div class="razon" id="escalaRazon">Escala 1:1</div>
+        <div class="regla">
+          <div class="barra" id="escalaBarra"></div>
+          <span id="escalaTramo">10 cm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inCintura = document.getElementById('inCintura');
+    const inCadera = document.getElementById('inCadera');
+    const inAltCadera = document.getElementById('inAltCadera');
+    const inAltTiro = document.getElementById('inAltTiro');
+    const inAltRodilla = document.getElementById('inAltRodilla');
+    const inLargo = document.getElementById('inLargo');
+    const inRodilla = document.getElementById('inRodilla');
+    const inTobillo = document.getElementById('inTobillo');
+    const radiosGluteos = Array.from(document.querySelectorAll('input[name="gluteos"]'));
+
+    const numCintura = document.getElementById('numCintura');
+    const numCadera = document.getElementById('numCadera');
+    const numAltCadera = document.getElementById('numAltCadera');
+    const numAltTiro = document.getElementById('numAltTiro');
+    const numAltRodilla = document.getElementById('numAltRodilla');
+    const numLargo = document.getElementById('numLargo');
+    const numRodilla = document.getElementById('numRodilla');
+    const numTobillo = document.getElementById('numTobillo');
+
+    const logCalculos = document.getElementById('logCalculos');
+    const svgPatron = document.getElementById('svgPatron');
+    const capaPatron = document.getElementById('capaPatron');
+    const avisoError = document.getElementById('avisoError');
+    const capaEscala = document.getElementById('capaEscala');
+    const escalaRazon = document.getElementById('escalaRazon');
+    const escalaBarra = document.getElementById('escalaBarra');
+    const escalaTramo = document.getElementById('escalaTramo');
+
+    const ESCALA = 6; // Relación visual: 1cm = 6px
+    const reflejar = Herramienta.reflejar;
+    // La misma spline interpolante que dibuja la copa de la manga. Aquí lleva
+    // las costuras de la pierna, que el enunciado manda unir "con líneas
+    // suaves" pasando por los puntos de tiro, rodilla y bajo.
+    const spline = Herramienta.spline;
+
+    // ---- Constantes del enunciado -------------------------------------------
+    const METE_CD = 1;             // "en el centro delantero metemos 1 cm"
+    const BAJA_CD = 1.5;           // "y bajamos 1,5 cm ese mismo punto"
+    const AJUSTE_PIERNA = 1;       // rodilla y tobillo: -1 delante, +1 detrás
+    const UNA_PINZA_ESP = 3.5;     // "igual o inferior a 3,5 cm: una sola pinza"
+    const PPAL_ESP = 3;            // "la principal sea de 3 cm"
+    const MAX_SEC_ESP = 2;         // "la secundaria un máximo de 2 cm"
+    const SEPARA_SEC = 3;          // "3 cm entre los costados más cercanos"
+    const ACORTA_SEC = 2;          // "2 cm más corta que la principal"
+
+    // Cuánto sube y cuánto se mete el punto de centro de espalda con la cintura
+    // según el tipo de glúteos. Es lo que decide el volumen que admite el tiro.
+    const GLUTEOS = {
+      plano:      { sube: 2, mete: 1.5, nombre: 'plano' },
+      estandar:   { sube: 3, mete: 2.5, nombre: 'estándar' },
+      prominente: { sube: 3, mete: 3.5, nombre: 'prominente' }
+    };
+
+    // ---- Constantes DERIVADAS ------------------------------------------------
+    // El enunciado da rangos, no valores. Se toma el centro de cada uno y viven
+    // juntas aquí para poder corregirlas sin bucear por el trazado.
+    const LARGO_PINZA_DEL = 11;    // "el largo de la pinza oscila entre 10 y 12"
+    const LARGO_PINZA_ESP = 13.5;  // "con un largo de 12 a 15 cm"
+    // Cuánto se ciñe la curva de tiro a la esquina del rectángulo. 0 la haría
+    // recta en diagonal; 1 la pegaría del todo a la esquina.
+    const CINE_TIRO = 0.55;
+
+    const u = (cm) => cm * ESCALA;   // centímetros a unidades del lienzo
+
+    function renderizarEsquema() {
+      const cmCintura = parseFloat(inCintura.value);
+      const cmCadera = parseFloat(inCadera.value);
+      const cmAltCadera = parseFloat(inAltCadera.value);
+      const cmAltTiro = parseFloat(inAltTiro.value);
+      const cmAltRodilla = parseFloat(inAltRodilla.value);
+      const cmLargo = parseFloat(inLargo.value);
+      const cmRodilla = parseFloat(inRodilla.value);
+      const cmTobillo = parseFloat(inTobillo.value);
+      const gluteo = GLUTEOS[(radiosGluteos.find(r => r.checked) || {}).value] || GLUTEOS.estandar;
+
+      reflejar(numCintura, cmCintura);
+      reflejar(numCadera, cmCadera);
+      reflejar(numAltCadera, cmAltCadera);
+      reflejar(numAltTiro, cmAltTiro);
+      reflejar(numAltRodilla, cmAltRodilla);
+      reflejar(numLargo, cmLargo);
+      reflejar(numRodilla, cmRodilla);
+      reflejar(numTobillo, cmTobillo);
+
+      const fallar = (msg) => {
+        avisoError.textContent = '⚠ ' + msg;
+        avisoError.style.display = 'block';
+        capaPatron.innerHTML = '';
+        capaEscala.style.display = 'none';
+        logCalculos.textContent = 'Ajusta las medidas para poder trazar el patrón.';
+      };
+
+      // ---- Medidas incompatibles ---------------------------------------------
+      // Con ocho mandos un aviso genérico no dice cuál mover, así que cada
+      // condición trae el suyo.
+      if (cmCadera <= cmCintura) {
+        return fallar('El contorno de cadera tiene que ser mayor que el de cintura: su diferencia es lo que absorben las pinzas y los costados.');
+      }
+      if (cmAltCadera >= cmAltTiro) {
+        return fallar('La altura de cadera tiene que quedar por encima de la de tiro.');
+      }
+      if (cmAltTiro >= cmAltRodilla) {
+        return fallar('La altura de tiro tiene que quedar por encima de la de rodilla.');
+      }
+      if (cmAltRodilla >= cmLargo) {
+        return fallar('La rodilla cae por debajo del bajo. Baja la altura de rodilla o alarga el pantalón.');
+      }
+
+      const cuarto = cmCadera / 4;
+      const medioCintura = cmCintura / 2;
+
+      // Los dos avances salen de la cadera, no se introducen: el enunciado da
+      // la fórmula ("1/16 de contorno de cadera - 1,5 cm", y el de espalda el
+      // doble). La línea de plancha es la mitad de cada línea de tiro CON su
+      // avance, así que las dos piezas tienen la suya.
+      const cmAvanceDel = cmCadera / 16 - 1.5;
+      const cmAvanceEsp = cmAvanceDel * 2;
+
+      // El reparto de la cintura. X es la mitad de la diferencia cadera-cintura,
+      // porque se trabaja con medio patrón.
+      const X = (cmCadera - cmCintura) / 2;
+      const Y = X / 2;                         // costados en total
+      const meteCostado = Y / 2;               // lo que se mete cada costado
+      const pinzaDel = Math.max(0, X / 6 - 1); // con poca diferencia no hay pinza
+      const pinzaEspTotal = X / 3;
+
+      // Paso 4: los anchos de pierna, uno menos delante y uno más detrás.
+      const anchoRodDel = cmRodilla / 2 - AJUSTE_PIERNA;
+      const anchoRodEsp = cmRodilla / 2 + AJUSTE_PIERNA;
+      const anchoTobDel = cmTobillo / 2 - AJUSTE_PIERNA;
+      const anchoTobEsp = cmTobillo / 2 + AJUSTE_PIERNA;
+      if (anchoTobDel <= 0 || anchoRodDel <= 0) {
+        return fallar('El contorno de rodilla o el de tobillo son demasiado pequeños para el delantero.');
+      }
+
+      // Cada pieza: el tiro sale hacia fuera del centro y la plancha va a la
+      // mitad de la línea de tiro ya alargada.
+      const xTiroDel = -cmAvanceDel, xTiroEsp = -cmAvanceEsp;
+      const planchaDel = (xTiroDel + cuarto) / 2;
+      const planchaEsp = (xTiroEsp + cuarto) / 2;
+
+      // Si la rodilla es tan ancha que su punto interior rebasa el de tiro, la
+      // entrepierna saldría hacia fuera en vez de hacia dentro.
+      if (planchaDel - anchoRodDel / 2 < xTiroDel) {
+        return fallar('La rodilla es demasiado ancha para el avance de tiro delantero: la entrepierna se saldría del punto de tiro.');
+      }
+      if (planchaEsp - anchoRodEsp / 2 < xTiroEsp) {
+        return fallar('La rodilla es demasiado ancha para el avance de tiro de la espalda.');
+      }
+
+      // ---- Delantero: la línea roja del boceto -------------------------------
+      // Va del punto de centro delantero (metido 1 cm y bajado 1,5) al punto de
+      // cintura del costado, ya metido lo que le toca de cadera. Lo que mide,
+      // descontada su pinza, es Z: la cintura del delantero sobre el papel.
+      const xCinturaDel = cuarto - meteCostado;
+      const anchoBocaDel = xCinturaDel - METE_CD;
+      if (anchoBocaDel <= 0) {
+        return fallar('El costado se mete tanto que se come el cuarto de cadera entero. Hace falta más cadera o menos diferencia con la cintura.');
+      }
+      const lineaRoja = Math.hypot(anchoBocaDel, BAJA_CD);
+      const Z = lineaRoja - pinzaDel;
+
+      // ---- Espalda ------------------------------------------------------------
+      // Lo que le queda a la espalda es medio contorno de cintura menos lo que
+      // ya ocupa el delantero. La línea de largo A lo lleva además la pinza.
+      const cinturaEsp = medioCintura - Z;
+      if (cinturaEsp <= 0) {
+        return fallar('El delantero se lleva ya toda la media cintura (' + Z.toFixed(1).replace('.', ',')
+          + ' cm de ' + medioCintura.toFixed(1).replace('.', ',') + '): a la espalda no le queda nada. Sube el contorno de cintura o baja el de cadera.');
+      }
+
+      // Una pinza o dos, según la profundidad que haya salido.
+      let pinzasEsp;
+      if (pinzaEspTotal <= UNA_PINZA_ESP) {
+        pinzasEsp = [{ ancho: pinzaEspTotal, largo: LARGO_PINZA_ESP, trama: 'pts-principal', nombre: 'Pinza de espalda' }];
+      } else {
+        // Con más de 3,5 se parte en dos: la principal fija en 3 y la
+        // secundaria lo que quede, con tope de 2. Si aún sobra medida, se va
+        // sola al costado, porque la línea A se acorta y el sobrante crece.
+        const sec = Math.min(pinzaEspTotal - PPAL_ESP, MAX_SEC_ESP);
+        pinzasEsp = [
+          { ancho: PPAL_ESP, largo: LARGO_PINZA_ESP, trama: 'pts-principal', nombre: 'Pinza principal' },
+          { ancho: sec, largo: LARGO_PINZA_ESP - ACORTA_SEC, trama: 'pts-secundaria', nombre: 'Pinza secundaria' }
+        ];
+      }
+      const pinzadoEsp = pinzasEsp.reduce((s, p) => s + p.ancho, 0);
+      const largoA = cinturaEsp + pinzadoEsp;
+
+      if (largoA <= gluteo.sube) {
+        return fallar('La línea de cintura de la espalda (' + largoA.toFixed(1).replace('.', ',')
+          + ' cm) no llega ni a bajar los ' + gluteo.sube.toFixed(1).replace('.', ',')
+          + ' cm que sube el centro de espalda con glúteo ' + gluteo.nombre + '.');
+      }
+      const avanceEspX = Math.sqrt(largoA * largoA - gluteo.sube * gluteo.sube);
+      const xCinturaEsp = gluteo.mete + avanceEspX;
+      const metidoEsp = cuarto - xCinturaEsp;
+      if (metidoEsp < 0) {
+        return fallar('La línea de cintura de la espalda no cabe en el cuarto de cadera: se sale '
+          + (-metidoEsp).toFixed(1).replace('.', ',') + ' cm. Hace falta más cadera, menos cintura, '
+          + 'o un tipo de glúteos que se meta menos.');
+      }
+
+      // Colocación de las pinzas sobre la línea A, medida desde el centro de
+      // espalda: la principal escuadrada en la mitad —la regla que el enunciado
+      // da para el caso de una sola pinza— y la secundaria hacia el costado,
+      // dejando 3 cm entre los costados más cercanos.
+      pinzasEsp[0].s = largoA / 2;
+      if (pinzasEsp[1]) {
+        pinzasEsp[1].s = pinzasEsp[0].s + pinzasEsp[0].ancho / 2 + SEPARA_SEC + pinzasEsp[1].ancho / 2;
+      }
+      const ultima = pinzasEsp[pinzasEsp.length - 1];
+      if (pinzasEsp[0].s - pinzasEsp[0].ancho / 2 <= 0 || ultima.s + ultima.ancho / 2 >= largoA) {
+        return fallar('Las pinzas no caben en la línea de cintura de la espalda, que solo mide '
+          + largoA.toFixed(1).replace('.', ',') + ' cm.');
+      }
+
+      avisoError.style.display = 'none';
+
+      // ---- Puntos comunes -----------------------------------------------------
+      const yCad = u(cmAltCadera), yTiro = u(cmAltTiro);
+      const yRod = u(cmAltRodilla), yBajo = u(cmLargo);
+      const W = u(cuarto);
+
+      const pt = (x, y) => ({ x: x, y: y });
+      const P = (p) => p.x.toFixed(2) + ',' + p.y.toFixed(2);
+
+      // La curva de tiro: sale horizontal del punto de tiro y llega a plomo a
+      // la cadera, ciñéndose a la esquina del rectángulo.
+      const curvaTiro = (xTiro) =>
+        `C ${(xTiro * (1 - CINE_TIRO)).toFixed(2)},${yTiro.toFixed(2)} `
+        + `0,${(yCad + (yTiro - yCad) * CINE_TIRO).toFixed(2)} `
+        + `0,${yCad.toFixed(2)} `;
+
+      // Delantero -------------------------------------------------------------
+      const pCD = pt(u(METE_CD), u(BAJA_CD));
+      const pCostadoDel = pt(u(xCinturaDel), 0);
+      // La cintura ya no es horizontal: baja hacia el centro delantero, así que
+      // los dos pies de la pinza se apoyan a alturas distintas.
+      const yCinturaDel = (x) => pCD.y + (pCostadoDel.y - pCD.y) * (x - pCD.x) / (pCostadoDel.x - pCD.x);
+      // La pinza va centrada en la línea de plancha y baja en su misma
+      // dirección (vertical): el enunciado la ancla a la plancha, no a la
+      // cintura. Los dos pies se miden a media pinza a cada lado SOBRE la
+      // línea de cintura, no en horizontal: la profundidad de una pinza es lo
+      // que se pliega de esa línea, y medirla en proyección dejaba la cintura
+      // corta por unas centésimas cuando la línea baja mucho.
+      const largoDel = Math.hypot(pCostadoDel.x - pCD.x, pCostadoDel.y - pCD.y);
+      const dirDel = { x: (pCostadoDel.x - pCD.x) / largoDel, y: (pCostadoDel.y - pCD.y) / largoDel };
+      const centroPinzaDel = pt(u(planchaDel), yCinturaDel(u(planchaDel)));
+      const semiDel = u(pinzaDel) / 2;
+      const pinzaDelPies = [
+        pt(centroPinzaDel.x - dirDel.x * semiDel, centroPinzaDel.y - dirDel.y * semiDel),
+        pt(centroPinzaDel.x + dirDel.x * semiDel, centroPinzaDel.y + dirDel.y * semiDel)
+      ];
+      const puntaDel = pt(u(planchaDel), centroPinzaDel.y + u(LARGO_PINZA_DEL));
+      const uvePinzaDel = pinzaDel > 0.001
+        ? `L ${P(pinzaDelPies[0])} L ${P(puntaDel)} L ${P(pinzaDelPies[1])} `
+        : '';
+
+      const costadoDel = spline([
+        pt(W, yTiro),
+        pt(u(planchaDel + anchoRodDel / 2), yRod),
+        pt(u(planchaDel + anchoTobDel / 2), yBajo)
+      ], { x: 0, y: 1 }, null);
+      const entrepiernaDel = spline([
+        pt(u(planchaDel - anchoTobDel / 2), yBajo),
+        pt(u(planchaDel - anchoRodDel / 2), yRod),
+        pt(u(xTiroDel), yTiro)
+      ], null, null);
+
+      const pathDelantero = `M ${P(pCD)} `
+        + uvePinzaDel
+        + `L ${P(pCostadoDel)} `                                 // cintura al costado
+        + `L ${W.toFixed(2)},${yCad.toFixed(2)} `                // costado hasta la cadera
+        + `L ${W.toFixed(2)},${yTiro.toFixed(2)} `               // recto hasta el tiro
+        + costadoDel
+        + `L ${u(planchaDel - anchoTobDel / 2).toFixed(2)},${yBajo.toFixed(2)} `  // bajo
+        + entrepiernaDel
+        + curvaTiro(u(xTiroDel))
+        + `L ${P(pCD)} Z`;
+
+      // Espalda ---------------------------------------------------------------
+      const pCE = pt(u(gluteo.mete), -u(gluteo.sube));
+      const pCostadoEsp = pt(u(xCinturaEsp), 0);
+      // Las pinzas van escuadradas a la línea A, no a plomo: esa línea sube
+      // hacia el centro de espalda.
+      const dxAB = pCostadoEsp.x - pCE.x, dyAB = pCostadoEsp.y - pCE.y;
+      const lenAB = Math.hypot(dxAB, dyAB);
+      const uAB = { x: dxAB / lenAB, y: dyAB / lenAB };
+      const nAB = { x: -uAB.y, y: uAB.x };          // gira 90 grados hacia abajo
+      const sobre = (s) => pt(pCE.x + uAB.x * u(s), pCE.y + uAB.y * u(s));
+      pinzasEsp.forEach(p => {
+        p.pieA = sobre(p.s - p.ancho / 2);
+        p.pieB = sobre(p.s + p.ancho / 2);
+        const c = sobre(p.s);
+        p.punta = pt(c.x + nAB.x * u(p.largo), c.y + nAB.y * u(p.largo));
+      });
+
+      const costadoEsp = spline([
+        pt(W, yTiro),
+        pt(u(planchaEsp + anchoRodEsp / 2), yRod),
+        pt(u(planchaEsp + anchoTobEsp / 2), yBajo)
+      ], { x: 0, y: 1 }, null);
+      const entrepiernaEsp = spline([
+        pt(u(planchaEsp - anchoTobEsp / 2), yBajo),
+        pt(u(planchaEsp - anchoRodEsp / 2), yRod),
+        pt(u(xTiroEsp), yTiro)
+      ], null, null);
+
+      const pathEspalda = `M ${P(pCE)} `
+        + pinzasEsp.map(p => `L ${P(p.pieA)} L ${P(p.punta)} L ${P(p.pieB)} `).join('')
+        + `L ${P(pCostadoEsp)} `                                    // cintura al costado
+        + `L ${W.toFixed(2)},${yCad.toFixed(2)} `                   // costado hasta la cadera
+        + `L ${W.toFixed(2)},${yTiro.toFixed(2)} `
+        + costadoEsp
+        + `L ${u(planchaEsp - anchoTobEsp / 2).toFixed(2)},${yBajo.toFixed(2)} `
+        + entrepiernaEsp
+        + curvaTiro(u(xTiroEsp))
+        + `L ${P(pCE)} Z`;
+
+      // ---- Rellenos -----------------------------------------------------------
+      const trama = Herramienta.trama;
+      // Lo que se quita por el costado entre la cintura y la cadera.
+      const zonaCostado = (xCintura) =>
+        `M ${xCintura.toFixed(2)},0 L ${W.toFixed(2)},0 L ${W.toFixed(2)},${yCad.toFixed(2)} Z`;
+
+      // ---- Rótulos y leyenda --------------------------------------------------
+      const HUECO_TITULO = 44;
+      const yTitulo = pCE.y - HUECO_TITULO;
+
+      // Un tercio mayor que en las otras tres, como el resto de los cuerpos de
+      // letra del pantalón: se dibuja a 1:10 y con los comunes no se leería.
+      const leyenda = (entradas) =>
+        Herramienta.leyenda(entradas, yBajo, { lado: 19, paso: 28, hueco: 30 });
+
+      const guias = (plancha, anchoRod) => `
+            <line x1="0" y1="${yCad.toFixed(2)}" x2="${W.toFixed(2)}" y2="${yCad.toFixed(2)}" class="linea-guia" />
+            <line x1="0" y1="${yTiro.toFixed(2)}" x2="${W.toFixed(2)}" y2="${yTiro.toFixed(2)}" class="linea-guia" />
+            <line x1="${u(plancha - anchoRod / 2).toFixed(2)}" y1="${yRod.toFixed(2)}" x2="${u(plancha + anchoRod / 2).toFixed(2)}" y2="${yRod.toFixed(2)}" class="linea-guia" />
+            <line x1="${u(plancha).toFixed(2)}" y1="${(yTiro + 6).toFixed(2)}" x2="${u(plancha).toFixed(2)}" y2="${(yBajo - 6).toFixed(2)}" class="plancha" />`;
+
+      const medida = (a, b) => `<line x1="${a.x.toFixed(2)}" y1="${a.y.toFixed(2)}" x2="${b.x.toFixed(2)}" y2="${b.y.toFixed(2)}" class="linea-medida" />`;
+      // El avance sale del borde del rectángulo (x = 0) hacia fuera, sobre la
+      // propia línea de tiro, que es donde se añade.
+      const avance = (xTiro) =>
+        `<line x1="0" y1="${yTiro.toFixed(2)}" x2="${u(xTiro).toFixed(2)}" y2="${yTiro.toFixed(2)}" class="linea-avance" />`;
+
+      // Los rótulos de centro y costado van girados y por la pierna, que es
+      // donde hay sitio: de la cintura al tiro solo caben 26 cm, menos de lo
+      // que mide "Centro Delantero" a este cuerpo. Se pegan al borde de cada
+      // pieza, así que hay que calcularlos con el bajo de cada una; en la
+      // espalda, que va reflejada, el borde de pantalla es W menos el suyo.
+      //
+      // El porqué del anclaje por el borde está en Herramienta.girado. El hueco
+      // se mide con la pieza MÁS ANGOSTA —el delantero, que lleva un centímetro
+      // menos— para que los cuatro rótulos sigan a la misma distancia aunque el
+      // tobillo sea estrecho.
+      const HUECO_ROTULO = Herramienta.huecoRotulo(u(anchoTobDel));
+      const girado = Herramienta.girado;
+
+      // Los de la pierna arrancan justo encima del bajo y suben.
+      const yRotulo = yBajo - 26;
+      const xCentroDel = u(planchaDel - anchoTobDel / 2) + HUECO_ROTULO;
+      const xCostadoDel = u(planchaDel + anchoTobDel / 2) - HUECO_ROTULO;
+      const xCostadoEsp = W - u(planchaEsp + anchoTobEsp / 2) + HUECO_ROTULO;
+      const xCentroEsp = W - u(planchaEsp - anchoTobEsp / 2) - HUECO_ROTULO;
+
+      // La línea de plancha lleva su rótulo en las dos piezas, centrado a lo
+      // alto entre el tiro y la rodilla —donde la pierna es más ancha y no
+      // choca con nada— y separado de la línea como los demás. Cada uno va por
+      // fuera de su plancha hacia el costado, así que las dos piezas quedan en
+      // espejo, igual que el trazado.
+      const yPlancha = (yTiro + yRod) / 2;
+      const xPlanchaDel = u(planchaDel) + HUECO_ROTULO;
+      const xPlanchaEsp = W - u(planchaEsp) - HUECO_ROTULO;
+
+      const MAGENTA = '#cc00cc';
+
+      const svgContent = `
+        <g id="gDelantero">
+          <text x="${u(xTiroDel).toFixed(2)}" y="${yTitulo.toFixed(2)}" class="titulo">DELANTERO (1/4)</text>
+          ${guias(planchaDel, anchoRodDel)}
+          ${trama('pts-costado', zonaCostado(pCostadoDel.x))}
+          ${pinzaDel > 0.001 ? trama('pts-principal', `M ${P(pinzaDelPies[0])} L ${P(puntaDel)} L ${P(pinzaDelPies[1])} Z`) : ''}
+          ${medida(pCD, pCostadoDel)}
+          ${avance(xTiroDel)}
+          <path d="${pathDelantero}" class="silueta-patron" />
+          ${girado(xCentroDel, yRotulo, 'Centro Delantero', true)}
+          ${girado(xCostadoDel, yRotulo, 'Costado', false)}
+          ${girado(xPlanchaDel, yPlancha, 'Línea de plancha', true, { clase: 'cota', centrado: true })}
+          ${leyenda([
+            { nombre: 'Avance de tiro', cm: cmAvanceDel, color: MAGENTA },
+            { nombre: 'Entra en costado', cm: meteCostado, trama: 'pts-costado' },
+            { nombre: 'Pinza delantera', cm: pinzaDel, trama: 'pts-principal' }
+          ])}
+        </g>
+
+        <g id="gEspalda">
+          <text x="0" y="${yTitulo.toFixed(2)}" class="titulo">ESPALDA (1/4)</text>
+          <g transform="translate(${W.toFixed(2)}, 0) scale(-1, 1)">
+            ${guias(planchaEsp, anchoRodEsp)}
+            ${trama('pts-costado', zonaCostado(pCostadoEsp.x))}
+            ${pinzasEsp.map(p => trama(p.trama, `M ${P(p.pieA)} L ${P(p.punta)} L ${P(p.pieB)} Z`)).join('\n            ')}
+            ${medida(pCE, pCostadoEsp)}
+            ${avance(xTiroEsp)}
+            <path d="${pathEspalda}" class="silueta-patron" />
+          </g>
+          ${girado(xCostadoEsp, yRotulo, 'Costado', true)}
+          ${girado(xCentroEsp, yRotulo, 'Centro Espalda', false)}
+          ${girado(xPlanchaEsp, yPlancha, 'Línea de plancha', false, { clase: 'cota', centrado: true })}
+          ${leyenda([
+            { nombre: 'Avance de tiro', cm: cmAvanceEsp, color: MAGENTA },
+            { nombre: 'Entra en costado', cm: metidoEsp, trama: 'pts-costado' }
+          ].concat(pinzasEsp.map(p => ({ nombre: p.nombre, cm: p.ancho, trama: p.trama }))))}
+        </g>
+      `;
+
+      capaPatron.innerHTML = svgContent;
+
+      // Las dos piezas se pegan al origen, una tras otra, y el lienzo se recorta
+      // a lo que ocupan. Hay que medirlo: el rótulo y la leyenda pueden ser más
+      // anchos que la propia pieza.
+      const SEPARACION = 60;
+      const gDel = document.getElementById('gDelantero');
+      const gEsp = document.getElementById('gEspalda');
+      const cajaDel = gDel.getBBox(), cajaEsp = gEsp.getBBox();
+      gDel.setAttribute('transform', `translate(${-cajaDel.x}, 0)`);
+      gEsp.setAttribute('transform', `translate(${cajaDel.width + SEPARACION - cajaEsp.x}, 0)`);
+
+      // ---- Informe -------------------------------------------------------------
+      const n = Herramienta.cm;
+      const fila = Herramienta.fila, bloque = Herramienta.bloque;
+
+      // Cuando la profundidad pasa de 3 + 2 el sobrante no se pierde: acorta la
+      // línea A y acaba metiéndose por el costado. Se dice en la fila sangrada,
+      // o parecería que las dos cifras tienen que sumar la de arriba.
+      const sobraPinza = pinzaEspTotal - pinzadoEsp > 0.005;
+      const filasCintura = [
+        fila('Diferencia (X)', n(X) + ' cm'),
+        // El total que el método manda quitar por los costados. NO se enseña
+        // como "a + b": eso daría a entender que cada pieza mete la mitad, y
+        // solo el delantero se construye así. Lo que mete de verdad cada una
+        // está abajo, en "Entra al costado": la espalda sale del trazado del
+        // tiro y casi nunca coincide.
+        fila('Costados', n(Y) + ' cm'),
+        fila('Pinza delantera', n(pinzaDel) + ' cm'),
+        fila('Pinza de espalda', n(pinzaEspTotal) + ' cm')
+      ];
+      if (pinzasEsp.length > 1) {
+        filasCintura.push(fila('en dos',
+          n(pinzasEsp[0].ancho) + ' + ' + n(pinzasEsp[1].ancho) + (sobraPinza ? '*' : ''), true));
+      }
+
+      // El enunciado pone tope a lo que la espalda puede meter en cadera: lo
+      // mismo que el delantero. Se avisa, no se corrige: el trazado es válido.
+      const notas = [];
+      if (sobraPinza) {
+        notas.push('* La pinza no admite más de 3 + 2: el resto va al costado.');
+      }
+      if (metidoEsp > meteCostado + 0.05) {
+        notas.push('La espalda mete al costado más que el delantero.');
+      }
+
+      // Los dos bloques cortos van juntos arriba y los dos largos abajo: la
+      // rejilla hace tan alta cada fila como su bloque mayor, y emparejados al
+      // revés quedaba un hueco muerto debajo del más corto. Además se lee bien:
+      // arriba el armazón de la pieza, abajo el reparto de la cintura.
+      logCalculos.innerHTML = '<div class="grupos">'
+        + bloque('El rectángulo', [
+            fila('Cuarto de cadera', n(cuarto) + ' cm'),
+            fila('Avance del.', n(cmAvanceDel) + ' cm'),
+            fila('Avance esp.', n(cmAvanceEsp) + ' cm')
+          ])
+        + bloque('La pierna', [
+            fila('Rodilla', n(anchoRodDel) + ' + ' + n(anchoRodEsp)),
+            fila('Bajo', n(anchoTobDel) + ' + ' + n(anchoTobEsp))
+          ])
+        + bloque('Sobra en cintura', filasCintura)
+        + bloque('Cintura por pieza', [
+            fila('Delantero (Z)', n(Z) + ' cm'),
+            fila('Espalda', n(cinturaEsp) + ' cm'),
+            fila('Línea A', n(largoA) + ' cm'),
+            fila('Entra al costado', n(meteCostado) + ' &middot; ' + n(metidoEsp))
+          ])
+        + notas.map(t => '<div class="nota">' + t + '</div>').join('')
+        + '</div>';
+
+      // getBBox no cuenta el grosor del trazo: el margen se lo come.
+      const MARGEN = 24;
+      const caja = capaPatron.getBBox();
+      svgPatron.setAttribute('viewBox',
+        `${caja.x - MARGEN} ${caja.y - MARGEN} ${caja.width + 2 * MARGEN} ${caja.height + 2 * MARGEN}`);
+
+      Herramienta.describir(svgPatron,
+        `Pantalón base para ${cmCintura} de cintura, ${cmCadera} de cadera y ${cmLargo} cm de largo`,
+        `Delantero y espalda, un cuarto cada uno, enfrentados por el costado, sobre el `
+        + `rectángulo de cuarto de cadera. El tiro avanza ${n(cmAvanceDel)} cm delante y `
+        + `${n(cmAvanceEsp)} detrás, en magenta. Glúteos de tipo ${gluteo.nombre}. `
+        + `Las cifras están en el informe.`);
+
+      capaEscala.style.display = '';
+      util.actualizarEscala();
+    }
+
+    // Un trazado que revienta tiene que decirlo: sin esto se queda el dibujo
+    // anterior en pantalla y la herramienta parece que va, pero no responde.
+    renderizarEsquema = Herramienta.blindar(renderizarEsquema, {
+      aviso: avisoError, capa: capaPatron, escala: capaEscala, informe: logCalculos
+    });
+
+    // Sliders, casillas numéricas, agrupación de renders y capa de escala:
+    // todo eso vive en js/herramienta.js, compartido con las demás herramientas.
+    // Los radios del tipo de glúteos entran por el enganche 'casillas', que se
+    // limita a colgarles un 'change' que pide render.
+    const util = Herramienta.montar({
+      nombre: 'pantalon',
+      svg: svgPatron,
+      escala: { capa: capaEscala, razon: escalaRazon, barra: escalaBarra, tramo: escalaTramo },
+      tramas: ['costado', 'principal', 'secundaria'],
+      cmPorUnidad: ESCALA,
+      render: renderizarEsquema,
+      medidas: [
+        [inCintura, numCintura],
+        [inCadera, numCadera],
+        [inAltCadera, numAltCadera],
+        [inAltTiro, numAltTiro],
+        [inAltRodilla, numAltRodilla],
+        [inLargo, numLargo],
+        [inRodilla, numRodilla],
+        [inTobillo, numTobillo]
+      ],
+      casillas: radiosGluteos
+    });
+
+    renderizarEsquema();
+    util.avisarAlto();   // el modal necesita el alto para no cortar la herramienta
+  </script>
+</body>
+</html>
