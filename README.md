@@ -66,11 +66,55 @@ local. Acepta el nombre o el número del botón (`?opcion=2` equivale a
 `?opcion=cuerpo`); un valor que no exista se ignora y te deja en la portada.
 Cerrar la ventana borra el parámetro de la dirección.
 
+Los seis SVG se generaron una sola vez con una utilidad aparte y se comprobaron
+descodificándolos con otra librería distinta. En la web son archivos estáticos:
+no llevan código ni dependencias.
+
 ## Pruebas
 
 Abre **`pruebas.html`** en el navegador: comprueba la geometría de los cinco
 trazados y da el resultado en pantalla. Ahora mismo, **12 741 comprobaciones,
 0 fallos**.
+
+## Cómo está hecho
+
+La intención era que esto funcione en cualquier parte: cualquier sistema
+operativo, cualquier navegador razonablemente reciente, un portátil viejo o el
+móvil que lleves en el bolsillo del delantal. Para eso, cuanto menos lleve
+encima, mejor.
+
+Solo hay tres lenguajes, los tres nativos del navegador:
+
+- **HTML** para el marcado del contenido.
+- **CSS** para la presentación: color, tipografía, medidas, impresión.
+- **JavaScript** para la lógica, sin ningún framework ni librería.
+
+Los patrones se dibujan en **SVG**, que el navegador entiende de fábrica. El
+JavaScript escribe directamente las líneas, los arcos y las cotas, sin ninguna
+librería de gráficos por medio; por eso el trazado sale nítido a cualquier
+tamaño y se imprime sin pixelarse.
+
+No hay framework por una razón concreta: un framework trae un paso de
+compilación, y un paso de compilación rompe lo que más importa aquí, que es
+poder abrir `index.html` con doble clic. Tampoco hay nada que se pida por
+internet —ni una fuente, ni un icono, ni una estadística—. Las dos tipografías,
+Fraunces e Inter, van incrustadas en base64 dentro de `css/fonts.css`, porque un
+`.woff2` externo no llega a cargarse desde `file://`. El resultado es que la
+calculadora funciona sin conexión, ocupa poco más de medio megabyte y no manda
+datos a ningún sitio.
+
+### Con qué se ha construido
+
+| | |
+|---|---|
+| **Claude Code** | Asistente de IA, como pareja de programación. |
+| **Visual Studio Code** | Editor y gestión del proyecto. |
+| **Git** | Control de versiones en local. |
+| **GitHub** | Repositorio remoto y copia de seguridad. |
+| **GitHub Pages** | Publicación web, gratuita para repositorios públicos. Es la dirección a la que apuntan los códigos QR. |
+
+Nada de esto hace falta para *usar* la calculadora: son las herramientas del
+taller, no la prenda.
 
 ## Licencia
 
