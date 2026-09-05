@@ -265,19 +265,59 @@ input[type="range"]:disabled { cursor: not-allowed; }
   border-radius: 8px;
   background-color: #faf7f2;
 }
-svg { width: 100%; height: auto; max-height: 540px; }
+/* El relleno de la derecha es el carril reservado para la escala. Sin el, el
+   rotulo pisaba el trazado: el viewBox se cine al dibujo con 24 unidades de
+   margen -puestas solo para que no se corte el grosor del trazo-, asi que no
+   sobra sitio por ningun lado. Medido en las cinco herramientas: en el movil el
+   41% del rotulo caia sobre tinta en la falda y el 35% en el cuerpo.
+   Va aqui y no en .visor-svg a proposito. En el visor, que es un elemento
+   flexible con flex-basis 0, esos 30px salen del reparto y los pagan los DOS
+   hermanos: la columna de mandos perdia 10,7px -su 1,4 de 3,9- y el informe del
+   cuerpo se quedaba sin sitio, con 288px para las 293 que necesita. Aqui dentro
+   el carril lo paga solo el dibujo, que es de quien tiene que salir.
+   Y cuesta poco: el alto casi siempre manda -max-height recorta a 540px-, y
+   cuando manda el alto quitar 30px de ancho no encoge el trazado ni un pixel,
+   solo recorta franja vacia. */
+svg { width: 100%; height: auto; max-height: 540px; padding-right: 30px; box-sizing: border-box; }
 
 /* La escala depende del tamaño en pantalla, no de las coordenadas del
    dibujo, así que va superpuesta en HTML y no dentro del SVG: metida en la
    capa del patrón entraría en el getBBox que ciñe el lienzo y lo encogería. */
 .escala {
   position: absolute;
-  left: 10px;
+  /* Pegada al borde derecho y en vertical. Medido sobre las cinco herramientas
+     en 48 combinaciones de medidas y a dos anchos: de las siete colocaciones
+     probadas -las cuatro esquinas, el centro abajo y los dos laterales en
+     vertical- esta es la unica que no pisa el trazado en NINGUNA. La de abajo a
+     la izquierda, que era la de antes, lo pisaba en 10 de 48; arriba a la
+     izquierda, en 38 de 48.
+     El motivo es que el lienzo no deja hueco por arriba ni por abajo: el
+     viewBox se cine al dibujo con 24 unidades de margen, y esas 24 estan solo
+     para que no se corte el grosor del trazo. La franja libre aparece a los
+     lados, cuando max-height recorta los trazados altos y el dibujo se queda
+     mas estrecho que su caja. Ahi es donde cabe esto. */
+  right: 4px;
   bottom: 8px;
+  /* El origen en la esquina inferior derecha mas el translateX(100%) dejan la
+     caja pegada al borde y creciendo hacia arriba. Con el rotate a secas se
+     salia del visor por abajo. El giro no toca el ancho que le pone
+     actualizarEscala() a la barra -transform no altera la maquetacion-, asi
+     que 10 cm de barra siguen siendo 10 cm de patron. */
+  transform-origin: 100% 100%;
+  transform: rotate(-90deg) translateX(100%);
+  /* En una linea: en dos, la caja era mas alta que ancha y no entraba en la
+     franja. */
+  display: flex;
+  align-items: center;
+  /* Justo lo suficiente. Con 8 de hueco y 8 de relleno el rotulo medía 6px mas
+     y asomaba por encima del visor en el pañuelo a 360px, que es donde la caja
+     es mas baja. */
+  gap: 6px;
+  white-space: nowrap;
   pointer-events: none;
   background: rgba(250, 247, 242, 0.88);
   border-radius: 5px;
-  padding: 5px 8px 6px;
+  padding: 4px 6px;
   font-size: 11px;
   color: #5b6b73;
   line-height: 1.35;
@@ -287,7 +327,6 @@ svg { width: 100%; height: auto; max-height: 540px; }
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-top: 3px;
 }
 /* La barra lleva un tope vertical en cada extremo, como una regla de plano.
    border-box para que el ancho que le pone el JS sea el de tope a tope: con
