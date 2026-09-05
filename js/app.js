@@ -23,10 +23,10 @@
       color: "#4a4a4a",
       descargas: [
         { archivo: "toma_medidas/general.pdf",  nombre: "General",  detalle: "Todas las medidas", peso: "520 KB" },
-        { archivo: "toma_medidas/falda.pdf",    nombre: "Falda",    detalle: "Cintura, cadera, rodilla y largo", peso: "516 KB" },
-        { archivo: "toma_medidas/cuerpo.pdf",   nombre: "Cuerpo",   detalle: "Talle, pecho, hombro, sisa y manga", peso: "518 KB" },
-        { archivo: "toma_medidas/vestido.pdf",  nombre: "Vestido",  detalle: "Las del cuerpo, más cintura y cadera", peso: "519 KB" },
-        { archivo: "toma_medidas/pantalon.pdf", nombre: "Pantalón", detalle: "Cintura, cadera, tiro, rodilla y tobillo", peso: "517 KB" },
+        { archivo: "toma_medidas/falda.pdf",    nombre: "Falda",    detalle: "Medidas específicas", peso: "516 KB" },
+        { archivo: "toma_medidas/cuerpo.pdf",   nombre: "Cuerpo",   detalle: "Medidas específicas", peso: "518 KB" },
+        { archivo: "toma_medidas/vestido.pdf",  nombre: "Vestido",  detalle: "Medidas específicas", peso: "519 KB" },
+        { archivo: "toma_medidas/pantalon.pdf", nombre: "Pantalón", detalle: "Medidas específicas", peso: "517 KB" },
         { archivo: "toma_medidas/completo.pdf", nombre: "Las cinco juntas", detalle: "El cuaderno entero, para imprimirlo de una vez", peso: "546 KB" }
       ]
     }
