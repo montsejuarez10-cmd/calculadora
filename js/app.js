@@ -27,7 +27,7 @@
         { archivo: "toma_medidas/cuerpo.pdf",   nombre: "Cuerpo",   detalle: "Talle, pecho, hombro, sisa y manga", peso: "518 KB" },
         { archivo: "toma_medidas/vestido.pdf",  nombre: "Vestido",  detalle: "Las del cuerpo, más cintura y cadera", peso: "519 KB" },
         { archivo: "toma_medidas/pantalon.pdf", nombre: "Pantalón", detalle: "Cintura, cadera, tiro, rodilla y tobillo", peso: "517 KB" },
-        { archivo: "toma_medidas/completo.pdf", nombre: "Las cinco juntas", detalle: "El cuaderno entero, para imprimirlo de una vez", peso: "2,5 MB" }
+        { archivo: "toma_medidas/completo.pdf", nombre: "Las cinco juntas", detalle: "El cuaderno entero, para imprimirlo de una vez", peso: "546 KB" }
       ]
     }
   };

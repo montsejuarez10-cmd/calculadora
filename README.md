@@ -44,7 +44,11 @@ la portada las ofrece todas para descargar.
 | `pantalon.pdf` | Cintura, cadera, tiro, rodilla, tobillo y largo de pierna. |
 | `completo.pdf` | Las cinco en un solo archivo, para imprimirlas de una vez. |
 
-Las cinco sueltas salieron de `completo.pdf`, que se conserva sin tocar.
+Las cinco sueltas salieron de `completo.pdf`. Los seis pesan unos 520 KB cada
+uno: los PDF venían de Illustrator con su bloque de datos privados de edición
+dentro —unos 2 MB por archivo que no se imprimen nunca— y se les ha quitado.
+El trazado no se ha tocado: las páginas renderizadas salen byte a byte iguales
+que antes.
 
 ## Estructura
 
@@ -125,7 +129,7 @@ Fraunces e Inter, van incrustadas en base64 dentro de `css/fonts.css`, porque un
 `.woff2` externo no llega a cargarse desde `file://`. El resultado es que la
 calculadora funciona sin conexión y no manda datos a ningún sitio. La
 aplicación en sí ocupa poco más de medio megabyte; lo que abulta son las fichas
-en PDF de `toma_medidas/`, que son 5 MB y solo se descargan si alguien las pide.
+en PDF de `toma_medidas/`, que son 3 MB y solo se descargan si alguien las pide.
 
 ### Con qué se ha construido
 
