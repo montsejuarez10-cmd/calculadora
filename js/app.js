@@ -1,11 +1,35 @@
-﻿  // Las cinco opciones del menú. Cada una trae su título, su descripción, la
-  // herramienta que embebe y el color con el que se tiñen su botón y su ventana.
+﻿  // Las opciones del menú. Cada una trae su título, su descripción, lo que abre
+  // —una herramienta embebida o una lista de descargas— y el color con el que
+  // se tiñen su botón y su ventana.
   var OPCIONES = {
     "1": { slug: "falda", titulo: "Falda Base", desc: "Trazado técnico interactivo de la silueta completa (delantero y trasero), con la regla 50-32-18.", embebido: "falda_base_interactivo.html", color: "#ec5151" },
     "2": { slug: "cuerpo", titulo: "Cuerpo Base", desc: "Trazado del bloque delantero y espalda resolviendo el ajuste a la prominencia del pecho y el reparto 25-40-35 a la cintura.", embebido: "cuerpo_base_interactivo.html", color: "#f27b2c" },
     "3": { slug: "manga", titulo: "Manga Base", desc: "Trazado proporcional de la copa y de la forma de la manga, sacado del recorrido de las dos sisas del cuerpo base.", embebido: "manga_base_interactivo.html", color: "#ffa875" },
     "4": { slug: "pantalon", titulo: "Pantalón Base", desc: "Trazado del delantero y la espalda sobre el rectángulo de cuarto de cadera, con el avance de tiro sacado de la cadera y el reparto de la cintura en costados y pinzas según el tipo de glúteos.", embebido: "pantalon_base_interactivo.html", color: "#90aada" },
-    "5": { slug: "panuelo", titulo: "Falda Pañuelo", desc: "Trazado del cuarto de falda a partir del radio de cintura, con una capa por cada largo que quieras superponer.", embebido: "falda_panuelo_interactivo.html", color: "#488164" }
+    "5": { slug: "panuelo", titulo: "Falda Pañuelo", desc: "Trazado del cuarto de falda a partir del radio de cintura, con una capa por cada largo que quieras superponer.", embebido: "falda_panuelo_interactivo.html", color: "#488164" },
+
+    // La sexta no lleva herramienta: en vez de embeber un trazador, ofrece las
+    // fichas en papel donde se anotan las medidas del cliente. Por eso trae
+    // "descargas" donde las otras traen "embebido", y abrirOpcion mira cuál de
+    // las dos tiene para saber qué enseñar.
+    //
+    // La lista va escrita a mano, y no puede ser de otra manera: esto es una web
+    // estática, sin servidor al que preguntarle qué hay dentro de la carpeta. Si
+    // algún día se añade una ficha a toma_medidas/, hay que añadirla aquí.
+    "6": {
+      slug: "fichas",
+      titulo: "Ficha toma de medidas",
+      desc: "Las hojas en blanco donde se anotan las medidas del cliente. Descárgalas e imprímelas en A4.",
+      color: "#4a4a4a",
+      descargas: [
+        { archivo: "toma_medidas/general.pdf",  nombre: "General",  detalle: "Todas las medidas", peso: "520 KB" },
+        { archivo: "toma_medidas/falda.pdf",    nombre: "Falda",    detalle: "Cintura, cadera, rodilla y largo", peso: "516 KB" },
+        { archivo: "toma_medidas/cuerpo.pdf",   nombre: "Cuerpo",   detalle: "Talle, pecho, hombro, sisa y manga", peso: "518 KB" },
+        { archivo: "toma_medidas/vestido.pdf",  nombre: "Vestido",  detalle: "Las del cuerpo, más cintura y cadera", peso: "519 KB" },
+        { archivo: "toma_medidas/pantalon.pdf", nombre: "Pantalón", detalle: "Cintura, cadera, tiro, rodilla y tobillo", peso: "517 KB" },
+        { archivo: "toma_medidas/completo.pdf", nombre: "Las cinco juntas", detalle: "El cuaderno entero, para imprimirlo de una vez", peso: "2,5 MB" }
+      ]
+    }
   };
 
   var modal = document.getElementById('opcion-modal');
@@ -15,7 +39,49 @@
   var iframeWrap = document.getElementById('iframe-wrap');
   var modalIframe = document.getElementById('modal-iframe');
   var iframeLoading = document.getElementById('iframe-loading');
+  var fichasLista = document.getElementById('fichas-lista');
   var lastFocused = null;
+
+  // Rellena la ventana con un enlace de descarga por ficha. Se construye con
+  // createElement y textContent, nunca con innerHTML: los nombres salen de la
+  // tabla de aquí arriba, pero pegarlos como HTML sería sembrar un agujero para
+  // el día en que alguno venga de otro sitio.
+  function pintarDescargas(datos){
+    fichasLista.textContent = '';
+    datos.descargas.forEach(function(f){
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.className = 'ficha-btn';
+      a.href = f.archivo;
+      // El atributo "download" es lo que convierte el enlace en una descarga en
+      // vez de abrir el PDF en el visor del navegador. El nombre del archivo se
+      // deja tal cual: es corto y ya dice qué es.
+      a.setAttribute('download', '');
+      // Los lectores de pantalla anuncian el enlace entero de un tirón, así que
+      // el texto accesible dice qué hace, no solo cómo se llama.
+      a.setAttribute('aria-label', 'Descargar la ficha de ' + f.nombre + ' en PDF, ' + f.peso);
+
+      var nom = document.createElement('span');
+      nom.className = 'ficha-nombre';
+      nom.textContent = f.nombre;
+
+      var det = document.createElement('span');
+      det.className = 'ficha-detalle';
+      det.textContent = f.detalle;
+
+      // El peso va aparte y a la derecha: quien abre esto desde el móvil con
+      // datos quiere saber qué se va a descargar antes de tocarlo.
+      var peso = document.createElement('span');
+      peso.className = 'ficha-peso';
+      peso.textContent = f.peso;
+
+      a.appendChild(nom);
+      a.appendChild(det);
+      a.appendChild(peso);
+      li.appendChild(a);
+      fichasLista.appendChild(li);
+    });
+  }
 
   function abrirOpcion(id){
     var datos = OPCIONES[id];
@@ -27,6 +93,8 @@
     // tabla: así cada opción arrastra el suyo sin que puedan separarse. Se le
     // quita la clase tag-icon, que lleva el trazo blanco y el tamaño fijo
     // pensados para el disco del botón.
+    // La opción de las fichas no tiene icono, y entonces el hueco se queda
+    // vacío: .titulo-icono:empty lo esconde y el título va solo.
     modalIcono.innerHTML = '';
     var origen = document.querySelector('.tag-btn[data-opcion="' + id + '"] .tag-icon');
     if (origen) {
@@ -35,19 +103,30 @@
       modalIcono.appendChild(clon);
     }
 
-    // Las cinco opciones llevan ya su herramienta embebida.
-    modal.classList.add("modal-wide");
+    // Dos ventanas distintas con el mismo diálogo: así el cerrar, la tecla Esc,
+    // el clic en el fondo, la devolución del foco y el borrado del parámetro de
+    // la URL valen para las dos sin escribirlos dos veces.
+    var conHerramienta = !!datos.embebido;
+    iframeWrap.hidden = !conHerramienta;
+    fichasLista.hidden = conHerramienta;
+    // Ancha solo cuando lleva herramienta: la lista de fichas en 70rem dejaría
+    // seis renglones perdidos en una sábana de papel.
+    modal.classList.toggle("modal-wide", conHerramienta);
 
-    // La herramienta embebida se carga una sola vez y se mantiene viva aunque se cierre
-    // el modal: reabrirla es instantáneo y conserva las medidas que dejó el usuario.
-    if (modalIframe.getAttribute("src") !== datos.embebido) {
-      iframeLoading.style.display = "flex";
-      // El alto de la herramienta anterior no vale para esta.
-      altoDeclarado = 0;
-      modalIframe.style.height = "";
-      modalIframe.src = datos.embebido;
+    if (conHerramienta) {
+      // La herramienta embebida se carga una sola vez y se mantiene viva aunque se cierre
+      // el modal: reabrirla es instantáneo y conserva las medidas que dejó el usuario.
+      if (modalIframe.getAttribute("src") !== datos.embebido) {
+        iframeLoading.style.display = "flex";
+        // El alto de la herramienta anterior no vale para esta.
+        altoDeclarado = 0;
+        modalIframe.style.height = "";
+        modalIframe.src = datos.embebido;
+      }
+      modalIframe.title = datos.titulo;
+    } else {
+      pintarDescargas(datos);
     }
-    modalIframe.title = datos.titulo;
 
     // Cada opción tiñe su botón y la ventana que abre.
     modal.style.setProperty("--color-opcion", datos.color);

@@ -124,6 +124,20 @@
         <span class="tag-sub">Falda</span>
       </span>
     </button>
+    <!-- Salto de renglón: fuerza que la ficha caiga a una fila propia y, de
+         paso, le pone el doble de aire que hay entre botones (dos huecos de
+         1,1rem en vez de uno). Va aquí dentro y no en otro contenedor para que
+         el botón siga colgando de #options, que es quien escucha los clics. -->
+    <span class="salto-fila" aria-hidden="true"></span>
+    <!-- Sin icono, a propósito: no es una herramienta de trazado como las cinco
+         de arriba, sino papel para imprimir, y la ausencia del disco de color es
+         lo que lo dice de un vistazo. -->
+    <button type="button" class="tag-btn tag-btn-ficha" data-opcion="6">
+      <span>
+        <span class="tag-label">Ficha</span>
+        <span class="tag-sub">de medidas</span>
+      </span>
+    </button>
   </div>
 
 </main>
@@ -140,6 +154,10 @@
       <p class="iframe-loading" id="iframe-loading">Cargando herramienta…</p>
       <iframe id="modal-iframe" scrolling="no"></iframe>
     </div>
+
+    <!-- La lista de fichas: la rellena app.js y solo se ve cuando la opción
+         abierta trae descargas en vez de herramienta. -->
+    <ul class="fichas" id="fichas-lista" hidden></ul>
   </div>
 </dialog>
 

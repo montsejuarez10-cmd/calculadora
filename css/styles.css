@@ -422,3 +422,94 @@
     .calc-row{ grid-template-columns:1fr; }
     .card{ padding:2rem 1.4rem 1.8rem; }
   }
+
+  /* ---- La ficha de toma de medidas ---- */
+
+  /* Un elemento flexible de base 100% obliga a saltar de renglón. Con altura
+     cero, la ficha queda separada de las cinco herramientas por dos huecos de
+     la rejilla (2,2rem) en vez de uno: se lee como algo aparte sin abrir un
+     agujero en la portada. */
+  .salto-fila{
+    flex-basis:100%;
+    height:0;
+  }
+
+  /* Sin disco de color, el texto se centra: si se quedara a la izquierda, donde
+     empieza en los otros cinco, el hueco del icono ausente parecería una imagen
+     que no ha cargado. El filete de puntos toma el color de la opción, que es
+     lo único que queda para llevarlo. */
+  .tag-btn-ficha{
+    justify-content:center;
+    text-align:center;
+    padding-left:1.4rem;
+  }
+  .tag-btn-ficha::before{
+    border-color:var(--color-opcion, var(--paper-edge));
+  }
+
+  /* El atributo hidden lo pone y lo quita app.js, pero .iframe-wrap declara
+     display:block y una declaración de la hoja gana siempre al hidden del
+     navegador. Sin estas dos reglas la lista y la herramienta se verían a la
+     vez. */
+  .iframe-wrap[hidden],
+  .fichas[hidden]{ display:none; }
+
+  .fichas{
+    list-style:none;
+    margin:0 0 0.4rem;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:0.5rem;
+  }
+
+  /* Cada ficha es un enlace con descarga, no un botón: así el menú contextual
+     del navegador ofrece "guardar enlace como" y la rueda del ratón abre en
+     pestaña nueva, cosas que un <button> con JavaScript quita sin dar nada a
+     cambio. */
+  .ficha-btn{
+    display:grid;
+    grid-template-columns:1fr auto;
+    align-items:baseline;
+    gap:0.1rem 0.8rem;
+    padding:0.7rem 0.9rem;
+    border-radius:8px;
+    background:var(--paper-2);
+    border:1px solid var(--paper-edge);
+    color:var(--ink);
+    text-decoration:none;
+    transition:background 140ms ease, transform 140ms ease, border-color 140ms ease;
+  }
+  .ficha-btn:hover{
+    background:#F8F1DE;
+    border-color:var(--color-opcion, var(--ink));
+    transform:translateX(2px);
+  }
+  .ficha-btn:focus-visible{
+    outline:2px solid var(--color-opcion, var(--thread));
+    outline-offset:2px;
+  }
+  .ficha-nombre{
+    font-weight:600;
+    font-size:1rem;
+    line-height:1.25;
+  }
+  /* El peso ocupa la segunda columna y las dos filas: queda alineado a la
+     derecha, a la altura del nombre, y no empuja al detalle. */
+  .ficha-peso{
+    grid-column:2;
+    grid-row:1 / span 2;
+    align-self:center;
+    font-family:var(--font-detalle);
+    font-size:0.72rem;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:0.04em;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .ficha-detalle{
+    grid-column:1;
+    font-size:0.82rem;
+    line-height:1.35;
+    color:var(--ink-soft);
+  }

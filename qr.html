@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Códigos QR · Calculadora de patronaje</title>
-<meta name="description" content="Hoja imprimible con los seis códigos QR de la calculadora de patronaje.">
+<meta name="description" content="Hoja imprimible con los siete códigos QR de la calculadora de patronaje.">
 <link rel="stylesheet" href="css/fonts.css">
 <style>
   :root{
@@ -70,6 +70,9 @@
     grid-template-columns:repeat(2, 1fr);
     gap:1.2rem;
   }
+
+  /* Ocupa las dos columnas: ver el comentario de su tarjeta más abajo. */
+  .tarjeta-ficha{ grid-column:1 / -1; }
 
   .tarjeta{
     position:relative;
@@ -176,17 +179,20 @@
   @media print{
     html,body{ background:#fff; color:#000; }
     .hoja{ max-width:none; padding:0; }
-    header{ margin:0 0 6mm; }
+    header{ margin:0 0 4mm; }
     h1{ font-size:16pt; margin:0 0 2mm; }
     .eyebrow{ font-size:7pt; color:#000; }
     .lede{ font-size:8.5pt; color:#000; opacity:1; }
-    .rejilla{ gap:7mm; }
+    /* 5mm y no 7, y 4mm de relleno y no 5: con la séptima tarjeta la hoja se
+       iba a una segunda página por unos milímetros. Apretar la rejilla y el
+       relleno de las tarjetas las devuelve a un A4. */
+    .rejilla{ gap:5mm; }
     .tarjeta{
       background:#fff;
       box-shadow:none;
       border:1px solid #000;
       border-radius:0;
-      padding:5mm;
+      padding:4mm;
       gap:5mm;
     }
     .tarjeta::before{ inset:2mm; border-color:#999; }
@@ -290,6 +296,19 @@
         <p class="sub">Falda</p>
         <p class="desc">El cuarto de falda desde el radio de cintura, con una capa por cada largo.</p>
         <p class="url">…/calculadora/?opcion=panuelo</p>
+      </div>
+    </div>
+
+    <!-- La ficha cierra la hoja ocupando las dos columnas. Son siete tarjetas:
+         a dos columnas la última quedaría coja, y además en la portada su botón
+         también va aparte de las cinco herramientas. Sin disco, como su botón. -->
+    <div class="tarjeta tarjeta-ficha" style="--color-opcion:#4a4a4a">
+      <img class="codigo" src="img/qr/qr-fichas.svg" alt="Código QR: abre las fichas de toma de medidas">
+      <div class="datos">
+        <p class="nombre">Ficha</p>
+        <p class="sub">De medidas</p>
+        <p class="desc">Las seis hojas en blanco donde se anotan las medidas del cliente, para descargar e imprimir en A4.</p>
+        <p class="url">…/calculadora/?opcion=fichas</p>
       </div>
     </div>
 
