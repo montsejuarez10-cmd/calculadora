@@ -172,18 +172,23 @@
      usan las mismas, asi que al partirse los botones quedan alineados en
      vertical y en horizontal con el mismo hueco en los dos ejes. Centrada, una
      fila flexible centra cada renglon por su cuenta y las columnas no se
-     corresponden: a 900px la primera empezaba en x=88 y la segunda en x=262. */
+     corresponden: a 900px la primera empezaba en x=88 y la segunda en x=262.
+
+     El numero de columnas no se deja a auto-fit, sino que se fija por tramos, y
+     solo con divisores de seis: 1, 2, 3 y 6. Los botones son seis, asi que
+     cualquier otro numero deja la ultima fila a medias -con auto-fit salian 4+2
+     a 900px- y entonces el conjunto se ve escorado a la izquierda por mucho que
+     la rejilla este centrada. Con un divisor no hay filas incompletas: el bloque
+     es siempre un rectangulo lleno, y centrarlo lo centra de verdad. */
   .options{
     display:grid;
-    grid-template-columns:repeat(auto-fit, 10.5rem);
+    grid-template-columns:10.5rem;
     justify-content:center;
     gap:1.1rem;
     width:100%;
     /* main es una columna flexible, y sin esto el min-width:auto de este hijo
-       vale el ancho minimo de la rejilla -las seis columnas, 1096px- y se
-       desborda en vez de encogerse: auto-fit calculaba siempre seis columnas,
-       tambien a 390px. Con 0 puede encoger y el numero de columnas sale del
-       ancho que hay de verdad. */
+       vale el ancho minimo de su contenido y la rejilla se desborda en vez de
+       encogerse. */
     min-width:0;
     /* 73rem y no 64: es todo el ancho de contenido que deja main (76rem menos
        sus 1,5rem de relleno a cada lado), y hace falta entero para que los seis
@@ -471,6 +476,18 @@
     padding-left:1.4rem;
   }
   .tag-btn-ficha:hover{ background:#F0E3C4; }
+
+  /* Los tramos. Cada umbral es el ancho de ventana en el que ese numero de
+     columnas empieza a caber: n columnas piden n*168 + (n-1)*17,6 px, mas los
+     48 de relleno de main. Van con unos pocos pixeles de holgura para no
+     cambiar justo en el limite.
+       2 columnas:  353,6 + 48 =  401,6  ->  25,5rem (408px)
+       3 columnas:  539,2 + 48 =  587,2  ->  37rem   (592px)
+       6 columnas: 1096,0 + 48 = 1144,0  ->  71,75rem (1148px)
+     No hay tramo de 4 ni de 5: dejarian la ultima fila coja. */
+  @media (min-width: 25.5rem){ .options{ grid-template-columns:repeat(2, 10.5rem); } }
+  @media (min-width: 37rem){   .options{ grid-template-columns:repeat(3, 10.5rem); } }
+  @media (min-width: 71.75rem){ .options{ grid-template-columns:repeat(6, 10.5rem); } }
 
   /* Con sitio de sobra para los seis en un renglon, la fila vuelve a ser
      flexible y la ficha recupera su hueco mayor: 40px hasta el Panuelo frente a
