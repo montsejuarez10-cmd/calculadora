@@ -14,51 +14,54 @@
 
 <svg class="mat-illustrations" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
   <defs>
-    <g id="piece-bodice">
-      <path class="piece piece-outline" d="M15,20 C15,8 35,2 50,10 C65,2 85,8 85,20 L95,55 L85,130 L60,140 L40,140 L15,130 L5,55 Z"/>
-      <path class="piece piece-detail" d="M50,58 L45,96 M50,58 L55,96"/>
-      <path class="piece piece-solid" d="M50,20 L50,110 M44,20 L44,26 M56,20 L56,26 M44,104 L56,104 M44,110 L56,110"/>
-      <polygon class="notch" points="5,55 11,53 11,58"/>
-      <polygon class="notch" points="95,55 89,53 89,58"/>
+    <!-- Las cinco siluetas son copia literal de los iconos de los botones, más
+         abajo en este mismo archivo, y de las tarjetas de qr.html. Si algún día
+         se redibuja una, hay que moverla en los tres sitios.
+         El transform iguala el ÁREA que ocupaba la pieza a la que sustituye y
+         deja su centro donde estaba el de aquélla, para no descolocar el
+         reparto. Se iguala el área y no el ancho ni el alto porque las
+         proporciones no coinciden: con áreas iguales el peso visual se
+         mantiene, aunque la manga pase de estrecha y alta a ancha y baja.
+         Ojo: las clases .piece* de css/styles.css no llegan al clon que hace
+         <use>, así que lo que se ve es la silueta rellena en negro al 12-22 %
+         de opacidad que pone el propio <use>, no el contorno de tiza que
+         describe la hoja. Se deja igual que estaba: es el aspecto que tiene
+         la portada desde siempre. -->
+    <g id="pieza-falda" transform="translate(-9.2,14) scale(1.019)">
+      <path class="piece piece-outline" d="M46,12 C54,4 72,4 80,12 L116,90 C98,100 28,100 10,90 Z"/>
+      <path class="piece piece-detail" d="M57,16 L46,86 M69,16 L80,86"/>
     </g>
 
-    <g id="piece-sleeve">
-      <path class="piece piece-outline" d="M10,40 C10,15 40,5 60,5 C80,5 95,15 95,40 L85,45 L80,120 L25,120 L20,45 Z"/>
-      <path class="piece piece-solid" d="M55,18 L55,108 M49,18 L61,18 M49,108 L61,108"/>
-      <polygon class="notch" points="10,40 16,39 15,44"/>
-      <polygon class="notch" points="95,40 89,39 90,44"/>
+    <g id="pieza-cuerpo" transform="translate(-5.3,-6.1) scale(1.106)">
+      <path class="piece piece-outline" d="M8,32 L34,13 C40,25 60,25 66,13 L92,32 C84,46 80,58 80,72 C80,92 70,110 68,130 L32,130 C30,110 20,92 20,72 C20,58 16,46 8,32 Z"/>
     </g>
 
-    <g id="piece-skirt">
-      <path class="piece piece-outline" d="M35,10 C45,2 65,2 75,10 L95,130 L15,130 Z"/>
-      <path class="piece piece-solid" d="M55,24 L55,112 M49,24 L61,24 M49,112 L61,112"/>
-      <path class="piece piece-detail" d="M35,10 L15,130 M75,10 L95,130"/>
+    <g id="pieza-manga" transform="translate(-10.2,16.2) scale(0.784)">
+      <path class="piece piece-outline" d="M62,8 C70,26 90,26 98,8 L116,20 C136,46 152,72 158,104 L106,110 C104,84 102,60 102,46 C88,51 72,51 58,46 C58,60 56,84 54,110 L2,104 C8,72 24,46 44,20 Z"/>
     </g>
 
-    <g id="piece-pants">
+    <!-- El icono del pantalón es, letra por letra, el trazado que ya había
+         aquí. Esta pieza no cambia ni de forma ni de tamaño: solo pierde la
+         línea de hilo y los piquetes. Por eso no lleva transform ni --k. -->
+    <g id="pieza-pantalon">
       <path class="piece piece-outline" d="M20,5 L80,5 L88,20 L78,140 L55,140 L50,70 L45,140 L22,140 L12,20 Z"/>
-      <path class="piece piece-solid" d="M35,22 L35,60 M29,22 L41,22"/>
-      <polygon class="notch" points="12,20 18,20 15,25"/>
-      <polygon class="notch" points="88,20 82,20 85,25"/>
     </g>
 
-    <g id="piece-collar">
-      <path class="piece piece-outline" d="M10,60 C10,25 35,10 60,10 C85,10 100,25 100,60 L92,60 C92,32 78,20 60,20 C42,20 18,32 18,60 Z"/>
-      <circle class="notch" cx="60" cy="66" r="1.6"/>
-      <circle class="notch" cx="40" cy="63" r="1.6"/>
-      <circle class="notch" cx="80" cy="63" r="1.6"/>
+    <g id="pieza-panuelo" transform="translate(13.46,-2.74) scale(0.692)">
+      <path class="piece piece-outline" d="M60,8 L112,60 L60,112 L8,60 Z"/>
+      <circle class="piece piece-detail" cx="60" cy="60" r="17"/>
     </g>
   </defs>
 
-  <g opacity="0.22"><use href="#piece-bodice" transform="translate(90,60) rotate(-8) scale(1.3)"/></g>
-  <g opacity="0.16"><use href="#piece-sleeve" transform="translate(1180,40) rotate(12) scale(1.15)"/></g>
-  <g opacity="0.18"><use href="#piece-skirt" transform="translate(1250,420) rotate(-6) scale(1.4)"/></g>
-  <g opacity="0.15"><use href="#piece-pants" transform="translate(60,520) rotate(7) scale(1.2)"/></g>
-  <g opacity="0.20"><use href="#piece-collar" transform="translate(640,40) rotate(3) scale(1.1)"/></g>
-  <g opacity="0.13"><use href="#piece-bodice" transform="translate(1120,650) rotate(15) scale(0.9)"/></g>
-  <g opacity="0.14"><use href="#piece-sleeve" transform="translate(-20,300) rotate(-20) scale(1)"/></g>
-  <g opacity="0.12"><use href="#piece-pants" transform="translate(760,700) rotate(-10) scale(1.05)"/></g>
-  <g opacity="0.16"><use href="#piece-skirt" transform="translate(340,720) rotate(9) scale(0.85)"/></g>
+  <g opacity="0.22"><use href="#pieza-cuerpo" transform="translate(90,60) rotate(-8) scale(1.3)"/></g>
+  <g opacity="0.16"><use href="#pieza-manga" transform="translate(1180,40) rotate(12) scale(1.15)"/></g>
+  <g opacity="0.18"><use href="#pieza-falda" transform="translate(1250,420) rotate(-6) scale(1.4)"/></g>
+  <g opacity="0.15"><use href="#pieza-pantalon" transform="translate(60,520) rotate(7) scale(1.2)"/></g>
+  <g opacity="0.20"><use href="#pieza-panuelo" transform="translate(640,40) rotate(3) scale(1.1)"/></g>
+  <g opacity="0.13"><use href="#pieza-cuerpo" transform="translate(1120,650) rotate(15) scale(0.9)"/></g>
+  <g opacity="0.14"><use href="#pieza-manga" transform="translate(-20,300) rotate(-20) scale(1)"/></g>
+  <g opacity="0.12"><use href="#pieza-pantalon" transform="translate(760,700) rotate(-10) scale(1.05)"/></g>
+  <g opacity="0.16"><use href="#pieza-falda" transform="translate(340,720) rotate(9) scale(0.85)"/></g>
 </svg>
 
 <!-- El desfile: segunda capa de fondo, encima del tapiz y por debajo del
