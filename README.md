@@ -15,7 +15,7 @@ Desde la portada, cada botón despliega su calculadora en una ventana modal.
 Cada herramienta es también una página autónoma, así que se puede abrir suelta
 si solo te interesa una.
 
-Aparte de las cinco, hay un sexto botón, **Ficha de medidas**, que no traza
+Aparte de las cinco, hay un sexto botón, **Fichas de medidas**, que no traza
 nada: abre las hojas en blanco donde se anotan las medidas del cliente, para
 descargarlas e imprimirlas.
 
@@ -32,7 +32,7 @@ descargarlas e imprimirlas.
 ## Las fichas de toma de medidas
 
 En `toma_medidas/` están las hojas en blanco donde se anotan las medidas del
-cliente, en PDF y listas para imprimir en A4. El botón **Ficha de medidas** de
+cliente, en PDF y listas para imprimir en A4. El botón **Fichas de medidas** de
 la portada las ofrece todas para descargar.
 
 | ficha | qué pide |

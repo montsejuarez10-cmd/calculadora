@@ -436,6 +436,10 @@
      que no ha cargado. El filete de puntos toma el color de la opción, que es
      lo único que queda para llevarlo. */
   .tag-btn-ficha{
+    /* Papel distinto, el mismo tono que llevan las filas de descarga dentro de
+       su ventana: el boton y lo que abre comparten hoja. Es tambien lo que lo
+       separa de las cinco herramientas ademas del hueco. */
+    background:var(--paper-2);
     justify-content:center;
     text-align:center;
     padding-left:1.4rem;
@@ -444,6 +448,7 @@
        distancia que la que hay entre botones. */
     margin-left:1.4rem;
   }
+  .tag-btn-ficha:hover{ background:#F0E3C4; }
   .tag-btn-ficha::before{
     border-color:var(--color-opcion, var(--paper-edge));
   }
