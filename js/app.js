@@ -18,7 +18,7 @@
     // algún día se añade una ficha a toma_medidas/, hay que añadirla aquí.
     "6": {
       slug: "fichas",
-      titulo: "Fichas toma de medidas",
+      titulo: "Fichas de toma de medidas",
       desc: "Las hojas en blanco donde se anotan las medidas del cliente. Descárgalas e imprímelas en A4.",
       color: "#4a4a4a",
       descargas: [
