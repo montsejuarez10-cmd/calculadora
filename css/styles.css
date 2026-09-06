@@ -108,6 +108,17 @@
     position:relative;
     z-index:1;
     flex:1 0 auto;
+    /* Sin esto, el min-width:auto de este hijo flexible vale el ancho minimo de
+       su contenido, y la rejilla de botones -seis columnas de 168px- lo estiraba
+       a 1144px dentro de una ventana de 390: body lo recorta con su
+       overflow-x:hidden y los botones se salian de la pantalla sin dar la cara.
+       Con 0, main nunca es mas ancho que la ventana y la rejilla cuenta sus
+       columnas contra el ancho que hay de verdad.
+       Y width:100% porque con margin:0 auto main no se estira: se dimensiona
+       por su contenido, y sin un ancho definido volveria a medir lo que mida la
+       rejilla. Los dos hacen falta; ninguno solo. */
+    min-width:0;
+    width:100%;
     max-width:76rem;
     margin:0 auto;
     /* El margen de arriba se encoge con la ventana: en pantallas cortas la
@@ -157,16 +168,26 @@
     text-wrap:balance;
   }
 
+  /* Rejilla y no fila flexible: con columnas de ancho fijo, todas las filas
+     usan las mismas, asi que al partirse los botones quedan alineados en
+     vertical y en horizontal con el mismo hueco en los dos ejes. Centrada, una
+     fila flexible centra cada renglon por su cuenta y las columnas no se
+     corresponden: a 900px la primera empezaba en x=88 y la segunda en x=262. */
   .options{
-    display:flex;
-    flex-wrap:wrap;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, 10.5rem);
     justify-content:center;
     gap:1.1rem;
     width:100%;
+    /* main es una columna flexible, y sin esto el min-width:auto de este hijo
+       vale el ancho minimo de la rejilla -las seis columnas, 1096px- y se
+       desborda en vez de encogerse: auto-fit calculaba siempre seis columnas,
+       tambien a 390px. Con 0 puede encoger y el numero de columnas sale del
+       ancho que hay de verdad. */
+    min-width:0;
     /* 73rem y no 64: es todo el ancho de contenido que deja main (76rem menos
        sus 1,5rem de relleno a cada lado), y hace falta entero para que los seis
-       botones entren en una sola línea. Por debajo de eso la fila se parte
-       sola, que es lo que tiene que pasar. */
+       botones entren en una sola linea. */
     max-width:73rem;
     margin:0 0 3rem;
   }
@@ -184,6 +205,11 @@
     /* 10,5rem: el boton mas ancho por contenido es Pantalon, que pide 10,17rem,
        asi que a esta medida ninguno aprieta y los seis van iguales. */
     min-width:10.5rem;
+    /* El alto salia por accidente: 2,5rem del disco del icono mas 1rem de
+       relleno arriba y otro abajo. Escrito aqui, el boton de las fichas -que no
+       lleva disco- mide lo mismo este donde este, y no depende de que un vecino
+       mas alto lo estire: solo en su fila se quedaba en 68px frente a 72. */
+    min-height:4.5rem;
     cursor:pointer;
     font-family:var(--font-body);
     text-align:left;
@@ -443,12 +469,23 @@
     justify-content:center;
     text-align:center;
     padding-left:1.4rem;
-    /* La separación que lo distingue de las cinco herramientas. El margen se
-       suma al hueco de 1,1rem de la rejilla, así que queda al doble y algo de
-       distancia que la que hay entre botones. */
-    margin-left:1.4rem;
   }
   .tag-btn-ficha:hover{ background:#F0E3C4; }
+
+  /* Con sitio de sobra para los seis en un renglon, la fila vuelve a ser
+     flexible y la ficha recupera su hueco mayor: 40px hasta el Panuelo frente a
+     los 17,6 de los demas. Ese margen dentro de la rejilla correria una columna
+     y romperia la alineacion, por eso las dos cosas van juntas aqui.
+     74rem y no otro numero: los seis en una linea piden 6x168 + 4x17,6 + 40 =
+     1118,4px, mas los 48 de relleno de main son 1166,4. A 1184 quedan 17,6 de
+     holgura -justo un hueco de mas- para que el cambio de modo no coincida con
+     el punto en que la fila se parte y no quede una franja de anchuras con el
+     margen puesto y las columnas ya rotas. En rem a proposito: si se agranda la
+     letra del navegador, el umbral crece con los botones. */
+  @media (min-width: 74rem){
+    .options{ display:flex; flex-wrap:wrap; }
+    .tag-btn-ficha{ margin-left:1.4rem; }
+  }
   .tag-btn-ficha::before{
     border-color:var(--color-opcion, var(--paper-edge));
   }
