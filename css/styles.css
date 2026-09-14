@@ -117,17 +117,15 @@
     text-align:center;
   }
 
-  /* El aviso, abajo a la derecha. Sin caja: fondo transparente y texto blanco.
-     Comparte la columna de main -76rem y el mismo relleno lateral- para que su
-     borde derecho caiga a plomo con el del contenido, no contra el filo de la
-     ventana. */
+  /* El aviso, en la esquina de abajo a la derecha. Ya no sigue la columna de
+     main: se pega al filo de la ventana con el mismo relleno de 1,5rem que usa
+     el resto de la pagina, que es lo mas a la derecha que puede ir sin quedar
+     descolgado del margen comun. */
   .aviso{
     position:relative;
     z-index:1;
     width:100%;
-    max-width:76rem;
-    margin:0 auto;
-    padding:0 1.5rem 1.6rem;
+    padding:0 1.5rem 1.5rem;
     display:flex;
     justify-content:flex-end;
   }
@@ -139,10 +137,20 @@
     font-size:0.76rem;
     line-height:1.55;
     color:#fff;
-    /* La sombra no es adorno: el aviso cae sobre el desfile, donde el publico
-       es bastante mas claro que el tapiz, y sin ella el blanco se perderia
-       justo en las figuras. Con fondo transparente es lo unico que separa el
-       texto de lo que tiene detras. */
+    /* Blanco muy diluido: la caja tiene que leerse como caja sobre el tapiz
+       pero sin llegar a ser clara, porque el texto tambien es blanco. Al 14 %
+       sobre el verde queda un panel apenas insinuado y el contraste del texto
+       no baja de 7:1 contra el. El radio es el de los botones. */
+    background:rgba(255,255,255,0.14);
+    /* El filo no es adorno: donde por detras pasa una figura del publico, que es
+       mas clara que el tapiz, el relleno al 14 % se funde con ella y la caja
+       deja de leerse como caja. La linea la sostiene siempre. */
+    border:1px solid rgba(255,255,255,0.3);
+    border-radius:10px;
+    padding:0.7rem 0.95rem;
+    /* La sombra sigue haciendo falta: por debajo del panel pasan las figuras
+       del desfile, bastante mas claras que el tapiz, y es lo que evita que el
+       blanco se pierda justo encima de ellas. */
     text-shadow:0 1px 3px rgba(0,0,0,0.7);
   }
   @media (max-width: 30rem){
