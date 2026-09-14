@@ -117,6 +117,41 @@
     text-align:center;
   }
 
+  /* El aviso, abajo a la derecha. Sin caja: fondo transparente y texto blanco.
+     Comparte la columna de main -76rem y el mismo relleno lateral- para que su
+     borde derecho caiga a plomo con el del contenido, no contra el filo de la
+     ventana. */
+  .aviso{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:76rem;
+    margin:0 auto;
+    padding:0 1.5rem 1.6rem;
+    display:flex;
+    justify-content:flex-end;
+  }
+  .aviso p{
+    margin:0;
+    max-width:31rem;
+    text-align:right;
+    text-wrap:pretty;
+    font-size:0.76rem;
+    line-height:1.55;
+    color:#fff;
+    /* La sombra no es adorno: el aviso cae sobre el desfile, donde el publico
+       es bastante mas claro que el tapiz, y sin ella el blanco se perderia
+       justo en las figuras. Con fondo transparente es lo unico que separa el
+       texto de lo que tiene detras. */
+    text-shadow:0 1px 3px rgba(0,0,0,0.7);
+  }
+  @media (max-width: 30rem){
+    /* En el movil la linea es demasiado corta para alinear a la derecha sin que
+       quede desflecada: se centra y se deja a todo el ancho. */
+    .aviso{ justify-content:center; }
+    .aviso p{ text-align:center; }
+  }
+
   .eyebrow{
     font-family:var(--font-detalle);
     font-size:0.95rem;
