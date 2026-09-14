@@ -317,30 +317,23 @@
       // hasta la cintura, y desde ahí el largo de cada capa.
       const enDiag = (d) => ({ x: d / RAIZ2, y: d / RAIZ2 });
 
-      // El radio, del centro al arco. El rótulo va pegado a la cota, a 13 de
-      // ella: medio trazo son 3,5 y media X a cuerpo 18 son 6,3, así que
-      // quedan unas tres unidades de aire. Se aparta hacia el hueco de arriba
-      // a la derecha, el que queda entre la bisectriz y la línea horizontal.
+      // El radio, del centro al arco. El rótulo va en el punto medio de la
+      // cota y pegado a ella, a 13: medio trazo son 3,5 y media X a cuerpo 18
+      // son 6,3, así que quedan unas tres unidades de aire. Se aparta en
+      // perpendicular hacia el hueco de arriba a la derecha, el que queda entre
+      // la bisectriz y la línea horizontal.
       //
-      // Su sitio natural es el punto medio de la cota, pero ahí no cabe: por
-      // esa esquina sube el rótulo girado de la línea de referencia, que ocupa
-      // la banda x=[14, 40] de arriba abajo del plano, y el punto medio cae
-      // dentro. Medido, es lo que hace fallar la prueba "ningún texto del plano
-      // se pisa con otro". Así que, si el rótulo cae en la banda, se desliza A
-      // LO LARGO de la cota —no apartándolo más— hasta librarla: sigue a 13 del
-      // trazo, que es lo que se ve, y solo se corre hacia el arco. Con la
-      // cintura grande el desplazamiento es casi nulo y queda en el medio; con
-      // la cintura al mínimo se va a unos dos tercios.
+      // Cabe en el medio porque el rótulo de la línea de referencia va por
+      // FUERA de la pieza, a la izquierda de su línea. Dentro subía por esta
+      // esquina y obligaba a correr la X hacia el arco.
       //
       // Solo la letra: la cifra va en la leyenda y en el informe, y aquí dentro
       // del hueco de la cintura no cabe sin montarse sobre el arco.
       const SEPARA_ROTULO = 13;   // del trazo de la cota al centro de la letra
-      const LIBRA_BANDA = 49;     // 40,3 de banda + 7,3 de media X + aire
       const medioRadio = enDiag(r / 2);
       const aparta = SEPARA_ROTULO / RAIZ2;
-      const xBase = medioRadio.x + aparta;
-      const xRotulo = Math.max(xBase, LIBRA_BANDA);
-      const yRotulo = medioRadio.y - aparta + (xRotulo - xBase);
+      const xRotulo = medioRadio.x + aparta;
+      const yRotulo = medioRadio.y - aparta;
       const cotaRadio =
         `<line x1="0" y1="0" x2="${enDiag(r).x.toFixed(2)}" y2="${enDiag(r).y.toFixed(2)}" class="cota-radio" />`
         + `<text x="${xRotulo.toFixed(2)}" y="${yRotulo.toFixed(2)}"`
@@ -433,7 +426,7 @@
           ${cotaRadio}
           ${capas.map(marcaCapa).join('\n          ')}
           <circle cx="0" cy="0" r="4.5" class="punto-ref" />
-          ${girado(14, L - 14, 'Línea de referencia', true)}
+          ${girado(-14, L - 14, 'Línea de referencia', false)}
           ${cinturilla}
           ${ficha}
         </g>
