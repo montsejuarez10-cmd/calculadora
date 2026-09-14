@@ -79,10 +79,12 @@ h1 { margin: 0 0 4px; font-size: 21px; font-family: 'Fraunces', Georgia, serif; 
 .control-group { display: flex; flex-direction: column; gap: 5px; }
 
 /* Con muchas medidas la columna de mandos se hace tan alta que la herramienta
-   ya no cabe en el modal y aparece barra de desplazamiento. La usa el pantalón,
-   que tiene once; las demás, con cuatro o nueve, siguen en una sola columna.
-   Se le da algo más de sitio a costa del visor: el trazado del pantalón es casi
-   cuadrado y no lo echa de menos. */
+   ya no cabe en el modal y aparece barra de desplazamiento. La usan el
+   pantalón, que tiene once, y el cuerpo, que con nueve medía 713px frente a los
+   unos 600 de las demás y era la única con barra en pantallas medianas; con dos
+   columnas baja a 594. Las otras, con cuatro, siguen en una sola columna.
+   Se le da algo más de sitio a costa del visor: los dos trazados van sobrados
+   de ancho y no lo echan de menos. */
 .controles.dos-columnas {
   flex: 2;
   display: grid;
