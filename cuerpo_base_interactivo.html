@@ -236,7 +236,16 @@
       // al punto de axila. Sin este cm de holgura el hombro se sale del cuarto
       // y la sisa sale hacia fuera y vuelve.
       if (medioAnchoEsp + SALIENTE_HOMBRO + 1 > anchoCuarto) {
-        return fallar('El ancho de espalda no deja sitio para el hombro y la sisa dentro del cuarto de pecho. Baja el ancho de espalda o sube el contorno de pecho.');
+        // El aviso da las dos salidas con su cifra, ya redondeadas al paso de
+        // los deslizadores (1 cm): el pecho mínimo para esta espalda y la
+        // espalda máxima para este pecho. Salen de despejar la condición.
+        const libre = SALIENTE_HOMBRO + 1;
+        const pechoMin = Math.ceil(4 * (medioAnchoEsp + libre) - HOLGURA_PECHO - 1e-9);
+        const espaldaMax = Math.floor(2 * (anchoCuarto - libre) + 1e-9);
+        return fallar('Con ' + cmAnchoEsp + ' cm de ancho de espalda no caben el hombro y la sisa: '
+          + 'el contorno de pecho tiene que ser de ' + pechoMin + ' cm o más. '
+          + 'Si prefieres mantener ' + cmPecho + ' cm de pecho, baja el ancho de espalda a '
+          + espaldaMax + ' cm o menos.');
       }
       if (cmAltPecho >= cmTalleDel) {
         return fallar('La altura de pecho tiene que quedar por encima de la cintura: baja la altura o sube el largo de talle delantero.');
