@@ -1,11 +1,16 @@
-﻿  // Las opciones del menú. Cada una trae su título, su descripción, lo que abre
+﻿  // Los cuatro patrones base comparten subtitulo a proposito, asi que va en una
+  // constante: cuatro copias de la misma frase acaban desincronizandose sin que
+  // nadie se entere. El panuelo y las fichas traen la suya, que no es esta.
+  var DESC_BASE = "Trazado orientativo del resultado final del patrón base según tus medidas.";
+
+  // Las opciones del menú. Cada una trae su título, su descripción, lo que abre
   // —una herramienta embebida o una lista de descargas— y el color con el que
   // se tiñen su botón y su ventana.
   var OPCIONES = {
-    "1": { slug: "falda", titulo: "Falda Base", desc: "Trazado técnico interactivo de la silueta completa (delantero y trasero), con la regla 50-32-18.", embebido: "falda_base_interactivo.html", color: "#ec5151" },
-    "2": { slug: "cuerpo", titulo: "Cuerpo Base", desc: "Trazado del bloque delantero y espalda resolviendo el ajuste a la prominencia del pecho y el reparto 25-40-35 a la cintura.", embebido: "cuerpo_base_interactivo.html", color: "#f27b2c" },
-    "3": { slug: "manga", titulo: "Manga Base", desc: "Trazado proporcional de la copa y de la forma de la manga, sacado del recorrido de las dos sisas del cuerpo base.", embebido: "manga_base_interactivo.html", color: "#ffa875" },
-    "4": { slug: "pantalon", titulo: "Pantalón Base", desc: "Trazado del delantero y la espalda sobre el rectángulo de cuarto de cadera, con el avance de tiro sacado de la cadera y el reparto de la cintura en costados y pinzas según el tipo de glúteos.", embebido: "pantalon_base_interactivo.html", color: "#90aada" },
+    "1": { slug: "falda", titulo: "Falda Base", desc: DESC_BASE, embebido: "falda_base_interactivo.html", color: "#ec5151" },
+    "2": { slug: "cuerpo", titulo: "Cuerpo Base", desc: DESC_BASE, embebido: "cuerpo_base_interactivo.html", color: "#f27b2c" },
+    "3": { slug: "manga", titulo: "Manga Base", desc: DESC_BASE, embebido: "manga_base_interactivo.html", color: "#ffa875" },
+    "4": { slug: "pantalon", titulo: "Pantalón Base", desc: DESC_BASE, embebido: "pantalon_base_interactivo.html", color: "#90aada" },
     "5": { slug: "panuelo", titulo: "Falda Pañuelo", desc: "Trazado del cuarto de falda a partir del radio de cintura, con una capa por cada largo que quieras superponer.", embebido: "falda_panuelo_interactivo.html", color: "#488164" },
 
     // La sexta no lleva herramienta: en vez de embeber un trazador, ofrece las
