@@ -126,7 +126,9 @@ cada pieza, dibujado en el taller, con su línea de hilo, sus pinzas y sus
 líneas de cintura, cadera, bíceps y rodilla. En el fondo de la portada van
 enteros, como piezas repartidas sobre la mesa de corte; en los botones y en la
 hoja de códigos va solo el contorno, porque a 33 píxeles de alto las líneas de
-construcción caen por debajo del píxel y lo único que aportan es suciedad.
+construcción caen por debajo del píxel y lo único que aportan es suciedad. El
+del pantalón va además cortado por la línea de rodilla: entero mide 1:3,4 de
+ancho por alto y a ese tamaño se quedaba en una tira de 10 píxeles.
 
 No hay framework por una razón concreta: un framework trae un paso de
 compilación, y un paso de compilación rompe lo que más importa aquí, que es

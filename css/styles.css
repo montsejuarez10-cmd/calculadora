@@ -236,12 +236,12 @@
     flex-shrink:0;
   }
 
-  /* Cada pieza tiene su caja porque sus proporciones van de 1:1 en el pañuelo a
-     1:3,4 en el pantalón, y una caja única las dejaría irreconocibles: con el
-     alto de las demás, el pantalón se quedaba en 9,6 px de ancho y el pañuelo
-     desbordaba el disco. Así que manda el alto, con dos excepciones: el
-     pantalón, que es una tira y se le da algo más para que gane ancho, y el
-     pañuelo, que es cuadrado y se limita por el ancho. */
+  /* Cada pieza tiene su caja porque sus proporciones no coinciden y una caja
+     única las dejaría irreconocibles. Manda el alto, con una excepción: el
+     pañuelo es cuadrado y se limita por el ancho, que si no desbordaría el
+     disco. El pantalón medía 1:3,4 y con el alto de los demás se quedaba en
+     9,6 px: su icono va recortado por la rodilla, y así entra en la misma
+     proporción que el cuerpo y la manga sin necesitar excepción. */
   .tag-icon{
     overflow:visible;
     /* Tinta y no blanco: sobre el disco de color gana en las cinco opciones
@@ -261,7 +261,7 @@
   [data-opcion="1"] .tag-icon{ width:1.27rem;  height:2.06rem; }
   [data-opcion="2"] .tag-icon{ width:1.055rem; height:2.06rem; }
   [data-opcion="3"] .tag-icon{ width:1.025rem; height:2.06rem; }
-  [data-opcion="4"] .tag-icon{ width:0.665rem; height:2.25rem; }
+  [data-opcion="4"] .tag-icon{ width:1.08rem;  height:2.06rem; }
   [data-opcion="5"] .tag-icon{ width:1.45rem;  height:1.45rem;  }
 
   .tag-label{
