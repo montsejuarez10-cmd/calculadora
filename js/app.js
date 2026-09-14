@@ -28,10 +28,10 @@
       color: "#4a4a4a",
       descargas: [
         { archivo: "toma_medidas/general.pdf",  nombre: "General",  detalle: "Todas las medidas", peso: "520 KB" },
-        { archivo: "toma_medidas/falda.pdf",    nombre: "Falda",    detalle: "Medidas específicas para el desarrollo de falda", peso: "516 KB" },
-        { archivo: "toma_medidas/cuerpo.pdf",   nombre: "Cuerpo",   detalle: "Medidas específicas para el desarrollo de cuerpo", peso: "518 KB" },
-        { archivo: "toma_medidas/vestido.pdf",  nombre: "Vestido",  detalle: "Medidas específicas para el desarrollo de vestido", peso: "519 KB" },
-        { archivo: "toma_medidas/pantalon.pdf", nombre: "Pantalón", detalle: "Medidas específicas para el desarrollo de pantalón", peso: "517 KB" },
+        { archivo: "toma_medidas/falda.pdf",    nombre: "Falda",    detalle: "Medidas específicas para el desarrollo de la falda", peso: "516 KB" },
+        { archivo: "toma_medidas/cuerpo.pdf",   nombre: "Cuerpo",   detalle: "Medidas específicas para el desarrollo del cuerpo", peso: "518 KB" },
+        { archivo: "toma_medidas/vestido.pdf",  nombre: "Vestido",  detalle: "Medidas específicas para el desarrollo del vestido", peso: "519 KB" },
+        { archivo: "toma_medidas/pantalon.pdf", nombre: "Pantalón", detalle: "Medidas específicas para el desarrollo del pantalón", peso: "517 KB" },
         { archivo: "toma_medidas/completo.pdf", nombre: "Las cinco juntas", detalle: "El cuaderno entero, para imprimirlo de una vez", peso: "546 KB" }
       ]
     }
