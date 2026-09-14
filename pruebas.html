@@ -323,6 +323,20 @@ function probarFalda(marco) {
       var mitades = r['del. y esp.'].split('+').map(num);
       t.ok('La cadera se reparte igual entre las dos piezas',
         cerca(mitades[0], mitades[1]), ctx + ' -> ' + r['del. y esp.']);
+      // Con la falda corta los rótulos girados son más altos que la pieza: no
+      // pueden subir hasta la cintura. La cintura delantera baja 8 unidades en
+      // el centro, así que se exige ese margen a los cuatro.
+      ['gDelantero', 'gEspalda'].forEach(function (id) {
+        var g = d.getElementById(id);
+        var guia = g.querySelector('rect.linea-guia');
+        var caja = guia.getBoundingClientRect();
+        var k = caja.height / parseFloat(guia.getAttribute('height'));
+        rotulos(g).forEach(function (rot) {
+          t.ok('Los rótulos no suben hasta la cintura',
+            rot.getBoundingClientRect().top >= caja.top + 8 * k,
+            ctx + ' -> ' + rot.textContent);
+        });
+      });
     }
   });
   return res;

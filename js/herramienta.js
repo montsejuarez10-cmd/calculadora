@@ -527,12 +527,14 @@ var Herramienta = (function () {
   //   haciaDerecha = false  -> hacia la IZQUIERDA
   //
   // x,y es el punto de anclaje, ya separado de la línea lo que se quiera.
-  // opciones: { clase, centrado } — 'centrado' reparte el texto a lo alto en
-  // vez de arrancarlo en y.
+  // opciones: { clase, centrado, cuerpo } — 'centrado' reparte el texto a lo
+  // alto en vez de arrancarlo en y; 'cuerpo' fija el tamaño de letra en px
+  // cuando el de la clase no cabe.
   function girado(x, y, texto, haciaDerecha, opciones) {
     var o = opciones || {};
     var px = x.toFixed(2), py = y.toFixed(2);
     return '<text x="' + px + '" y="' + py + '" class="' + (o.clase || 'texto') + '"'
+      + (o.cuerpo ? ' style="font-size:' + o.cuerpo.toFixed(2) + 'px"' : '')
       + ' dominant-baseline="' + (haciaDerecha ? 'text-before-edge' : 'text-after-edge') + '"'
       + (o.centrado ? ' text-anchor="middle"' : '')
       + ' transform="rotate(-90, ' + px + ', ' + py + ')">' + texto + '</text>';

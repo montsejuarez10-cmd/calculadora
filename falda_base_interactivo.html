@@ -59,9 +59,9 @@
       <div class="control-group">
         <div class="fila-medida">
           <label for="inLargo">Largo Deseado:</label>
-          <span class="valores"><input type="number" id="numLargo" class="num" min="40" max="90" step="1" value="40"> cm</span>
+          <span class="valores"><input type="number" id="numLargo" class="num" min="30" max="90" step="1" value="40"> cm</span>
         </div>
-        <input type="range" id="inLargo" min="40" max="90" value="40">
+        <input type="range" id="inLargo" min="30" max="90" value="40">
       </div>
       <!-- INFORME MATEMÁTICO -->
       <div class="reporte-tecnico">
@@ -302,6 +302,14 @@
       const girado = Herramienta.girado;
       const hueco = Herramienta.huecoRotulo(wCaderaPx);
       const yRotulo = hLargoPx - 15;
+      // Con la falda corta, "Centro Delantero" es más alto que la pieza y se
+      // monta sobre la cintura. Entonces los cuatro rótulos bajan de cuerpo, lo
+      // mismo todos para que sigan pareciendo iguales. La letra es Courier:
+      // cada carácter mide 0,6 del cuerpo. A 18px caben a partir de unos 35 cm.
+      const CUERPO_ROTULO = 18, AIRE_CINTURA = 10;
+      const sitioRotulo = yRotulo - yCinturaDel - AIRE_CINTURA;
+      const cuerpoRotulo = Math.min(CUERPO_ROTULO, sitioRotulo / ('Centro Delantero'.length * 0.6));
+      const opcRotulo = cuerpoRotulo < CUERPO_ROTULO ? { cuerpo: cuerpoRotulo } : undefined;
 
       // El resumen bajo cada pieza —un cuadrado con la trama de la pinza y su
       // tamaño— lo dibuja Herramienta.leyenda, igual en las cuatro.
@@ -341,8 +349,8 @@
           ${pxPDel1 > 0 ? trama('pts-principal', pinza(ejeDel1, pxPDel1, lenPDel1, yPDel1)) : ''}
           ${pxPDel2 > 0 ? trama('pts-secundaria', pinza(ejeDel2, pxPDel2, lenPDel2, yPDel2)) : ''}
           <path d="${pathDelantero}" class="silueta-patron" />
-          ${girado(hueco, yRotulo, 'Centro Delantero', true)}
-          ${girado(wCaderaPx - hueco, yRotulo, 'Costado', false)}
+          ${girado(hueco, yRotulo, 'Centro Delantero', true, opcRotulo)}
+          ${girado(wCaderaPx - hueco, yRotulo, 'Costado', false, opcRotulo)}
           ${leyenda(entradasDel)}
         </g>
       `;
@@ -383,8 +391,8 @@
             ${pxPEsp2 > 0 ? trama('pts-secundaria', pinza(ejeEsp2, pxPEsp2, lenPEsp2, yPEsp2)) : ''}
             <path d="${pathEspalda}" class="silueta-patron" />
           </g>
-          ${girado(hueco, yRotulo, 'Costado', true)}
-          ${girado(wCaderaPx - hueco, yRotulo, 'Centro Espalda', false)}
+          ${girado(hueco, yRotulo, 'Costado', true, opcRotulo)}
+          ${girado(wCaderaPx - hueco, yRotulo, 'Centro Espalda', false, opcRotulo)}
           ${leyenda(entradasEsp)}
         </g>
       `;
