@@ -127,9 +127,11 @@
           /* Las capas de dentro no son la silueta de la pieza: son el contorno
              de otra falda que se superpone, y van sin relleno. */
           .capa-interior { stroke: #2c3e50; stroke-width: 2; stroke-linejoin: round; fill: none; }
-          /* El radio de cintura y el arco que traza: es lo único que hay que
-             calcular, así que van en naranja para que se localicen de un
-             vistazo sobre un plano que es todo azul pizarra.
+          /* El radio de cintura es lo único que hay que calcular, así que va en
+             naranja para que se localice de un vistazo sobre un plano que es
+             todo azul pizarra. El arco que traza no se resalta: ya lo dibuja
+             el contorno de la pieza, y repintado encima tapaba el borde de la
+             cintura con un trazo de 7 que no era el de la silueta.
 
              El trazo va de naranja puro. Eso lo deja en 2,5:1 sobre el lienzo,
              por debajo del 3:1 que se le pide a un gráfico —sobre un fondo casi
@@ -210,7 +212,7 @@
     // lomo teniendo en cuenta la costura del centro espalda."
     const COSTURA_CE = 2;
 
-    // El mismo naranja que el CSS: la muestra de la ficha y el trazo del arco
+    // El mismo naranja que el CSS: la muestra de la ficha y la cota del radio
     // tienen que ir del mismo color, y desde JS no se puede pintar con una
     // variable CSS dentro de un atributo fill.
     const NARANJA = "#f57f00";
@@ -291,8 +293,6 @@
       const L = u(fuera.lado);
       const MARGEN_GUIA = 18;   // lo que las líneas de referencia rebasan la pieza
 
-      // El cuarto de círculo de la cintura, del eje vertical al horizontal.
-      const arco = (rr) => `M 0,${rr.toFixed(2)} A ${rr.toFixed(2)},${rr.toFixed(2)} 0 0 0 ${rr.toFixed(2)},0`;
 
       // La pieza: cuadrado menos el cuarto de círculo. Se recorre desde el
       // arranque del arco para que el contorno salga en un solo trazo cerrado.
@@ -412,7 +412,6 @@
           <line x1="0" y1="0" x2="${(dx + MARGEN_GUIA).toFixed(2)}" y2="${(dx + MARGEN_GUIA).toFixed(2)}" class="bisectriz" />
           <path d="${pieza(L)}" class="silueta-patron" />
           ${capas.slice(1).map(c => `<path d="${pieza(u(c.lado))}" class="capa-interior" />`).join('\n          ')}
-          <path d="${arco(r)}" class="cota-radio" />
           ${cotaRadio}
           ${capas.map(marcaCapa).join('\n          ')}
           <circle cx="0" cy="0" r="4.5" class="punto-ref" />
