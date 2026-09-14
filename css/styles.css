@@ -57,25 +57,10 @@
       repeating-linear-gradient(45deg, rgba(239,230,211,0.035) 0 1px, transparent 1px 22px),
       radial-gradient(ellipse at 50% -10%, rgba(233,213,157,0.10), transparent 55%);
     background-attachment:fixed;	
-  }
-  .mat-illustrations .piece{
-    fill:none;
-    stroke:var(--chalk);
-  }
-  .mat-illustrations .piece-outline{
-    stroke-width:1.4;
-    stroke-dasharray:6 5;
-  }
-  .mat-illustrations .piece-detail{
-    stroke-width:1;
-    stroke-dasharray:2 4;
-  }
-  .mat-illustrations .piece-solid{
-    stroke-width:1.2;
-  }
-  .mat-illustrations .notch{
-    fill:var(--chalk);
-    stroke:none;
+    /* La tinta de las piezas del tapiz. Va aqui y no en cada trazado
+       porque estos declaran stroke="currentColor", que es lo unico que
+       atraviesa el clon de <use>: las reglas CSS no llegan a el. */
+    color:var(--chalk);
   }
 
   /* El desfile va en la misma capa que el tapiz (z-index 0) pero despues en el
@@ -251,28 +236,33 @@
     flex-shrink:0;
   }
 
-  /* El icono ocupa el 65 % del ancho del disco y el 82 % del alto. Ninguno de
-     los cinco llena las esquinas de su caja —los dos más altos, cuerpo y
-     pantalón, se quedan a 1,04rem del centro con 1,25 de radio—, así que hay
-     aire de sobra. */
+  /* Cada pieza tiene su caja porque sus proporciones van de 1:1 en el pañuelo a
+     1:3,4 en el pantalón, y una caja única las dejaría irreconocibles: con el
+     alto de las demás, el pantalón se quedaba en 9,6 px de ancho y el pañuelo
+     desbordaba el disco. Así que manda el alto, con dos excepciones: el
+     pantalón, que es una tira y se le da algo más para que gane ancho, y el
+     pañuelo, que es cuadrado y se limita por el ancho. */
   .tag-icon{
-    width:1.62rem;
-    height:2.04rem;
     overflow:visible;
-  }
-  /* Tinta y no blanco: sobre el disco de color gana en las cinco opciones
-     (4,6 la falda, 6,0 el cuerpo, 8,7 la manga, 7,0 el pantalón y 4,1 el rosa
-     de la paleta, frente a 3,6 / 2,7 / 1,9 / 2,3 / 4,0 en blanco). En los tonos
-     claros el trazo blanco casi desaparecía. Uniforme a propósito: mezclar
-     iconos claros y oscuros en la misma fila se vería como un descuido. */
-  .tag-icon path,
-  .tag-icon circle{
+    /* Tinta y no blanco: sobre el disco de color gana en las cinco opciones
+       (4,6 la falda, 6,0 el cuerpo, 8,7 la manga, 7,0 el pantalón y 4,1 el rosa
+       de la paleta, frente a 3,6 / 2,7 / 1,9 / 2,3 / 4,0 en blanco). En los
+       tonos claros el trazo blanco casi desaparecía. */
+    color:var(--ink);
     fill:none;
-    stroke:var(--ink);
-    stroke-width:6;
+    stroke:currentColor;
+    /* El grosor lo pone cada icono en su atributo style, porque el título de la
+       ventana modal clona este SVG y le quita la clase: lo que se declare aquí
+       no llega al clon, pero --trazo sí, y allí se multiplica. */
+    stroke-width:var(--trazo, 6);
     stroke-linejoin:round;
     stroke-linecap:round;
   }
+  [data-opcion="1"] .tag-icon{ width:1.27rem;  height:2.06rem; }
+  [data-opcion="2"] .tag-icon{ width:1.055rem; height:2.06rem; }
+  [data-opcion="3"] .tag-icon{ width:1.025rem; height:2.06rem; }
+  [data-opcion="4"] .tag-icon{ width:0.665rem; height:2.25rem; }
+  [data-opcion="5"] .tag-icon{ width:1.45rem;  height:1.45rem;  }
 
   .tag-label{
     font-weight:600;
@@ -435,19 +425,17 @@
     height:1em;
     width:auto;
     overflow:visible;
-  }
-  /* Trazo más grueso que en el botón (6): ahí el icono va en blanco sobre el
-     disco y a 1,45rem, aquí compite con una Fraunces de 700 y a 6 se veía
-     escuálido al lado del título. */
-  .titulo-icono svg path,
-  .titulo-icono svg circle{
     fill:none;
     stroke:var(--color-opcion, var(--ink));
-    stroke-width:11;
+    /* Un 80 % más grueso que en el botón: allí el icono va sobre el disco de
+       color y aquí compite con una Fraunces de 700, donde el mismo trazo se
+       veía escuálido al lado del título. Se multiplica en vez de fijarse
+       porque cada pieza trae su propio --trazo —sus viewBox tienen escalas
+       muy distintas— y el clon lo arrastra en su atributo style. */
+    stroke-width:calc(var(--trazo, 6) * 1.8);
     stroke-linejoin:round;
     stroke-linecap:round;
   }
-
   .card p{
     font-size:0.98rem;
     line-height:1.55;

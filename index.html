@@ -14,42 +14,79 @@
 
 <svg class="mat-illustrations" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
   <defs>
-    <!-- Las cinco siluetas son copia literal de los iconos de los botones, más
-         abajo en este mismo archivo, y de las tarjetas de qr.html. Si algún día
-         se redibuja una, hay que moverla en los tres sitios.
+    <!-- Las cinco piezas son los bloques planos del taller, dibujados en
+         Illustrator: contorno, línea de hilo, pinzas y las líneas de cintura,
+         cadera, bíceps y rodilla. El mismo trazado, recortado al contorno, es
+         el icono de los botones más abajo y el de las tarjetas de qr.html; si
+         algún día se redibuja una pieza, hay que moverla en los tres sitios.
+
          El transform iguala el ÁREA que ocupaba la pieza a la que sustituye y
          deja su centro donde estaba el de aquélla, para no descolocar el
-         reparto. Se iguala el área y no el ancho ni el alto porque las
-         proporciones no coinciden: con áreas iguales el peso visual se
-         mantiene, aunque la manga pase de estrecha y alta a ancha y baja.
-         Ojo: las clases .piece* de css/styles.css no llegan al clon que hace
-         <use>, así que lo que se ve es la silueta rellena en negro al 12-22 %
-         de opacidad que pone el propio <use>, no el contorno de tiza que
-         describe la hoja. Se deja igual que estaba: es el aspecto que tiene
-         la portada desde siempre. -->
-    <g id="pieza-falda" transform="translate(-9.2,14) scale(1.019)">
-      <path class="piece piece-outline" d="M46,12 C54,4 72,4 80,12 L116,90 C98,100 28,100 10,90 Z"/>
-      <path class="piece piece-detail" d="M57,16 L46,86 M69,16 L80,86"/>
+         reparto de las nueve. Se iguala el área y no el ancho ni el alto
+         porque las proporciones no coinciden —el pantalón mide 1:3,4 y el
+         pañuelo 1:1—: con áreas iguales el peso visual se mantiene.
+
+         El color y el grosor van como atributos y no como clases: las reglas
+         CSS no alcanzan al clon que hace <use>, así que lo que no viaje en el
+         propio elemento no se pinta. De ahí el stroke="currentColor", que sí
+         se resuelve contra el color heredado en el punto del <use>, y el
+         stroke-width en unidades de cada pieza, calculado como 1,5 px entre su
+         factor de escala para que las cinco pesen igual sobre el tapiz. -->
+
+    <g id="pieza-falda" fill="none" stroke="currentColor" transform="translate(15.35,2.24) scale(0.7556)">
+      <path stroke-width="2" d="M236.11,300.43l4.78-38.21Q263.72,260.63,287,258c8.41,24.23,13.57,54.58,14.84,76.35v93.33H197.93V264.34q16.62-.48,33.48-1.5Z" transform="translate(-197.43 -257.49)"/>
+      <line stroke-width="1.44" x1="38.68" y1="44.17" x2="38.68" y2="170.22"/>
+      <line stroke-width="1.44" x1="0.5" y1="76.9" x2="104.43" y2="76.9"/>
     </g>
 
-    <g id="pieza-cuerpo" transform="translate(-5.3,-6.1) scale(1.106)">
-      <path class="piece piece-outline" d="M8,32 L34,13 C40,25 60,25 66,13 L92,32 C84,46 80,58 80,72 C80,92 70,110 68,130 L32,130 C30,110 20,92 20,72 C20,58 16,46 8,32 Z"/>
+    <g id="pieza-cuerpo" fill="none" stroke="currentColor" transform="translate(10.36,-4.55) scale(1.2339)">
+      <polyline stroke-width="1.22" points="58.61 125.06 0.5 125.19 0.5 23.25"/>
+      <path stroke-width="1.22" d="M289,358.39q-.56,23.49-23,22.78" transform="translate(-265.48 -357.92)"/>
+      <line stroke-width="1.22" x1="23.49" y1="0.47" x2="54.67" y2="11.81"/>
+      <path stroke-width="1.22" d="M328.34,415.09c-8-.21-13.07-4.62-13.86-15.1q-.53-10.41,5.67-30.26" transform="translate(-265.48 -357.92)"/>
+      <path stroke-width="1.22" d="M328.34,415.09a145.09,145.09,0,0,0,.92,17" transform="translate(-265.48 -357.92)"/>
+      <path stroke-width="1.22" d="M329.26,432.09a348.35,348.35,0,0,0-5.17,51" transform="translate(-265.48 -357.92)"/>
+      <line stroke-width="0.88" x1="0.5" y1="74.17" x2="63.78" y2="74.17"/>
+      <line stroke-width="0.88" x1="26.01" y1="74.17" x2="26.01" y2="125.19"/>
+      <line stroke-width="0.88" x1="26.01" y1="82.67" x2="30.26" y2="125.19"/>
+      <line stroke-width="0.88" x1="21.76" y1="125.19" x2="26.01" y2="82.67"/>
+      <line stroke-width="0.88" x1="63.23" y1="68.5" x2="34.52" y2="74.17"/>
+      <line stroke-width="0.88" x1="62.82" y1="79.84" x2="34.52" y2="74.17"/>
+      <line stroke-width="0.88" x1="45.93" y1="42.07" x2="49.04" y2="42.07"/>
     </g>
 
-    <g id="pieza-manga" transform="translate(-10.2,16.2) scale(0.784)">
-      <path class="piece piece-outline" d="M62,8 C70,26 90,26 98,8 L116,20 C136,46 152,72 158,104 L106,110 C104,84 102,60 102,46 C88,51 72,51 58,46 C58,60 56,84 54,110 L2,104 C8,72 24,46 44,20 Z"/>
+    <g id="pieza-manga" fill="none" stroke="currentColor" transform="translate(17.37,-8.37) scale(0.842)">
+      <path stroke-width="1.78" d="M339,371.31s-14.45-1.78-15.71-13a26.13,26.13,0,0,0-3.82-9.35c-3.45-5.33-9.89-11.1-21.71-11.79h-.22c-.62.25-16.35,1.13-20.63,17.08a24.24,24.24,0,0,1-1.95,5.06c-6,11.36-18.67,12-18.67,12" transform="translate(-255.87 -336.65)"/>
+      <line stroke-width="1.78" x1="82.99" y1="34.66" x2="70.09" y2="167.74"/>
+      <line stroke-width="1.78" x1="0.5" y1="34.66" x2="13.4" y2="167.74"/>
+      <line stroke-width="1.78" x1="13.4" y1="167.74" x2="70.09" y2="167.74"/>
+      <line stroke-width="1.28" x1="41.74" y1="0.5" x2="41.74" y2="167.74"/>
+      <line stroke-width="1.28" x1="0.5" y1="34.66" x2="82.99" y2="34.66"/>
+      <line stroke-width="1.28" x1="5.69" y1="88.27" x2="77.79" y2="88.27"/>
+      <line stroke-width="1.28" x1="17.35" y1="21.37" x2="20.61" y2="23.52"/>
+      <line stroke-width="1.28" x1="65.78" y1="11.7" x2="62.4" y2="13.94"/>
+      <line stroke-width="1.28" x1="66.84" y1="13.44" x2="63.64" y2="15.56"/>
     </g>
 
-    <!-- El icono del pantalón es, letra por letra, el trazado que ya había
-         aquí. Esta pieza no cambia ni de forma ni de tamaño: solo pierde la
-         línea de hilo y los piquetes. Por eso no lleva transform ni --k. -->
-    <g id="pieza-pantalon">
-      <path class="piece piece-outline" d="M20,5 L80,5 L88,20 L78,140 L55,140 L50,70 L45,140 L22,140 L12,20 Z"/>
+    <g id="pieza-pantalon" fill="none" stroke="currentColor" transform="translate(22.19,-21.71) scale(0.6623)">
+      <path stroke-width="2.26" d="M339,352.75c-.27,19.2-5,51.63-10.08,85l-8.5,124.73H275.05l-8.5-124.73c-1.76-34.14-3.22-69.35-10.08-85,16.77-1.6,14.17-40.4,15.91-70.86q10.72-.37,22.66-.91l2.69,26.4,2.67-26.65c2.81-.13,9.91-.5,12.81-.65q9.07-.46,18.69-1c5.16,21.73,6.9,37.7,7.09,51Z" transform="translate(-255.74 -278.53)"/>
+      <line stroke-width="1.63" x1="13.8" y1="51.55" x2="83.25" y2="51.55"/>
+      <line stroke-width="1.63" x1="0.73" y1="74.22" x2="83.25" y2="74.22"/>
+      <line stroke-width="1.63" x1="41.99" y1="283.99" x2="41.99" y2="28.85"/>
+      <line stroke-width="1.63" x1="10.81" y1="159.26" x2="73.17" y2="159.26"/>
     </g>
 
-    <g id="pieza-panuelo" transform="translate(13.46,-2.74) scale(0.692)">
-      <path class="piece piece-outline" d="M60,8 L112,60 L60,112 L8,60 Z"/>
-      <circle class="piece piece-detail" cx="60" cy="60" r="17"/>
+    <!-- El pañuelo no viene de una lámina: es la pieza que traza su propia
+         herramienta —un cuadrado al que se le muerde el cuarto de círculo de
+         la cintura en una esquina—, con los valores que la herramienta trae
+         por defecto: cintura de 72 cm y dos capas, de 38 y 22 cm de largo. De
+         ahí salen un radio de cintura de 11,78 cm sobre un lado de 35,20, y el
+         cuadrado de dentro a 0,679 del de fuera. La bisectriz es la línea
+         sobre la que se miden el radio y los largos. -->
+    <g id="pieza-panuelo" fill="none" stroke="currentColor" transform="translate(13.46,-2.74) scale(0.692)">
+      <path stroke-width="2.17" d="M8,42.8 A34.8,34.8 0 0 0 42.8,8 L112,8 L112,112 L8,112 Z"/>
+      <path stroke-width="1.56" d="M32.61,32.61 L112,112"/>
+      <path stroke-width="1.56" d="M78.57,8 L78.57,78.57 L8,78.57"/>
     </g>
   </defs>
 
@@ -75,53 +112,47 @@
   <h1>De tus medidas al <em>patrón perfecto</em></h1>
   <p class="lede">Cinco herramientas de cálculo pensadas para el proceso de patronaje. Elige una opción para desplegar su calculadora.</p>
 
+  <!-- Los iconos son el contorno de las piezas de arriba, sin las líneas de
+       construcción: a 33 px de alto las pinzas y las líneas de cintura caen
+       por debajo del píxel y lo único que aportan es suciedad. La silueta sola
+       sí se reconoce.
+       Cada uno lleva su --trazo porque los cinco viewBox tienen escalas muy
+       distintas —el pantalón mide 284 unidades de alto y el pañuelo 120—, y un
+       grosor único saldría cuatro veces más gordo en unos que en otros. El
+       valor es el que deja el trazo en 1,35 px. Va en el marcado, y no en la
+       hoja de estilo, porque el título de la ventana modal clona este mismo
+       SVG y le quita la clase: lo que no viaje en el elemento se pierde. -->
   <div class="options" id="options">
     <button type="button" class="tag-btn" data-opcion="1">
-      <!-- Corta y con vuelo: la cintura estrecha, el bajo abierto al triple y
-           curvado como cae la tela. Las dos tablas salen de la cintura y se
-           abren con ella; paran antes del bajo para que su trazo no se funda
-           con el contorno al tamaño del botón. -->
-      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 126 108" aria-hidden="true"><path d="M46,12 C54,4 72,4 80,12 L116,90 C98,100 28,100 10,90 Z"/><path d="M57,16 L46,86 M69,16 L80,86"/></svg></span>
+      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 104.93 170.72" style="--trazo:7" aria-hidden="true"><path d="M236.11,300.43l4.78-38.21Q263.72,260.63,287,258c8.41,24.23,13.57,54.58,14.84,76.35v93.33H197.93V264.34q16.62-.48,33.48-1.5Z" transform="translate(-197.43 -257.49)"/></svg></span>
       <span>
         <span class="tag-label">Falda</span>
         <span class="tag-sub">Base</span>
       </span>
     </button>
     <button type="button" class="tag-btn" data-opcion="2">
-      <!-- Corpiño sin mangas: el escote, los picos de hombro y las sisas son lo
-           que lo distingue de un contorno cualquiera al tamaño del botón. -->
-      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 100 145" aria-hidden="true"><path d="M8,32 L34,13 C40,25 60,25 66,13 L92,32 C84,46 80,58 80,72 C80,92 70,110 68,130 L32,130 C30,110 20,92 20,72 C20,58 16,46 8,32 Z"/></svg></span>
+      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 64.28 125.7" style="--trazo:5.15" aria-hidden="true"><polyline points="58.61 125.06 0.5 125.19 0.5 23.25"/><path d="M289,358.39q-.56,23.49-23,22.78" transform="translate(-265.48 -357.92)"/><path d="M23.49,0.47 L54.67,11.81"/><path d="M328.34,415.09c-8-.21-13.07-4.62-13.86-15.1q-.53-10.41,5.67-30.26" transform="translate(-265.48 -357.92)"/><path d="M328.34,415.09a145.09,145.09,0,0,0,.92,17" transform="translate(-265.48 -357.92)"/><path d="M329.26,432.09a348.35,348.35,0,0,0-5.17,51" transform="translate(-265.48 -357.92)"/></svg></span>
       <span>
         <span class="tag-label">Cuerpo</span>
         <span class="tag-sub">Base</span>
       </span>
     </button>
     <button type="button" class="tag-btn" data-opcion="3">
-      <!-- Solo el canesú: escote, hombros y las dos mangas, cortado por debajo
-           de las sisas. Sin cuerpo no hay nada que confundir con el corpiño
-           de al lado, y lo que queda son justo las mangas.
-           La caja es más ancha que alta para que quepa el vuelo: las dos mangas
-           bajan en campana, con el canto exterior curvado hacia fuera, y el puño
-           acaba midiendo casi cuatro veces el ancho del hombro. -->
-      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 160 116" aria-hidden="true"><path d="M62,8 C70,26 90,26 98,8 L116,20 C136,46 152,72 158,104 L106,110 C104,84 102,60 102,46 C88,51 72,51 58,46 C58,60 56,84 54,110 L2,104 C8,72 24,46 44,20 Z"/></svg></span>
+      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 83.48 168.24" style="--trazo:6.9" aria-hidden="true"><path d="M339,371.31s-14.45-1.78-15.71-13a26.13,26.13,0,0,0-3.82-9.35c-3.45-5.33-9.89-11.1-21.71-11.79h-.22c-.62.25-16.35,1.13-20.63,17.08a24.24,24.24,0,0,1-1.95,5.06c-6,11.36-18.67,12-18.67,12" transform="translate(-255.87 -336.65)"/><path d="M82.99,34.66 L70.09,167.74 L13.4,167.74 L0.5,34.66"/></svg></span>
       <span>
         <span class="tag-label">Manga</span>
         <span class="tag-sub">Base</span>
       </span>
     </button>
     <button type="button" class="tag-btn" data-opcion="4">
-      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 100 145" aria-hidden="true"><path d="M20,5 L80,5 L88,20 L78,140 L55,140 L50,70 L45,140 L22,140 L12,20 Z"/></svg></span>
+      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 83.75 284.49" style="--trazo:10.7" aria-hidden="true"><path d="M339,352.75c-.27,19.2-5,51.63-10.08,85l-8.5,124.73H275.05l-8.5-124.73c-1.76-34.14-3.22-69.35-10.08-85,16.77-1.6,14.17-40.4,15.91-70.86q10.72-.37,22.66-.91l2.69,26.4,2.67-26.65c2.81-.13,9.91-.5,12.81-.65q9.07-.46,18.69-1c5.16,21.73,6.9,37.7,7.09,51Z" transform="translate(-255.74 -278.53)"/></svg></span>
       <span>
         <span class="tag-label">Pantalón</span>
         <span class="tag-sub">Base</span>
       </span>
     </button>
     <button type="button" class="tag-btn" data-opcion="5">
-      <!-- La falda pañuelo entera vista en plano: un cuadrado girado 45 grados,
-           cuyas cuatro esquinas son los picos que cuelgan, con el círculo de la
-           cintura en el centro. Es el dibujo de "Ayuda a la confección" de la
-           lámina. -->
-      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 120 120" aria-hidden="true"><path d="M60,8 L112,60 L60,112 L8,60 Z"/><circle cx="60" cy="60" r="17"/></svg></span>
+      <span class="tag-num"><svg class="tag-icon" viewBox="0 0 120 120" style="--trazo:7" aria-hidden="true"><path d="M8,42.8 A34.8,34.8 0 0 0 42.8,8 L112,8 L112,112 L8,112 Z"/></svg></span>
       <span>
         <span class="tag-label">Pañuelo</span>
         <span class="tag-sub">Falda</span>

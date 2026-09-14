@@ -121,6 +121,13 @@ JavaScript escribe directamente las líneas, los arcos y las cotas, sin ninguna
 librería de gráficos por medio; por eso el trazado sale nítido a cualquier
 tamaño y se imprime sin pixelarse.
 
+Los iconos de las prendas no son una interpretación: son el bloque plano de
+cada pieza, dibujado en el taller, con su línea de hilo, sus pinzas y sus
+líneas de cintura, cadera, bíceps y rodilla. En el fondo de la portada van
+enteros, como piezas repartidas sobre la mesa de corte; en los botones y en la
+hoja de códigos va solo el contorno, porque a 33 píxeles de alto las líneas de
+construcción caen por debajo del píxel y lo único que aportan es suciedad.
+
 No hay framework por una razón concreta: un framework trae un paso de
 compilación, y un paso de compilación rompe lo que más importa aquí, que es
 poder abrir `index.html` con doble clic. Tampoco hay nada que se pida por
