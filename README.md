@@ -134,7 +134,8 @@ El logo del taller está en `img/logo.svg`, pero la portada lo lleva copiado
 dentro de `index.html`, porque tiene que cambiar de color. En el título de cada
 ventana va del color de su patrón, y en la esquina inferior izquierda del fondo,
 del color tiza de las piezas. Un `<img>` no se puede teñir, y una máscara con el
-archivo externo no funciona al abrir la página con doble clic.
+archivo externo no funciona al abrir la página con doble clic. Al pasar el
+ratón por encima de cualquiera de los dos aparece la firma «Wbanet Studio».
 
 No hay framework por una razón concreta: un framework trae un paso de
 compilación, y un paso de compilación rompe lo que más importa aquí, que es

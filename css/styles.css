@@ -100,14 +100,68 @@
     position:fixed;
     left:clamp(16px, 2.5vw, 40px);
     bottom:clamp(16px, 2.5vw, 40px);
+    z-index:0;
+    pointer-events:none;
+  }
+  .logo-fondo svg{
+    display:block;
     height:clamp(90px, 13vw, 190px);
     width:auto;
     aspect-ratio:233.12 / 292.69;
-    z-index:0;
-    pointer-events:none;
     fill:var(--chalk);
+    /* La opacidad va en el dibujo y no en la caja, que también lleva la firma. */
     opacity:0.85;
     filter:drop-shadow(0 0 10px rgba(10,20,17,0.9)) drop-shadow(0 0 3px rgba(10,20,17,0.9));
+  }
+  /* Para que salga la firma el logo tiene que recibir el ratón, y main, que
+     ocupa la ventana entera, lo tapa: sube por encima. Solo donde hay ratón.
+     En un móvil no hay hover y, al desplazarse, el texto tiene que seguir
+     pasando por encima del logo, no por debajo. */
+  @media (hover: hover){
+    .logo-fondo{ z-index:2; pointer-events:auto; }
+  }
+  /* La firma del fondo sale a la derecha del logo, a media altura, y en papel:
+     la oscura de la tarjeta se perdía sobre el verde de la mesa. */
+  .logo-fondo.firma::after{
+    left:calc(100% + 10px);
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--ink);
+    background:var(--paper);
+  }
+
+  /* ---- Firma del logo -------------------------------------------------
+     Donde esté el logo, al pasar el ratón aparece «Wbanet Studio». Es una
+     etiqueta propia y no un title: el tooltip del navegador tarda un segundo
+     en salir y no se puede vestir. El texto sale de data-firma, así que el
+     marcado lo dice una vez. La caja lleva aria-hidden: el contenido de
+     ::after cuenta para el nombre accesible, y en el modal el h2 da nombre al
+     diálogo, que pasaría a llamarse «Falda Base Wbanet Studio».
+     .firma no fija position: pisaría el fixed del logo del fondo. El del modal
+     lo pone relative en .titulo-logo. */
+  .firma::after{
+    content:attr(data-firma);
+    position:absolute;
+    z-index:1;
+    white-space:nowrap;
+    font-family:var(--font-body);
+    font-size:0.78rem;
+    font-weight:600;
+    font-style:normal;
+    letter-spacing:0.04em;
+    line-height:1;
+    color:var(--paper);
+    background:var(--ink);
+    padding:0.45rem 0.65rem;
+    border-radius:6px;
+    box-shadow:0 6px 14px -6px rgba(0,0,0,0.6);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 140ms ease;
+  }
+  .firma:hover::after{ opacity:1; }
+  @media (prefers-reduced-motion: reduce){
+    .firma::after{ transition:none; }
   }
 
   main{
@@ -491,13 +545,23 @@
      altura en em lo escala con el título. Solo en las ventanas de patrones: la
      de fichas no es modal-wide. */
   .titulo-logo{
+    position:relative;
+    display:flex;
     margin-left:auto;
     margin-right:1.9rem;
     flex-shrink:0;
+  }
+  .titulo-logo svg{
     height:1.25em;
     width:auto;
     aspect-ratio:233.12 / 292.69;
     fill:var(--color-opcion, var(--ink));
+  }
+  /* En el modal la firma sale debajo del logo, alineada por su borde derecho:
+     arriba se saldría de la tarjeta. */
+  .titulo-logo.firma::after{
+    right:0;
+    top:calc(100% + 8px);
   }
   dialog#opcion-modal:not(.modal-wide) .titulo-logo{ display:none; }
 

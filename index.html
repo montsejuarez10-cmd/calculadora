@@ -117,8 +117,9 @@
 <img class="pasarela" src="img/pasarela.svg" alt="" aria-hidden="true">
 
 <!-- El logo del taller, tercera pieza del fondo: en la esquina de abajo a la
-     izquierda y encima del desfile por ir despues en el documento. -->
-<svg class="logo-fondo" aria-hidden="true" focusable="false"><use href="#logo-taller"/></svg>
+     izquierda y encima del desfile por ir despues en el documento. La firma
+     que sale al pasar el raton va en data-firma (ver .firma en styles.css). -->
+<span class="logo-fondo firma" data-firma="Wbanet Studio" aria-hidden="true"><svg focusable="false"><use href="#logo-taller"/></svg></span>
 
 <main>
   <p class="eyebrow">Taller de patronaje</p>
@@ -197,7 +198,7 @@
     <button type="button" class="card-close" id="modal-cerrar" aria-label="Cerrar">&times;</button>
     <!-- El icono va en su propio span porque el título se escribe con
          textContent y borraría cualquier hijo que hubiese dentro. -->
-    <h2 id="modal-titulo"><span class="titulo-icono" id="modal-icono" aria-hidden="true"></span><span id="modal-titulo-texto"></span><svg class="titulo-logo" aria-hidden="true" focusable="false"><use href="#logo-taller"/></svg></h2>
+    <h2 id="modal-titulo"><span class="titulo-icono" id="modal-icono" aria-hidden="true"></span><span id="modal-titulo-texto"></span><span class="titulo-logo firma" data-firma="Wbanet Studio" aria-hidden="true"><svg focusable="false"><use href="#logo-taller"/></svg></span></h2>
     <p id="modal-desc">Contenido pendiente: aquí se añadirán las instrucciones y el detalle definitivo de esta herramienta.</p>
 
     <div class="iframe-wrap" id="iframe-wrap">
