@@ -130,6 +130,12 @@ construcción caen por debajo del píxel y lo único que aportan es suciedad. El
 del pantalón va además cortado por la línea de rodilla: entero mide 1:3,4 de
 ancho por alto y a ese tamaño se quedaba en una tira de 10 píxeles.
 
+El logo del taller está en `img/logo.svg`, pero la portada lo lleva copiado
+dentro de `index.html`, porque tiene que cambiar de color. En el título de cada
+ventana va del color de su patrón, y en la esquina inferior izquierda del fondo,
+del color tiza de las piezas. Un `<img>` no se puede teñir, y una máscara con el
+archivo externo no funciona al abrir la página con doble clic.
+
 No hay framework por una razón concreta: un framework trae un paso de
 compilación, y un paso de compilación rompe lo que más importa aquí, que es
 poder abrir `index.html` con doble clic. Tampoco hay nada que se pida por

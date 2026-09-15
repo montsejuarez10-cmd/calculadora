@@ -89,6 +89,23 @@
     mask-image:linear-gradient(to bottom, transparent 0, #000 42%);
   }
 
+  /* El logo en la esquina de abajo a la izquierda, con la tiza del tapiz y una
+     opacidad parecida a la de sus piezas: es fondo, no cabecera. El tamaño va
+     en vw con topes para que no se coma el móvil ni se pierda en una pantalla
+     grande. */
+  .logo-fondo{
+    position:fixed;
+    left:clamp(16px, 2.5vw, 40px);
+    bottom:clamp(16px, 2.5vw, 40px);
+    height:clamp(90px, 13vw, 190px);
+    width:auto;
+    aspect-ratio:233.12 / 292.69;
+    z-index:0;
+    pointer-events:none;
+    fill:var(--chalk);
+    opacity:0.3;
+  }
+
   main{
     position:relative;
     z-index:1;
@@ -403,6 +420,10 @@
   }
   @media (max-width: 30rem){
     dialog#opcion-modal.modal-wide{ max-width:calc(100% - 1.5rem); }
+    /* Con el logo en la fila, a 1.9rem «Falda Pañuelo» y «Pantalón Base» se
+       partían en dos líneas en un móvil de 360-390px. A 1.55rem caben los
+       cinco desde 360, y el logo, que va en em, se encoge con el título. */
+    dialog#opcion-modal.modal-wide h2{ font-size:1.55rem; }
   }
   dialog#opcion-modal.modal-wide h2{
     margin-bottom:0.4rem;
@@ -459,6 +480,22 @@
     gap:0.6rem;
   }
   #modal-titulo-texto{ text-wrap:balance; }
+
+  /* El logo del taller, al final de la fila del título: margin-left:auto lo
+     empuja a la derecha y el margin-right lo aparta del botón de cerrar, que
+     va en absoluto a 12px del borde, mide 36 y cae a la altura del título. La
+     altura en em lo escala con el título. Solo en las ventanas de patrones: la
+     de fichas no es modal-wide. */
+  .titulo-logo{
+    margin-left:auto;
+    margin-right:1.9rem;
+    flex-shrink:0;
+    height:1.25em;
+    width:auto;
+    aspect-ratio:233.12 / 292.69;
+    fill:var(--color-opcion, var(--ink));
+  }
+  dialog#opcion-modal:not(.modal-wide) .titulo-logo{ display:none; }
 
   /* El icono se clona del botón que abre la ventana; height:1em lo ata al
      cuerpo del título y el ancho sale solo de la proporción de su viewBox. */
