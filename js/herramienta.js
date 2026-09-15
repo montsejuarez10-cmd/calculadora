@@ -179,7 +179,7 @@ var Herramienta = (function () {
       botonDefecto = document.createElement('button');
       botonDefecto.type = 'button';
       botonDefecto.className = 'volver-defecto';
-      botonDefecto.textContent = 'Volver a las medidas por defecto';
+      botonDefecto.textContent = 'Volver a las medidas por defecto (talla 40)';
       botonDefecto.addEventListener('click', function () {
         sliders.forEach(function (s) { s.value = porDefecto[s.id]; });
         cfg.medidas.forEach(function (par) { reflejar(par[1], par[0].value); });
