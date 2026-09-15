@@ -196,15 +196,22 @@
   /* El aviso, en la esquina de abajo a la derecha. Ya no sigue la columna de
      main: se pega al filo de la ventana con el mismo relleno de 1,5rem que usa
      el resto de la pagina, que es lo mas a la derecha que puede ir sin quedar
-     descolgado del margen comun. */
+     descolgado del margen comun.
+     z-index 3: por encima del logo del fondo, que con raton sube a 2 para
+     recibirlo. Donde los dos coinciden, en ventanas medianas, el aviso tapa al
+     logo. La fila ocupa todo el ancho y es transparente, asi que no atrapa el
+     raton: solo la caja del texto lo recibe, y el logo sigue sacando su firma
+     por la parte que queda a la vista. */
   .aviso{
     position:relative;
-    z-index:1;
+    z-index:3;
     width:100%;
     padding:0 1.5rem 1.5rem;
     display:flex;
     justify-content:flex-end;
+    pointer-events:none;
   }
+  .aviso p{ pointer-events:auto; }
   .aviso p{
     margin:0;
     /* El ancho crece con la letra para que el aviso no se haga más alto: a
